@@ -1,0 +1,11 @@
+{
+  "name": "immortility", "version": "0.1.0", "private": true,
+  "packageManager": "pnpm@10.27.0",
+  "scripts": {
+    "dev": "pnpm --filter @immortility/desktop tauri dev",
+    "build": "pnpm --filter @immortility/desktop build",
+    "desktop:build": "pnpm --filter @immortility/desktop tauri build --no-bundle",
+    "check": "pnpm --filter @immortility/desktop check",
+    "test": "pnpm --filter @immortility/desktop test"
+  }
+}

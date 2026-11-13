@@ -1,0 +1,16 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","title":"Content-free execution trajectory v1",
+  "type":"object","additionalProperties":false,
+  "required":["schema_version","task_id","attempt_id","agent","modality","transitions","duration_ms","outcome","failure_class","delegations","tools","artifact_refs","verification_evidence","completion_evidence"],
+  "properties":{
+    "schema_version":{"const":"1.0"},"task_id":{"type":"string"},"attempt_id":{"type":"string","format":"uuid"},
+    "agent":{"type":"object","additionalProperties":false,"required":["runtime","route"],"properties":{"runtime":{"const":"hermes"},"route":{"const":"openrouter/free"}}},
+    "modality":{"enum":["text","voice"]},"transitions":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["state","timestamp"],"properties":{"state":{"type":"string"},"timestamp":{"type":"string","format":"date-time"}}}},
+    "duration_ms":{"type":"number","minimum":0},"outcome":{"type":"string"},"failure_class":{"type":["string","null"]},
+    "delegations":{"type":"array","maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["role","status"],"properties":{"role":{"enum":["research","coding","review"]},"status":{"enum":["started","succeeded","failed"]}}}},
+    "tools":{"type":"object","additionalProperties":false,"required":["status","calls"],"properties":{"status":{"enum":["disabled","authorized"]},"calls":{"type":"array","maxItems":16,"items":{"type":"object","additionalProperties":false,"required":["name","status"],"properties":{"name":{"type":"string","minLength":1,"maxLength":32},"status":{"enum":["ok","denied","error"]}}}}}},
+    "artifact_refs":{"type":"array","maxItems":100,"items":{"type":"string","format":"uuid"}},
+    "verification_evidence":{"type":"array","maxItems":100,"items":{"type":"object","additionalProperties":false,"required":["verifier_id","evidence_ref","outcome"],"properties":{"verifier_id":{"type":"string","format":"uuid"},"evidence_ref":{"type":"string","format":"uuid"},"outcome":{"enum":["passed","failed","inconclusive"]}}}},
+    "completion_evidence":{"type":"object","additionalProperties":false,"required":["streamed_chunks","independent_verifier"],"properties":{"streamed_chunks":{"type":"integer","minimum":0},"independent_verifier":{"const":false}}}
+  }
+}

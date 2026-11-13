@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "audited_date": "2026-11-13",
+  "repositories": [
+    {
+      "repository": "NousResearch/hermes-agent",
+      "source_revision": "0e72e8a210ca30db18795e2dc0b739da480d2b75",
+      "default_branch": "main",
+      "license": "MIT",
+      "archived": false,
+      "pushed_at": "2026-11-13T12:33:21Z",
+      "latest_release": "v0.23.1",
+      "url": "https://github.com/NousResearch/hermes-agent"
+    },
+    {
+      "repository": "milind-soni/OpenMausBot",
+      "source_revision": "d76d0248fe83b8a85033800ccdae4876bfae1578",
+      "default_branch": "main",
+      "license": "Apache-2.0",
+      "archived": false,
+      "pushed_at": "2026-11-13T11:35:29Z",
+      "latest_release": "v0.1.155",
+      "url": "https://github.com/milind-soni/OpenMausBot"
+    },
+    {
+      "repository": "SYSTRAN/faster-whisper",
+      "source_revision": "6cb639e70786aea42b9233006ae60eaf07190bdb",
+      "default_branch": "master",
+      "license": "MIT",
+      "archived": false,
+      "pushed_at": "2026-11-12T09:05:56Z",
+      "latest_release": "v1.2.1",
+      "url": "https://github.com/SYSTRAN/faster-whisper"
+    },
+    {
+      "repository": "cjpais/Handy",
+      "source_revision": "bd4b02714ec243c5f92b98d8cdcad083a36e3dfe",
+      "default_branch": "main",
+      "license": "MIT",
+      "archived": false,
+      "pushed_at": "2026-11-13T08:09:18Z",
+      "latest_release": "v0.10.0",
+      "url": "https://github.com/cjpais/Handy"
+    },
+    {
+      "repository": "QwenLM/Qwen3-TTS",
+      "source_revision": "022e286b98fbec7e1e916cb940cdf532cd9f488e",
+      "default_branch": "main",
+      "license": "Apache-2.0",
+      "archived": false,
+      "pushed_at": "2026-03-17T06:38:41Z",
+      "latest_release": null,
+      "url": "https://github.com/QwenLM/Qwen3-TTS"
+    },
+    {
+      "repository": "browser-use/browser-use",
+      "source_revision": "48d9fe008bb98a8959279b495518652dfb934d6b",
+      "default_branch": "main",
+      "license": "MIT",
+      "archived": false,
+      "pushed_at": "2026-11-13T06:37:35Z",
+      "latest_release": "1.0.3",
+      "url": "https://github.com/browser-use/browser-use"
+    },
+    {
+      "repository": "microsoft/UFO",
+      "source_revision": "eae3c0a8d168c47cb10df0652e293e092eda1078",
+      "default_branch": "main",
+      "license": "MIT",
+      "archived": false,
+      "pushed_at": "2026-10-30T21:40:57Z",
+      "latest_release": "v3.0.10",
+      "url": "https://github.com/microsoft/UFO"
+    },
+    {
+      "repository": "docling-project/docling",
+      "source_revision": "b9bf356f9763095ca9d51e7452a054a7db20f237",
+      "default_branch": "main",
+      "license": "MIT",
+      "archived": false,
+      "pushed_at": "2026-11-13T09:40:18Z",
+      "latest_release": "v2.150.0",
+      "url": "https://github.com/docling-project/docling"
+    },
+    {
+      "repository": "microsoft/markitdown",
+      "source_revision": "ed178952a6672abdfd35b5f9e76a80b6cefc086e",
+      "default_branch": "main",
+      "license": "MIT",
+      "archived": false,
+      "pushed_at": "2026-11-07T00:14:01Z",
+      "latest_release": "v0.1.9",
+      "url": "https://github.com/microsoft/markitdown"
+    },
+    {
+      "repository": "Comfy-Org/ComfyUI",
+      "source_revision": "dc9ffe6adde25671bf535e99556ca9f8085c7d0f",
+      "default_branch": "master",
+      "license": "GPL-3.0",
+      "archived": false,
+      "pushed_at": "2026-11-13T07:57:03Z",
+      "latest_release": "v0.45.0",
+      "url": "https://github.com/Comfy-Org/ComfyUI"
+    },
+    {
+      "repository": "OHF-Voice/piper1-gpl",
+      "source_revision": "4bb7defd727b3d0a2833ec4b05ec2fd7ccac6b2c",
+      "default_branch": "main",
+      "license": "GPL-3.0",
+      "archived": false,
+      "pushed_at": "2026-11-12T17:40:23Z",
+      "latest_release": "v1.8.0",
+      "url": "https://github.com/OHF-Voice/piper1-gpl"
+    },
+    {
+      "repository": "snakers4/silero-vad",
+      "source_revision": "066409f3d9db45a30d21dfcbf9147826ffdd7052",
+      "default_branch": "master",
+      "license": "MIT",
+      "archived": false,
+      "pushed_at": "2026-10-22T02:02:27Z",
+      "latest_release": "v6.2.3",
+      "url": "https://github.com/snakers4/silero-vad"
+    },
+    {
+      "repository": "pymupdf/PyMuPDF",
+      "source_revision": "67fe11524c2ce7f6662a36f18c5345936964d96c",
+      "default_branch": "main",
+      "license": "AGPL-3.0",
+      "archived": false,
+      "pushed_at": "2026-11-13T09:27:21Z",
+      "latest_release": "2.1",
+      "url": "https://github.com/pymupdf/PyMuPDF"
+    }
+  ],
+  "openmausbot_revision": "d76d0248fe83b8a85033800ccdae4876bfae1578",
+  "openmausbot_protocol_files": {
+    "scripts/mcp-server.ts": "2839201c0e540f20b578adff516b30c85f8bd5f5ad608aec5b0f7027d2eafee5",
+    "scripts/mcp-message-projection.ts": "a90d49d3ed97598b22f1a3c6f0d0fc33b56a8d872ade377a57e68c8f97abe13d",
+    "electron/server-address.mjs": "bcbe30e074e525b15b97511bff5929f78738e894d9a5d4f54e472f4393a06e7f",
+    "electron/tailnet.mjs": "4cc9ddbff8daf627650d8674483ee90e80deff7d147f0cf2052d4baf2de6925d"
+  },
+  "adopted_new_integrations": []
+}

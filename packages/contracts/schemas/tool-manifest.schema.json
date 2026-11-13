@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://immortility.local/schemas/tool-manifest.v1.json",
+  "title": "Tool Capability Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "risk_tier",
+    "permissions",
+    "timeout_ms",
+    "execution",
+    "input_schema",
+    "output_schema",
+    "enabled"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_.-]+$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "risk_tier": {
+      "type": "string",
+      "enum": [
+        "R0",
+        "R1",
+        "R2",
+        "R3",
+        "R4"
+      ]
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "egress": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "timeout_ms": {
+      "type": "integer",
+      "minimum": 100
+    },
+    "execution": {
+      "type": "string",
+      "enum": [
+        "local",
+        "isolated_worker",
+        "cloud"
+      ]
+    },
+    "input_schema": {
+      "type": "object"
+    },
+    "output_schema": {
+      "type": "object"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "idempotent": {
+      "type": "boolean"
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "verification": {
+      "type": "string"
+    }
+  }
+}

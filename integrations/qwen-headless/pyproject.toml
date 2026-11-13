@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools==84.2.1", "wheel==0.47.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "immortility-qwen-tts-headless"
+version = "0.1.1.post1+immortility.2"
+description = "Research-only Apache-2.0 Qwen PR360 derivative; pinned 12Hz local artifacts"
+requires-python = ">=3.13,<3.14"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+dependencies = [
+  "transformers==5.15.1", "torch==2.15.0",
+  "setuptools==84.2.1", "librosa==1.0.1", "soundfile==0.14.0",
+  "einops==0.8.2", "numpy==2.5.4"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["qwen_tts*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+qwen_tts = ["artifacts.json"]

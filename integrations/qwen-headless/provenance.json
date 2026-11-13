@@ -1,0 +1,60 @@
+{
+  "upstream_commit": "00969daa8064e23adc9e5f52cdf20cf247f94159",
+  "archive_url": "https://codeload.github.com/andimarafioti/Qwen3-TTS/zip/00969daa8064e23adc9e5f52cdf20cf247f94159",
+  "archive_sha256": "545855ad56ddbddc237b746922aed5c789ca21e901347e68d5ee0deecfd2bd58",
+  "license": "Apache-2.0",
+  "status": "research-only; not activated",
+  "source_files": {
+    "qwen_tts/__init__.py": {
+      "upstream_sha256": "eb4312049f767f591b24d2d7be06cf2ec19a6759c7382c54fac3bd5d671d32c5",
+      "candidate_sha256": "eb4312049f767f591b24d2d7be06cf2ec19a6759c7382c54fac3bd5d671d32c5"
+    },
+    "qwen_tts/_transformers_compat.py": {
+      "upstream_sha256": "033673335ed7bcb19054cdabc6c8400e443493f4b54340f8f449577d122bf982",
+      "candidate_sha256": "033673335ed7bcb19054cdabc6c8400e443493f4b54340f8f449577d122bf982"
+    },
+    "qwen_tts/core/__init__.py": {
+      "upstream_sha256": "1b380d9de843b6d585d938c339d066136567ca7125412674234204af4386679e",
+      "candidate_sha256": "a9b8ae8e60c5d4c7bea4ac859eb6e83ff5b30f9443cc7fe1aedeb3220098f9c3"
+    },
+    "qwen_tts/core/models/__init__.py": {
+      "upstream_sha256": "917d38d8fd7ed84de73703fd2394d535ca416e15694d1e50324e4a06d4022c82",
+      "candidate_sha256": "917d38d8fd7ed84de73703fd2394d535ca416e15694d1e50324e4a06d4022c82"
+    },
+    "qwen_tts/core/models/configuration_qwen3_tts.py": {
+      "upstream_sha256": "4f50b37285f413c05e5d6e257c9969abf9f31a24cd000473f15e31468dbe8461",
+      "candidate_sha256": "4f50b37285f413c05e5d6e257c9969abf9f31a24cd000473f15e31468dbe8461"
+    },
+    "qwen_tts/core/models/modeling_qwen3_tts.py": {
+      "upstream_sha256": "d075627fac2876eb1386ba1429a3d02bf30486689ebe3796077814de953d2a75",
+      "candidate_sha256": "dc13366d85f7ae8a0f30ec8d8e88ea1b9cf0065e27ecf41154aeeb54eac30f8c"
+    },
+    "qwen_tts/core/models/processing_qwen3_tts.py": {
+      "upstream_sha256": "61472203188e46eda68d740c25f0f228ece24a61ecf942e57d6e49e78b4d6bcd",
+      "candidate_sha256": "61472203188e46eda68d740c25f0f228ece24a61ecf942e57d6e49e78b4d6bcd"
+    },
+    "qwen_tts/core/tokenizer_12hz/configuration_qwen3_tts_tokenizer_v2.py": {
+      "upstream_sha256": "9e30c24394b00cb0366d7da3482b7436468acc1cd3da1a6fe614a1d34653a5e3",
+      "candidate_sha256": "9e30c24394b00cb0366d7da3482b7436468acc1cd3da1a6fe614a1d34653a5e3"
+    },
+    "qwen_tts/core/tokenizer_12hz/modeling_qwen3_tts_tokenizer_v2.py": {
+      "upstream_sha256": "55a7e3428a7ca3cbc9a1a8f2275d47dd765e5ffb0258724d471c6d6586c4f573",
+      "candidate_sha256": "55a7e3428a7ca3cbc9a1a8f2275d47dd765e5ffb0258724d471c6d6586c4f573"
+    },
+    "qwen_tts/inference/qwen3_tts_model.py": {
+      "upstream_sha256": "e1da450732857c1f5fe3e36ebab85db2f6dc6a48caaff6973f463384e30275e4",
+      "candidate_sha256": "8102feaaf84ee17b7ee5a4203d99c1f0e071ee7a42e3e987e457a5930290bbe0"
+    },
+    "qwen_tts/inference/qwen3_tts_tokenizer.py": {
+      "upstream_sha256": "7a6b8056398eda6ed30b6e95c8de2b7e63678f97e214363c8e3b9d0078362c12",
+      "candidate_sha256": "ab973e2e723c93c3a806fbe93d928f6eda1f2ec6d78e158b8f0477af7158b97e"
+    }
+  },
+  "local_files": {
+    "pyproject.toml": "792bfb84ec8bd38133f8656b34cd9e4cc74fa3b7c4551f6788ab24f7a68a7a89",
+    "security.py": "eea022965d00b61b969731617b32c1ffab5449d03e32c64801a80494ad2cf675",
+    "artifacts.json": "6793b023a671f189ae12fe1710cf1c4068a1979b51714a85089ca185cd5540f8",
+    "profile_contract.py": "b173b99d7a96c253419f2159ced30aeabf7caafea4761d4ebde074aae4c3c0b1",
+    "uv.lock": "fb5f67695443c1399e9859c239ab694dbc79e5f5c01169cbac83d3d134ccec4c"
+  }
+}

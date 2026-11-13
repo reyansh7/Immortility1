@@ -1,0 +1,186 @@
+--- upstream/qwen_tts/core/__init__.py
++++ candidate/qwen_tts/core/__init__.py
+@@ -1,3 +1,4 @@
++# Modified by Immortility, 2026-11-13: headless 12Hz/offline research derivative.
+ # coding=utf-8
+ # Copyright 2026 The Alibaba Qwen team.
+ # SPDX-License-Identifier: Apache-2.0
+@@ -13,7 +14,5 @@
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+-from .tokenizer_25hz.configuration_qwen3_tts_tokenizer_v1 import Qwen3TTSTokenizerV1Config
+-from .tokenizer_25hz.modeling_qwen3_tts_tokenizer_v1 import Qwen3TTSTokenizerV1Model
+ from .tokenizer_12hz.configuration_qwen3_tts_tokenizer_v2 import Qwen3TTSTokenizerV2Config
+ from .tokenizer_12hz.modeling_qwen3_tts_tokenizer_v2 import Qwen3TTSTokenizerV2Model
+--- upstream/qwen_tts/core/models/modeling_qwen3_tts.py
++++ candidate/qwen_tts/core/models/modeling_qwen3_tts.py
+@@ -1,3 +1,4 @@
++# Modified by Immortility, 2026-11-13: headless 12Hz/offline research derivative.
+ # coding=utf-8
+ # Copyright 2026 The Qwen team, Alibaba Group and the HuggingFace Inc. team. All rights reserved.
+ #
+@@ -52,44 +53,8 @@
+ logger = logging.get_logger(__name__)
+ 
+ 
+-def download_weights_from_hf_specific(
+-    model_name_or_path: str,
+-    cache_dir: str | None,
+-    allow_patterns: list[str],
+-    revision: str | None = None,
+-    ignore_patterns: str | list[str] | None = None,
+-) -> str:
+-    """Download model weights from Hugging Face Hub. Users can specify the
+-    allow_patterns to download only the necessary weights.
+-
+-    Args:
+-        model_name_or_path (str): The model name or path.
+-        cache_dir (Optional[str]): The cache directory to store the model
+-            weights. If None, will use HF defaults.
+-        allow_patterns (list[str]): The allowed patterns for the
+-            weight files. Files matched by any of the patterns will be
+-            downloaded.
+-        revision (Optional[str]): The revision of the model.
+-        ignore_patterns (Optional[Union[str, list[str]]]): The patterns to
+-            filter out the weight files. Files matched by any of the patterns
+-            will be ignored.
+-
+-    Returns:
+-        str: The path to the downloaded model weights.
+-    """
+-    assert len(allow_patterns) > 0
+-    local_only = huggingface_hub.constants.HF_HUB_OFFLINE
+-
+-    for allow_pattern in allow_patterns:
+-        hf_folder = snapshot_download(
+-            model_name_or_path,
+-            allow_patterns=allow_pattern,
+-            ignore_patterns=ignore_patterns,
+-            cache_dir=cache_dir,
+-            revision=revision,
+-            local_files_only=local_only,
+-        )
+-    return hf_folder
++def download_weights_from_hf_specific(*args, **kwargs):
++    raise ValueError("remote_model_download_disabled")
+ 
+ 
+ class Res2NetBlock(torch.nn.Module):
+@@ -1914,13 +1879,14 @@
+             force_download=kwargs.pop("force_download", False),
+             proxies=kwargs.pop("proxies", None),
+             resume_download=kwargs.pop("resume_download", None),
+-            local_files_only=kwargs.pop("local_files_only", False),
++            local_files_only=True,
+             token=kwargs.pop("use_auth_token", None),
+             revision=kwargs.pop("revision", None),
+         )
+         if speech_tokenizer_path is None:
+             raise ValueError(f"""{pretrained_model_name_or_path}/{speech_tokenizer_path} not exists""")
+         speech_tokenizer_dir = os.path.dirname(speech_tokenizer_path)
++        kwargs.update(local_files_only=True, trust_remote_code=False, use_safetensors=True, weights_only=True)
+         speech_tokenizer = Qwen3TTSTokenizer.from_pretrained(
+             speech_tokenizer_dir,
+             *model_args,
+@@ -1936,7 +1902,7 @@
+             force_download=kwargs.pop("force_download", False),
+             proxies=kwargs.pop("proxies", None),
+             resume_download=kwargs.pop("resume_download", None),
+-            local_files_only=kwargs.pop("local_files_only", False),
++            local_files_only=True,
+             token=kwargs.pop("use_auth_token", None),
+             revision=kwargs.pop("revision", None),
+         )
+--- upstream/qwen_tts/inference/qwen3_tts_model.py
++++ candidate/qwen_tts/inference/qwen3_tts_model.py
+@@ -1,3 +1,4 @@
++# Modified by Immortility, 2026-11-13: headless 12Hz/offline research derivative.
+ # coding=utf-8
+ # Copyright 2026 The Alibaba Qwen team.
+ # SPDX-License-Identifier: Apache-2.0
+@@ -105,6 +106,8 @@
+             Qwen3TTSModel:
+                 Wrapper instance containing `model`, `processor`, and generation defaults.
+         """
++        from .._immortility_security import local_options
++        pretrained_model_name_or_path, kwargs = local_options(pretrained_model_name_or_path, kwargs)
+         AutoConfig.register("qwen3_tts", Qwen3TTSConfig)
+         AutoModel.register(Qwen3TTSConfig, Qwen3TTSForConditionalGeneration)
+         AutoProcessor.register(Qwen3TTSConfig, Qwen3TTSProcessor)
+@@ -115,7 +118,7 @@
+                 f"AutoModel returned {type(model)}, expected Qwen3TTSForConditionalGeneration. "
+             )
+ 
+-        processor = AutoProcessor.from_pretrained(pretrained_model_name_or_path, fix_mistral_regex=True,)
++        processor = AutoProcessor.from_pretrained(pretrained_model_name_or_path, fix_mistral_regex=True, local_files_only=True, trust_remote_code=False)
+ 
+         generate_defaults = model.generate_config
+         return cls(model=model, processor=processor, generate_defaults=generate_defaults)
+@@ -206,10 +209,7 @@
+ 
+     def _load_audio_to_np(self, x: str) -> Tuple[np.ndarray, int]:
+         if self._is_url(x):
+-            with urllib.request.urlopen(x) as resp:
+-                audio_bytes = resp.read()
+-            with io.BytesIO(audio_bytes) as f:
+-                audio, sr = sf.read(f, dtype="float32", always_2d=False)
++            raise ValueError("remote_audio_disabled")
+         elif self._is_probably_base64(x):
+             wav_bytes = self._decode_base64_to_wav_bytes(x)
+             with io.BytesIO(wav_bytes) as f:
+--- upstream/qwen_tts/inference/qwen3_tts_tokenizer.py
++++ candidate/qwen_tts/inference/qwen3_tts_tokenizer.py
+@@ -1,3 +1,4 @@
++# Modified by Immortility, 2026-11-13: headless 12Hz/offline research derivative.
+ # coding=utf-8
+ # Copyright 2026 The Alibaba Qwen team.
+ # SPDX-License-Identifier: Apache-2.0
+@@ -27,8 +28,6 @@
+ from transformers import AutoConfig, AutoFeatureExtractor, AutoModel
+ 
+ from ..core import (
+-    Qwen3TTSTokenizerV1Config,
+-    Qwen3TTSTokenizerV1Model,
+     Qwen3TTSTokenizerV2Config,
+     Qwen3TTSTokenizerV2Model,
+ )
+@@ -76,15 +75,15 @@
+             Qwen3TTSTokenizer:
+                 Initialized instance with `model`, `feature_extractor`, `config`.
+         """
++        from .._immortility_security import local_options
++        pretrained_model_name_or_path, kwargs = local_options(pretrained_model_name_or_path, kwargs, tokenizer=True)
+         inst = cls()
+ 
+-        AutoConfig.register("qwen3_tts_tokenizer_25hz", Qwen3TTSTokenizerV1Config)
+-        AutoModel.register(Qwen3TTSTokenizerV1Config, Qwen3TTSTokenizerV1Model)
+ 
+         AutoConfig.register("qwen3_tts_tokenizer_12hz", Qwen3TTSTokenizerV2Config)
+         AutoModel.register(Qwen3TTSTokenizerV2Config, Qwen3TTSTokenizerV2Model)
+ 
+-        inst.feature_extractor = AutoFeatureExtractor.from_pretrained(pretrained_model_name_or_path)
++        inst.feature_extractor = AutoFeatureExtractor.from_pretrained(pretrained_model_name_or_path, local_files_only=True, trust_remote_code=False)
+         inst.model = AutoModel.from_pretrained(pretrained_model_name_or_path, **kwargs)
+         from .._transformers_compat import restore_mimi_full_attention, restore_rope_buffers
+ 
+@@ -142,10 +141,7 @@
+                 1-D float32 waveform at target_sr.
+         """
+         if self._is_url(x):
+-            with urllib.request.urlopen(x) as resp:
+-                audio_bytes = resp.read()
+-            with io.BytesIO(audio_bytes) as f:
+-                audio, sr = sf.read(f, dtype="float32", always_2d=False)
++            raise ValueError("remote_audio_disabled")
+         elif self._is_probably_base64(x):
+             wav_bytes = self._decode_base64_to_wav_bytes(x)
+             with io.BytesIO(wav_bytes) as f:
+@@ -232,7 +228,6 @@
+ 
+         Returns:
+             25Hz:
+-                Qwen3TTSTokenizerV1EncoderOutput (if return_dict=True) with fields:
+                   - audio_codes: List[torch.LongTensor] each (codes_len,)
+                   - xvectors:   List[torch.FloatTensor] each (xvector_dim,)
+                   - ref_mels:   List[torch.FloatTensor] each (mel_len, mel_dim)

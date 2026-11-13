@@ -1,0 +1,31 @@
+# Conceptual policy, not automatically enforced without code.
+policy:
+  additional_paid_spend_usd: 0
+  allow_paid_inference: false
+  forbid_unknown_pricing: true
+  require_consent_for_cloud_file_content: true
+providers:
+  groq:
+    enabled_if_key_present: true
+    model_candidates: ["openai/gpt-oss-120b"]
+    expected_access: free_plan_only
+  openrouter:
+    enabled_if_key_present: true
+    model_candidates: ["openrouter/free"]
+    restrict_to_confirmed_zero_price: true
+  gemini:
+    enabled_if_key_present: true
+    model_candidates: []   # Discover eligible model IDs, then pin in local config
+    require_free_tier_confirmation: true
+  xai:
+    enabled: false
+    reason: direct API is separate from Grok Bot access and may bill
+  local:
+    enabled: optional
+    engine: ollama
+routes:
+  low_latency_chat: [gemini, groq, openrouter, local]
+  reasoning: [groq, gemini, openrouter]
+  vision: [gemini, openrouter, local]
+  code: [cursor_cli]
+# Router must validate capability, rate limits, pricing and privacy BEFORE each call.

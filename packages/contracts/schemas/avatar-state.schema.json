@@ -1,0 +1,11 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"Shared orb / future avatar presentation state",
+  "type":"object","additionalProperties":false,
+  "required":["schema_version","state","audio_level"],
+  "properties":{
+    "schema_version":{"const":"1.0"},
+    "state":{"enum":["idle","listening","transcribing","thinking","speaking","acting","awaiting-approval","cancelled","error","disconnected"]},
+    "audio_level":{"type":"number","minimum":0,"maximum":1}
+  }
+}

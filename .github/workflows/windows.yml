@@ -1,0 +1,24 @@
+name: Windows foundation
+on: [push, pull_request]
+jobs:
+  foundation:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.1'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '10.27.0'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.10'
+          python-version: '3.13'
+      - run: uv sync --frozen --extra voice
+      - run: pnpm install --frozen-lockfile
+      - run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check.ps1
+      - run: cargo check --locked --manifest-path apps/desktop/src-tauri/Cargo.toml
+      - run: cargo test --locked --manifest-path apps/desktop/src-tauri/Cargo.toml
+      - run: pnpm audit
+      - run: uv run --extra voice pip-audit

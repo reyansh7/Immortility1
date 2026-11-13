@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://immortility.local/schemas/event.v1.json",
+  "title": "Immortility Task Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "task_id",
+    "sequence",
+    "timestamp",
+    "type",
+    "actor",
+    "data"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "message.delta",
+        "task.state",
+        "tool.started",
+        "tool.progress",
+        "tool.completed",
+        "approval.requested",
+        "approval.resolved",
+        "artifact.created",
+        "audit.notice",
+        "task.error",
+        "agent.started",
+        "agent.completed"
+      ]
+    },
+    "actor": {
+      "type": "string"
+    },
+    "data": {
+      "type": "object"
+    },
+    "correlation_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

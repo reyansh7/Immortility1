@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Phase 1 text task admission", "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "session_id", "request_id", "content", "privacy_class", "cloud_consent"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "session_id": {"type":"string", "minLength":1, "maxLength":64},
+    "request_id": {"type":"string", "minLength":1, "maxLength":64},
+    "content": {"type":"string", "minLength":1, "maxLength":16000},
+    "privacy_class": {"enum":["public", "personal"]},
+    "cloud_consent": {"const":true},
+    "source": {"enum":["text","voice"],"default":"text"},
+    "response_length": {"enum":["brief","normal","detailed"],"default":"normal"}
+  }
+}

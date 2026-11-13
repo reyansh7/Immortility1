@@ -1,0 +1,1903 @@
+{
+  "date": "2026-11-13T13:53:00.823678+00:00",
+  "source": "pip-audit scan enriched from OSV and original advisory publishers",
+  "entries": 52,
+  "severity_counts": {
+    "MODERATE": 16,
+    "HIGH": 30,
+    "CRITICAL": 5,
+    "LOW": 1
+  },
+  "runtime_enabled": false,
+  "limitations": "Source/call-path assessment only. No exploit PoCs, synthesis or playback. Known CVSS disagreements are retained in severity_sources; HIGH for X-CLIP uses ZDI 7.8.",
+  "findings": [
+    {
+      "package": "accelerate",
+      "installed_version": "1.12.0",
+      "id": "PYSEC-2026-3804",
+      "aliases": [
+        "CVE-2026-69112",
+        "GHSA-4j2p-28q2-5m79"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-3804",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:H"
+            },
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-4j2p-28q2-5m79",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:H"
+            },
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Accelerate path traversal and denial of service via sharded checkpoint weight_map entries",
+      "fix_versions": [],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-3804",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-4j2p-28q2-5m79",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "Requires an attacker-controlled sharded checkpoint index. The existing pinned Qwen snapshot has single model.safetensors files, no shard indexes. No arbitrary checkpoint input is exposed; replacing/tampering with model files remains a risk."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4327",
+      "aliases": [
+        "BIT-pillow-2026-112394",
+        "CVE-2026-112394",
+        "GHSA-4558-3h8r-v8xp"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4327",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-4558-3h8r-v8xp",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:N/VA:L/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: P;2L and P;4L decoders may read 1 to 3 bytes past the passed buffer size",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4327",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-4558-3h8r-v8xp",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4328",
+      "aliases": [
+        "BIT-pillow-2026-112396",
+        "CVE-2026-112396",
+        "GHSA-4rr5-89j8-mwwm"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4328",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-4rr5-89j8-mwwm",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Heap use-after-free when encoding TIFF to an in-memory buffer",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4328",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-4rr5-89j8-mwwm",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4326",
+      "aliases": [
+        "BIT-pillow-2026-112392",
+        "CVE-2026-112392",
+        "GHSA-27h8-gf7j-v5hc"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4326",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-27h8-gf7j-v5hc",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: NULL dereference in ImagingExpand via rank filters on zero-size images",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4326",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-27h8-gf7j-v5hc",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4339",
+      "aliases": [
+        "BIT-pillow-2026-96639",
+        "CVE-2026-96639",
+        "GHSA-v9pv-5gc8-w2m6"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4339",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-v9pv-5gc8-w2m6",
+          "level": "CRITICAL",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow multi-frame loaders can reuse stale native image storage after mode transitions",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4339",
+      "severity": "CRITICAL",
+      "severity_reference": "https://github.com/advisories/GHSA-v9pv-5gc8-w2m6",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4340",
+      "aliases": [
+        "BIT-pillow-2026-96641",
+        "CVE-2026-96641",
+        "GHSA-4rm8-3hmm-39fg"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4340",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-4rm8-3hmm-39fg",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Reachable undefined behavior in native integer operations, potentially leading to denial of service or logic integrity compromise",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4340",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-4rm8-3hmm-39fg",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4343",
+      "aliases": [
+        "BIT-pillow-2026-96644",
+        "CVE-2026-96644",
+        "GHSA-9v9v-9qvf-h2hj"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4343",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-9v9v-9qvf-h2hj",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:L/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Heap over-read in WMF/EMF rendering via 16-bit dimension truncation (Windows builds)",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4343",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-9v9v-9qvf-h2hj",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4334",
+      "aliases": [
+        "BIT-pillow-2026-112896",
+        "CVE-2026-112896",
+        "GHSA-pchr-8j38-3x4p"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4334",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-pchr-8j38-3x4p",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: TIFF encoder ColorMap plane-size mismatch causes a heap out-of-bounds read",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4334",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-pchr-8j38-3x4p",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4337",
+      "aliases": [
+        "BIT-pillow-2026-96636",
+        "CVE-2026-96636",
+        "GHSA-p8hx-v2p6-rp84"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4337",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-p8hx-v2p6-rp84",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Decompression-bomb protection bypass via multi-frame seek() in MPO and DCX (MpoImageFile.seek / DcxImageFile.seek)",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4337",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-p8hx-v2p6-rp84",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4341",
+      "aliases": [
+        "BIT-pillow-2026-96642",
+        "CVE-2026-96642",
+        "GHSA-3j72-p6qg-6xp7"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4341",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-3j72-p6qg-6xp7",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: TarIO negative size field causes infinite CPU-spin loop",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4341",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-3j72-p6qg-6xp7",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4330",
+      "aliases": [
+        "BIT-pillow-2026-112398",
+        "CVE-2026-112398",
+        "GHSA-5x8w-8jj5-q52h"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4330",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-5x8w-8jj5-q52h",
+          "level": "CRITICAL",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Heap buffer overflow in FlashPix (FPX) JPEG decoding leads to code execution",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4330",
+      "severity": "CRITICAL",
+      "severity_reference": "https://github.com/advisories/GHSA-5x8w-8jj5-q52h",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4338",
+      "aliases": [
+        "BIT-pillow-2026-96637",
+        "CVE-2026-96637",
+        "GHSA-g842-9rc4-69pw"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4338",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-g842-9rc4-69pw",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Decompression bomb check bypass in SpiderImagePlugin.seek() leads to unbounded allocation DoS",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4338",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-g842-9rc4-69pw",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4335",
+      "aliases": [
+        "BIT-pillow-2026-112901",
+        "CVE-2026-112901",
+        "GHSA-xgh8-jp6q-p5x8"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4335",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-xgh8-jp6q-p5x8",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: ReDoS in XbmImagePlugin: 512-byte file stalls Image.open() for minutes",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4335",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-xgh8-jp6q-p5x8",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4336",
+      "aliases": [
+        "BIT-pillow-2026-114501",
+        "CVE-2026-114501",
+        "GHSA-654x-cwwv-5j9c"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4336",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-654x-cwwv-5j9c",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Arrow export leaks stale heap memory when PILLOW_ALIGNMENT > 1",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4336",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-654x-cwwv-5j9c",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4331",
+      "aliases": [
+        "BIT-pillow-2026-112402",
+        "CVE-2026-112402",
+        "GHSA-7mwm-ghpf-9vrm"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4331",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-7mwm-ghpf-9vrm",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Double free in ImagingScaleAffine on calloc failure via Image.transform",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4331",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-7mwm-ghpf-9vrm",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4332",
+      "aliases": [
+        "BIT-pillow-2026-112403",
+        "CVE-2026-112403",
+        "GHSA-8g5g-8vmr-9782"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4332",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-8g5g-8vmr-9782",
+          "level": "CRITICAL",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Heap buffer overflow in ImagingJpegDecode",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4332",
+      "severity": "CRITICAL",
+      "severity_reference": "https://github.com/advisories/GHSA-8g5g-8vmr-9782",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4329",
+      "aliases": [
+        "BIT-pillow-2026-112397",
+        "CVE-2026-112397",
+        "GHSA-58r4-6rv3-gfh8"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4329",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-58r4-6rv3-gfh8",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Out-of-bounds access in _imagingmorph on a zero-width image",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4329",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-58r4-6rv3-gfh8",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4333",
+      "aliases": [
+        "BIT-pillow-2026-112405",
+        "CVE-2026-112405",
+        "GHSA-cp9v-662q-vvx9"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4333",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-cp9v-662q-vvx9",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: NULL pointer dereference in Image.merge via an unvalidated band 0",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4333",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-cp9v-662q-vvx9",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4342",
+      "aliases": [
+        "BIT-pillow-2026-96643",
+        "CVE-2026-96643",
+        "GHSA-g4qv-2jxx-769h"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4342",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-g4qv-2jxx-769h",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: PNG eXIf chunk makes EXIF parsing run in quadratic time",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4342",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-g4qv-2jxx-769h",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "PYSEC-2026-4363",
+      "aliases": [
+        "CVE-2026-112902",
+        "GHSA-xvh5-g6gv-559v"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4363",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-xvh5-g6gv-559v",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": " Pillow: Memory disclosure and segfault in libtiff encoder via crafted TIFF tags",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4363",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-xvh5-g6gv-559v",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-p4wg-p73j-c528",
+      "aliases": [
+        "BIT-pillow-2026-112895",
+        "CVE-2026-112895"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-p4wg-p73j-c528",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Unbounded recursion parsing a PDF page tree or trailer chain (incomplete fix for CVE-2026-42310)",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-p4wg-p73j-c528",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-p4wg-p73j-c528",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-65qm-jvmh-6pqg",
+      "aliases": [
+        "BIT-pillow-2026-112400",
+        "CVE-2026-112400"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-65qm-jvmh-6pqg",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: GIF seek keeps rejected size after DecompressionBombError, allowing DoS",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-65qm-jvmh-6pqg",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-65qm-jvmh-6pqg",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-q45j-58j2-45rg",
+      "aliases": [
+        "BIT-pillow-2026-112897",
+        "CVE-2026-112897"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-q45j-58j2-45rg",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: TiffDecode returns uninitialized memory as pixels for short JPEG strips",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-q45j-58j2-45rg",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-q45j-58j2-45rg",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-462x-pgg6-55fp",
+      "aliases": [
+        "BIT-pillow-2026-112395",
+        "CVE-2026-112395"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-462x-pgg6-55fp",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow tiled-TIFF decoder reads past tile buffer in copy4 (Unpack.c:1290)",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-462x-pgg6-55fp",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-462x-pgg6-55fp",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-c6hw-5grf-ff96",
+      "aliases": [
+        "BIT-pillow-2026-112404",
+        "CVE-2026-112404"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-c6hw-5grf-ff96",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: OOB read in TiffDecode.c tile and RGBA paths leaks heap memory into pixels",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-c6hw-5grf-ff96",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-c6hw-5grf-ff96",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-vx6w-vv9f-6gvg",
+      "aliases": [
+        "CVE-2026-112899"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-vx6w-vv9f-6gvg",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: EPS load(scale) lets Ghostscript render past the decompression bomb limit",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-vx6w-vv9f-6gvg",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-vx6w-vv9f-6gvg",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-w889-685w-c8fh",
+      "aliases": [
+        "BIT-pillow-2026-112900",
+        "CVE-2026-112900"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-w889-685w-c8fh",
+          "level": "CRITICAL",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Argument Injection in Ghostscript call, potentially leading into RCE",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-w889-685w-c8fh",
+      "severity": "CRITICAL",
+      "severity_reference": "https://github.com/advisories/GHSA-w889-685w-c8fh",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-j4m9-6w36-pw47",
+      "aliases": [
+        "BIT-pillow-2026-112893",
+        "CVE-2026-112893"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-j4m9-6w36-pw47",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Invalid free in FreeType glyph rendering when a stroker is active",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-j4m9-6w36-pw47",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-j4m9-6w36-pw47",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-fc9g-5qg7-mf45",
+      "aliases": [
+        "BIT-pillow-2026-112891",
+        "CVE-2026-112891"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-fc9g-5qg7-mf45",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Quadratic GIF comment copying during save",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-fc9g-5qg7-mf45",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-fc9g-5qg7-mf45",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-22hg-r758-rrw9",
+      "aliases": [
+        "BIT-pillow-2026-112390",
+        "CVE-2026-112390"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-22hg-r758-rrw9",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Infinite loop in MIC n_frames when the embedded TIFF",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-22hg-r758-rrw9",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-22hg-r758-rrw9",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-74r2-7ff9-mjj2",
+      "aliases": [
+        "BIT-pillow-2026-112401",
+        "CVE-2026-112401"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-74r2-7ff9-mjj2",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Quadratic GIF comment concatenation allows DoS in Image.open()",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-74r2-7ff9-mjj2",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-74r2-7ff9-mjj2",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-254f-3936-288h",
+      "aliases": [
+        "BIT-pillow-2026-112391",
+        "CVE-2026-112391"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-254f-3936-288h",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: PdfParser can recurse without limit in get_value() and linearize_page_tree()",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-254f-3936-288h",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-254f-3936-288h",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-jg86-v3jv-hrpm",
+      "aliases": [
+        "BIT-pillow-2026-112894",
+        "CVE-2026-112894"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-jg86-v3jv-hrpm",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Quadratic-time DoS in PDF save_all (PdfParser.next_object_id)",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-jg86-v3jv-hrpm",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-jg86-v3jv-hrpm",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-f2g6-542v-9j58",
+      "aliases": [
+        "BIT-pillow-2026-112406",
+        "CVE-2026-112406"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-f2g6-542v-9j58",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Infinite loop in PdfParser.rewrite_pages on page tree Parent cycle",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-f2g6-542v-9j58",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-f2g6-542v-9j58",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-5xm2-6676-qcp9",
+      "aliases": [
+        "BIT-pillow-2026-112399",
+        "CVE-2026-112399"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-5xm2-6676-qcp9",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: APNG background disposal allocates full canvas before decompression bomb check",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-5xm2-6676-qcp9",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-5xm2-6676-qcp9",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-gg2r-wvfm-q9rx",
+      "aliases": [
+        "BIT-pillow-2026-112892",
+        "CVE-2026-112892"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-gg2r-wvfm-q9rx",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: MSP RLE decoder expands a tiny file into unbounded memory",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-gg2r-wvfm-q9rx",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-gg2r-wvfm-q9rx",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-332p-7hrc-92wf",
+      "aliases": [
+        "BIT-pillow-2026-112393",
+        "CVE-2026-112393"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-332p-7hrc-92wf",
+          "level": "CRITICAL",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Heap buffer overflow in _tiffWriteProc when saving TIFF to BytesIO",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-332p-7hrc-92wf",
+      "severity": "CRITICAL",
+      "severity_reference": "https://github.com/advisories/GHSA-332p-7hrc-92wf",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-24rc-8hj2-v98c",
+      "aliases": [
+        "BIT-pillow-2026-96638",
+        "CVE-2026-96638"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-24rc-8hj2-v98c",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: BMP RLE decoder memory-amplification DoS via unbounded delta escape / absolute mode",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-24rc-8hj2-v98c",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-24rc-8hj2-v98c",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-mrfp-p49p-3hf2",
+      "aliases": [
+        "BIT-pillow-2026-96640",
+        "CVE-2026-96640"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-mrfp-p49p-3hf2",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow PDF append accepts malformed shared page-tree DAG causing resource exhaustion",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-mrfp-p49p-3hf2",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-mrfp-p49p-3hf2",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-g7cr-3p24-7wf7",
+      "aliases": [
+        "BIT-pillow-2026-96778",
+        "CVE-2026-96778"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-g7cr-3p24-7wf7",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Heap buffer overflow writing JPEG comment after ICC profile fills buffer",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-g7cr-3p24-7wf7",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-g7cr-3p24-7wf7",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-78g4-xqwv-q3g8",
+      "aliases": [],
+      "severity_sources": [
+        {
+          "source": "GHSA-78g4-xqwv-q3g8",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Bundled libopenjp2 2.5.4 in all wheels since 11.1.0 carries OSV-2025-219 heap-buffer-overflow write reachable from Image.open().load()",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-78g4-xqwv-q3g8",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-78g4-xqwv-q3g8",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-xcvg-w56q-r89m",
+      "aliases": [
+        "CVE-2026-128067"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-xcvg-w56q-r89m",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:L/VA:H/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "Pillow: Heap buffer overflow saving TIFF with libtiff when tags override image size",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-xcvg-w56q-r89m",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-xcvg-w56q-r89m",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "pillow",
+      "installed_version": "12.3.0",
+      "id": "GHSA-wqgw-9xfh-qf2g",
+      "aliases": [
+        "CVE-2026-128066"
+      ],
+      "severity_sources": [
+        {
+          "source": "GHSA-wqgw-9xfh-qf2g",
+          "level": "MODERATE",
+          "cvss": []
+        }
+      ],
+      "summary": "Pillow: Memory DoS in TIFF and EXIF IFD parsing via overlapping tag data",
+      "fix_versions": [
+        "13.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-wqgw-9xfh-qf2g",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-wqgw-9xfh-qf2g",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "No image/PDF/font/Arrow input or processing operation is exposed by the reviewed Qwen worker; incidental PIL imports do not establish decoder reachability. Would become relevant if image processing or an arbitrary Python tool were enabled."
+    },
+    {
+      "package": "setuptools",
+      "installed_version": "78.1.0",
+      "id": "PYSEC-2025-49",
+      "aliases": [
+        "BIT-setuptools-2025-47273",
+        "CVE-2025-47273",
+        "GHSA-5rjg-fvgr-3xxf"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2025-49",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-5rjg-fvgr-3xxf",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N/E:P"
+            }
+          ]
+        }
+      ],
+      "summary": "setuptools has a path traversal vulnerability in PackageIndex.download that leads to Arbitrary File Write",
+      "fix_versions": [
+        "78.1.1"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2025-49",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-5rjg-fvgr-3xxf",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "Requires setuptools PackageIndex.download on an attacker-controlled package URL. The speech worker does not install/download Python packages. Candidate update 81.0.0 includes the 78.1.1 fix; original environment remains unchanged."
+    },
+    {
+      "package": "setuptools",
+      "installed_version": "78.1.0",
+      "id": "PYSEC-2026-3447",
+      "aliases": [
+        "BIT-setuptools-2026-59890",
+        "CVE-2026-59890",
+        "GHSA-h35f-9h28-mq5c"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-3447",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:L/A:N"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-h35f-9h28-mq5c",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:L/A:N"
+            }
+          ]
+        }
+      ],
+      "summary": "setuptools: MANIFEST.in exclusion bypass in sdist via Unicode normalization collision (NFC/NFD) on macOS APFS/HFS+",
+      "fix_versions": [
+        "83.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-3447",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-h35f-9h28-mq5c",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "Requires sdist creation and Unicode normalization collisions on macOS APFS/HFS+. This Windows speech runtime does neither; affected package version still present."
+    },
+    {
+      "package": "setuptools",
+      "installed_version": "78.1.0",
+      "id": "GHSA-xmj3-9gf7-h52w",
+      "aliases": [],
+      "severity_sources": [
+        {
+          "source": "GHSA-xmj3-9gf7-h52w",
+          "level": "LOW",
+          "cvss": [
+            {
+              "type": "CVSS_V4",
+              "score": "CVSS:4.0/AV:L/AC:H/AT:P/PR:L/UI:A/VC:N/VI:L/VA:L/SC:N/SI:N/SA:N"
+            }
+          ]
+        }
+      ],
+      "summary": "setuptools: Windows path escape via namespace_packages.txt during legacy wheel installation  Description",
+      "fix_versions": [
+        "84.1.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/GHSA-xmj3-9gf7-h52w",
+      "severity": "LOW",
+      "severity_reference": "https://github.com/advisories/GHSA-xmj3-9gf7-h52w",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "Windows-specific, but requires setuptools' legacy Wheel.install_as_egg on a malicious wheel. Runtime does not call it; uv installation does not use that legacy installer. Not a fix or assurance for arbitrary future package installs."
+    },
+    {
+      "package": "transformers",
+      "installed_version": "4.57.3",
+      "id": "PYSEC-2025-217",
+      "aliases": [
+        "CVE-2025-14929"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2025-217",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+            }
+          ]
+        }
+      ],
+      "summary": "X-CLIP checkpoint conversion: unsafe deserialization",
+      "fix_versions": [],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2025-217",
+      "severity": "HIGH",
+      "severity_reference": "https://www.zerodayinitiative.com/advisories/ZDI-25-1144/",
+      "cvss_base_score": 7.8,
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "X-CLIP checkpoint-conversion script is not called by the Qwen model path. Tensor-only private profile loading is a different code path."
+    },
+    {
+      "package": "transformers",
+      "installed_version": "4.57.3",
+      "id": "PYSEC-2026-2290",
+      "aliases": [
+        "CVE-2026-5241",
+        "GHSA-fgcw-684q-jj6r"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-2290",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-fgcw-684q-jj6r",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.0/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:H/A:N"
+            }
+          ]
+        }
+      ],
+      "summary": "huggingface/transformers: Arbitrary Code Execution During Model Initialization in the LightGlue Model Loading Path",
+      "fix_versions": [],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-2290",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-fgcw-684q-jj6r",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "LightGlue model initialization is not used; reviewed model is qwen3_tts. Arbitrary model/config substitution must stay forbidden."
+    },
+    {
+      "package": "transformers",
+      "installed_version": "4.57.3",
+      "id": "PYSEC-2026-2288",
+      "aliases": [
+        "CVE-2026-1839",
+        "GHSA-69w3-r845-3855"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-2288",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-69w3-r845-3855",
+          "level": "MODERATE",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.0/AV:L/AC:H/PR:N/UI:R/S:U/C:H/I:L/A:H"
+            }
+          ]
+        }
+      ],
+      "summary": "HuggingFace Transformers allows for arbitrary code execution in the `Trainer` class",
+      "fix_versions": [
+        "5.0.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-2288",
+      "severity": "MODERATE",
+      "severity_reference": "https://github.com/advisories/GHSA-69w3-r845-3855",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "Trainer._load_rng_state is not used and advisory requires PyTorch <2.6; installed Torch is 2.11.0+cu128. Those preconditions are absent."
+    },
+    {
+      "package": "transformers",
+      "installed_version": "4.57.3",
+      "id": "PYSEC-2026-2289",
+      "aliases": [
+        "CVE-2026-4372",
+        "GHSA-29pf-2h5f-8g72"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-2289",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-29pf-2h5f-8g72",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.0/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H"
+            }
+          ]
+        }
+      ],
+      "summary": "HuggingFace transformers vulnerable to remote code execution",
+      "fix_versions": [
+        "5.3.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-2289",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-29pf-2h5f-8g72",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "Model loading IS used. Malicious attention configuration can bypass remote-code trust checks. Fixed model revision and explicit SDPA constrain current input, but the original loader permits network/cache access; no sandbox or verified artifact-integrity proof currently closes this risk. Keep disabled."
+    },
+    {
+      "package": "transformers",
+      "installed_version": "4.57.3",
+      "id": "PYSEC-2026-3929",
+      "aliases": [
+        "CVE-2026-9856",
+        "GHSA-xrqw-3rrv-vx5w"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-3929",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:L"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-xrqw-3rrv-vx5w",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:H/A:L"
+            }
+          ]
+        }
+      ],
+      "summary": "Transformers save_pretrained path traversal allows arbitrary file writes through chat template names",
+      "fix_versions": [
+        "5.10.0"
+      ],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-3929",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-xrqw-3rrv-vx5w",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "Requires save_pretrained with attacker-controlled chat-template names. Worker does not call model/tokenizer save_pretrained; profile torch.save is different."
+    },
+    {
+      "package": "transformers",
+      "installed_version": "4.57.3",
+      "id": "PYSEC-2026-4174",
+      "aliases": [
+        "CVE-2026-80047",
+        "GHSA-x9r9-c232-4q39"
+      ],
+      "severity_sources": [
+        {
+          "source": "PYSEC-2026-4174",
+          "level": "UNKNOWN",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+            }
+          ]
+        },
+        {
+          "source": "GHSA-x9r9-c232-4q39",
+          "level": "HIGH",
+          "cvss": [
+            {
+              "type": "CVSS_V3",
+              "score": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H"
+            }
+          ]
+        }
+      ],
+      "summary": "Hugging Face Transformers downloads custom generation code before trust consent",
+      "fix_versions": [],
+      "withdrawn": null,
+      "url": "https://osv.dev/vulnerability/PYSEC-2026-4174",
+      "severity": "HIGH",
+      "severity_reference": "https://github.com/advisories/GHSA-x9r9-c232-4q39",
+      "current_exposure": "Broker Qwen activation disabled; no playback authorized.",
+      "conditional_reachability": "Generation/model initialization IS used. Requires attacker-controlled custom generation metadata. Fixed revision constrains input, but downloading before trust consent means trust_remote_code=False alone is insufficient. Keep disabled until patched or artifact/network restrictions are independently verified."
+    }
+  ]
+}

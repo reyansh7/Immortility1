@@ -1,0 +1,828 @@
+{
+  "generated_at": "2026-11-13T14:41:01.538930+00:00",
+  "candidate": "immortility-qwen-tts-headless==0.1.1.post1+immortility.2",
+  "recommendation": "BLOCKED for activation; CPU research gates passed",
+  "original_environment_changed": false,
+  "experimental_qwen_tts": false,
+  "original_entries": [
+    {
+      "id": "PYSEC-2026-3804",
+      "aliases": [
+        "CVE-2026-69112",
+        "GHSA-4j2p-28q2-5m79"
+      ],
+      "severity": "MODERATE",
+      "package": "accelerate",
+      "original_version": "1.12.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression. Device-map/offload arguments are rejected. Source/controlled-reader evidence shows 1.15.0 still unsafe; it was rejected.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-3804"
+    },
+    {
+      "id": "PYSEC-2026-4327",
+      "aliases": [
+        "BIT-pillow-2026-112394",
+        "CVE-2026-112394",
+        "GHSA-4558-3h8r-v8xp"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4327"
+    },
+    {
+      "id": "PYSEC-2026-4328",
+      "aliases": [
+        "BIT-pillow-2026-112396",
+        "CVE-2026-112396",
+        "GHSA-4rr5-89j8-mwwm"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4328"
+    },
+    {
+      "id": "PYSEC-2026-4326",
+      "aliases": [
+        "BIT-pillow-2026-112392",
+        "CVE-2026-112392",
+        "GHSA-27h8-gf7j-v5hc"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4326"
+    },
+    {
+      "id": "PYSEC-2026-4339",
+      "aliases": [
+        "BIT-pillow-2026-96639",
+        "CVE-2026-96639",
+        "GHSA-v9pv-5gc8-w2m6"
+      ],
+      "severity": "CRITICAL",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4339"
+    },
+    {
+      "id": "PYSEC-2026-4340",
+      "aliases": [
+        "BIT-pillow-2026-96641",
+        "CVE-2026-96641",
+        "GHSA-4rm8-3hmm-39fg"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4340"
+    },
+    {
+      "id": "PYSEC-2026-4343",
+      "aliases": [
+        "BIT-pillow-2026-96644",
+        "CVE-2026-96644",
+        "GHSA-9v9v-9qvf-h2hj"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4343"
+    },
+    {
+      "id": "PYSEC-2026-4334",
+      "aliases": [
+        "BIT-pillow-2026-112896",
+        "CVE-2026-112896",
+        "GHSA-pchr-8j38-3x4p"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4334"
+    },
+    {
+      "id": "PYSEC-2026-4337",
+      "aliases": [
+        "BIT-pillow-2026-96636",
+        "CVE-2026-96636",
+        "GHSA-p8hx-v2p6-rp84"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4337"
+    },
+    {
+      "id": "PYSEC-2026-4341",
+      "aliases": [
+        "BIT-pillow-2026-96642",
+        "CVE-2026-96642",
+        "GHSA-3j72-p6qg-6xp7"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4341"
+    },
+    {
+      "id": "PYSEC-2026-4330",
+      "aliases": [
+        "BIT-pillow-2026-112398",
+        "CVE-2026-112398",
+        "GHSA-5x8w-8jj5-q52h"
+      ],
+      "severity": "CRITICAL",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4330"
+    },
+    {
+      "id": "PYSEC-2026-4338",
+      "aliases": [
+        "BIT-pillow-2026-96637",
+        "CVE-2026-96637",
+        "GHSA-g842-9rc4-69pw"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4338"
+    },
+    {
+      "id": "PYSEC-2026-4335",
+      "aliases": [
+        "BIT-pillow-2026-112901",
+        "CVE-2026-112901",
+        "GHSA-xgh8-jp6q-p5x8"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4335"
+    },
+    {
+      "id": "PYSEC-2026-4336",
+      "aliases": [
+        "BIT-pillow-2026-114501",
+        "CVE-2026-114501",
+        "GHSA-654x-cwwv-5j9c"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4336"
+    },
+    {
+      "id": "PYSEC-2026-4331",
+      "aliases": [
+        "BIT-pillow-2026-112402",
+        "CVE-2026-112402",
+        "GHSA-7mwm-ghpf-9vrm"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4331"
+    },
+    {
+      "id": "PYSEC-2026-4332",
+      "aliases": [
+        "BIT-pillow-2026-112403",
+        "CVE-2026-112403",
+        "GHSA-8g5g-8vmr-9782"
+      ],
+      "severity": "CRITICAL",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4332"
+    },
+    {
+      "id": "PYSEC-2026-4329",
+      "aliases": [
+        "BIT-pillow-2026-112397",
+        "CVE-2026-112397",
+        "GHSA-58r4-6rv3-gfh8"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4329"
+    },
+    {
+      "id": "PYSEC-2026-4333",
+      "aliases": [
+        "BIT-pillow-2026-112405",
+        "CVE-2026-112405",
+        "GHSA-cp9v-662q-vvx9"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4333"
+    },
+    {
+      "id": "PYSEC-2026-4342",
+      "aliases": [
+        "BIT-pillow-2026-96643",
+        "CVE-2026-96643",
+        "GHSA-g4qv-2jxx-769h"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4342"
+    },
+    {
+      "id": "PYSEC-2026-4363",
+      "aliases": [
+        "CVE-2026-112902",
+        "GHSA-xvh5-g6gv-559v"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4363"
+    },
+    {
+      "id": "GHSA-p4wg-p73j-c528",
+      "aliases": [
+        "BIT-pillow-2026-112895",
+        "CVE-2026-112895"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-p4wg-p73j-c528"
+    },
+    {
+      "id": "GHSA-65qm-jvmh-6pqg",
+      "aliases": [
+        "BIT-pillow-2026-112400",
+        "CVE-2026-112400"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-65qm-jvmh-6pqg"
+    },
+    {
+      "id": "GHSA-q45j-58j2-45rg",
+      "aliases": [
+        "BIT-pillow-2026-112897",
+        "CVE-2026-112897"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-q45j-58j2-45rg"
+    },
+    {
+      "id": "GHSA-462x-pgg6-55fp",
+      "aliases": [
+        "BIT-pillow-2026-112395",
+        "CVE-2026-112395"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-462x-pgg6-55fp"
+    },
+    {
+      "id": "GHSA-c6hw-5grf-ff96",
+      "aliases": [
+        "BIT-pillow-2026-112404",
+        "CVE-2026-112404"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-c6hw-5grf-ff96"
+    },
+    {
+      "id": "GHSA-vx6w-vv9f-6gvg",
+      "aliases": [
+        "CVE-2026-112899"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-vx6w-vv9f-6gvg"
+    },
+    {
+      "id": "GHSA-w889-685w-c8fh",
+      "aliases": [
+        "BIT-pillow-2026-112900",
+        "CVE-2026-112900"
+      ],
+      "severity": "CRITICAL",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-w889-685w-c8fh"
+    },
+    {
+      "id": "GHSA-j4m9-6w36-pw47",
+      "aliases": [
+        "BIT-pillow-2026-112893",
+        "CVE-2026-112893"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-j4m9-6w36-pw47"
+    },
+    {
+      "id": "GHSA-fc9g-5qg7-mf45",
+      "aliases": [
+        "BIT-pillow-2026-112891",
+        "CVE-2026-112891"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-fc9g-5qg7-mf45"
+    },
+    {
+      "id": "GHSA-22hg-r758-rrw9",
+      "aliases": [
+        "BIT-pillow-2026-112390",
+        "CVE-2026-112390"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-22hg-r758-rrw9"
+    },
+    {
+      "id": "GHSA-74r2-7ff9-mjj2",
+      "aliases": [
+        "BIT-pillow-2026-112401",
+        "CVE-2026-112401"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-74r2-7ff9-mjj2"
+    },
+    {
+      "id": "GHSA-254f-3936-288h",
+      "aliases": [
+        "BIT-pillow-2026-112391",
+        "CVE-2026-112391"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-254f-3936-288h"
+    },
+    {
+      "id": "GHSA-jg86-v3jv-hrpm",
+      "aliases": [
+        "BIT-pillow-2026-112894",
+        "CVE-2026-112894"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-jg86-v3jv-hrpm"
+    },
+    {
+      "id": "GHSA-f2g6-542v-9j58",
+      "aliases": [
+        "BIT-pillow-2026-112406",
+        "CVE-2026-112406"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-f2g6-542v-9j58"
+    },
+    {
+      "id": "GHSA-5xm2-6676-qcp9",
+      "aliases": [
+        "BIT-pillow-2026-112399",
+        "CVE-2026-112399"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-5xm2-6676-qcp9"
+    },
+    {
+      "id": "GHSA-gg2r-wvfm-q9rx",
+      "aliases": [
+        "BIT-pillow-2026-112892",
+        "CVE-2026-112892"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-gg2r-wvfm-q9rx"
+    },
+    {
+      "id": "GHSA-332p-7hrc-92wf",
+      "aliases": [
+        "BIT-pillow-2026-112393",
+        "CVE-2026-112393"
+      ],
+      "severity": "CRITICAL",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-332p-7hrc-92wf"
+    },
+    {
+      "id": "GHSA-24rc-8hj2-v98c",
+      "aliases": [
+        "BIT-pillow-2026-96638",
+        "CVE-2026-96638"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-24rc-8hj2-v98c"
+    },
+    {
+      "id": "GHSA-mrfp-p49p-3hf2",
+      "aliases": [
+        "BIT-pillow-2026-96640",
+        "CVE-2026-96640"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-mrfp-p49p-3hf2"
+    },
+    {
+      "id": "GHSA-g7cr-3p24-7wf7",
+      "aliases": [
+        "BIT-pillow-2026-96778",
+        "CVE-2026-96778"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-g7cr-3p24-7wf7"
+    },
+    {
+      "id": "GHSA-78g4-xqwv-q3g8",
+      "aliases": [],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-78g4-xqwv-q3g8"
+    },
+    {
+      "id": "GHSA-xcvg-w56q-r89m",
+      "aliases": [
+        "CVE-2026-128067"
+      ],
+      "severity": "HIGH",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-xcvg-w56q-r89m"
+    },
+    {
+      "id": "GHSA-wqgw-9xfh-qf2g",
+      "aliases": [
+        "CVE-2026-128066"
+      ],
+      "severity": "MODERATE",
+      "package": "pillow",
+      "original_version": "12.3.0",
+      "candidate_version": null,
+      "result": "component_removed",
+      "resolution": "Component removed from the actual installed candidate, not an advisory suppression.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-wqgw-9xfh-qf2g"
+    },
+    {
+      "id": "PYSEC-2025-49",
+      "aliases": [
+        "BIT-setuptools-2025-47273",
+        "CVE-2025-47273",
+        "GHSA-5rjg-fvgr-3xxf"
+      ],
+      "severity": "HIGH",
+      "package": "setuptools",
+      "original_version": "78.1.0",
+      "candidate_version": "84.2.1",
+      "result": "updated_no_indexed_finding",
+      "resolution": "Updated beyond reported affected ranges; published package scans contain no findings.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2025-49"
+    },
+    {
+      "id": "PYSEC-2026-3447",
+      "aliases": [
+        "BIT-setuptools-2026-59890",
+        "CVE-2026-59890",
+        "GHSA-h35f-9h28-mq5c"
+      ],
+      "severity": "MODERATE",
+      "package": "setuptools",
+      "original_version": "78.1.0",
+      "candidate_version": "84.2.1",
+      "result": "updated_no_indexed_finding",
+      "resolution": "Updated beyond reported affected ranges; published package scans contain no findings.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-3447"
+    },
+    {
+      "id": "GHSA-xmj3-9gf7-h52w",
+      "aliases": [],
+      "severity": "LOW",
+      "package": "setuptools",
+      "original_version": "78.1.0",
+      "candidate_version": "84.2.1",
+      "result": "updated_no_indexed_finding",
+      "resolution": "Updated beyond reported affected ranges; published package scans contain no findings.",
+      "original_reference": "https://osv.dev/vulnerability/GHSA-xmj3-9gf7-h52w"
+    },
+    {
+      "id": "PYSEC-2025-217",
+      "aliases": [
+        "CVE-2025-14929"
+      ],
+      "severity": "HIGH",
+      "package": "transformers",
+      "original_version": "4.57.3",
+      "candidate_version": "5.15.1",
+      "result": "updated_no_indexed_finding",
+      "resolution": "Updated beyond reported affected ranges; published package scans contain no findings.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2025-217"
+    },
+    {
+      "id": "PYSEC-2026-2290",
+      "aliases": [
+        "CVE-2026-5241",
+        "GHSA-fgcw-684q-jj6r"
+      ],
+      "severity": "HIGH",
+      "package": "transformers",
+      "original_version": "4.57.3",
+      "candidate_version": "5.15.1",
+      "result": "updated_no_indexed_finding",
+      "resolution": "Updated beyond reported affected ranges; published package scans contain no findings.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-2290"
+    },
+    {
+      "id": "PYSEC-2026-2288",
+      "aliases": [
+        "CVE-2026-1839",
+        "GHSA-69w3-r845-3855"
+      ],
+      "severity": "MODERATE",
+      "package": "transformers",
+      "original_version": "4.57.3",
+      "candidate_version": "5.15.1",
+      "result": "updated_no_indexed_finding",
+      "resolution": "Updated beyond reported affected ranges; published package scans contain no findings.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-2288"
+    },
+    {
+      "id": "PYSEC-2026-2289",
+      "aliases": [
+        "CVE-2026-4372",
+        "GHSA-29pf-2h5f-8g72"
+      ],
+      "severity": "HIGH",
+      "package": "transformers",
+      "original_version": "4.57.3",
+      "candidate_version": "5.15.1",
+      "result": "updated_no_indexed_finding",
+      "resolution": "Updated beyond reported affected ranges; published package scans contain no findings.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-2289"
+    },
+    {
+      "id": "PYSEC-2026-3929",
+      "aliases": [
+        "CVE-2026-9856",
+        "GHSA-xrqw-3rrv-vx5w"
+      ],
+      "severity": "HIGH",
+      "package": "transformers",
+      "original_version": "4.57.3",
+      "candidate_version": "5.15.1",
+      "result": "updated_no_indexed_finding",
+      "resolution": "Updated beyond reported affected ranges; published package scans contain no findings.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-3929"
+    },
+    {
+      "id": "PYSEC-2026-4174",
+      "aliases": [
+        "CVE-2026-80047",
+        "GHSA-x9r9-c232-4q39"
+      ],
+      "severity": "HIGH",
+      "package": "transformers",
+      "original_version": "4.57.3",
+      "candidate_version": "5.15.1",
+      "result": "updated_no_indexed_finding",
+      "resolution": "Updated beyond reported affected ranges; published package scans contain no findings.",
+      "original_reference": "https://osv.dev/vulnerability/PYSEC-2026-4174"
+    }
+  ],
+  "supplemental_torch": {
+    "id": "GHSA-rrmf-rvhw-rf47",
+    "severity": "LOW",
+    "original_upstream_version": "2.11.0",
+    "candidate_version": "2.15.0",
+    "reported_fixed": "2.13.0",
+    "result": "updated_no_indexed_finding; CUDA binary not tested"
+  },
+  "scan_packages": 62,
+  "indexed_package_findings": 0,
+  "scan_skips": [
+    {
+      "package": "immortility-qwen-tts-headless",
+      "reason": "Dependency not found on PyPI and could not be audited: immortility-qwen-tts-headless (0.1.1.post1+immortility.2)"
+    }
+  ],
+  "residuals": [
+    {
+      "id": "R1",
+      "status": "OPEN",
+      "risk": "Local derivative is not indexed on PyPI; its source and behavior cannot be certified by a clean package scan.",
+      "gate": "Pinned source archive, Apache provenance, review diff and CPU contracts exist; independent review and full load/generation parity are still required."
+    },
+    {
+      "id": "R2",
+      "status": "OPEN",
+      "risk": "No CPU pretrained-weight load, CUDA model load, speech generation or cancellation under real inference was authorized.",
+      "gate": "Separate explicit native checkpoint approval; no automatic promotion or experimental flag change."
+    },
+    {
+      "id": "R3",
+      "status": "OPEN",
+      "risk": "Python path/hash/option checks are not an OS filesystem/network sandbox. Mutable model/profile files still present a check-to-use race.",
+      "gate": "Broker must supply approved canonical roots and trusted profile/metadata hashes; read-only artifact staging, restricted token/ACLs and independently enforced egress limits require a separate Windows security design/test."
+    },
+    {
+      "id": "R4",
+      "status": "OPEN",
+      "risk": "The candidate rejects device_map and omits Accelerate. A future CPU-load then explicit .to(cuda:0) path has not been validated on the real model.",
+      "gate": "Documented CPU/GPU memory, dtype, RoPE, ICL and speaker-parity checks before adoption; never silently select the candidate from the existing worker."
+    },
+    {
+      "id": "R5",
+      "status": "OPEN",
+      "risk": "Existing Windows taskkill cleanup exceeded its bound during competing imports; isolated lifecycle rerun passed.",
+      "gate": "Record serial regression outcome and reproduce cancellation under realistic load before native acceptance; no timeout relaxation or suppressed failure."
+    },
+    {
+      "id": "R6",
+      "status": "REJECTED_OPTION",
+      "risk": "Accelerate 1.15.0 has unchecked checkpoint index path joins despite the advisory's last-affected range ending at 1.14.0.",
+      "gate": "Synthetic reader-mocked path escape reproduced without weight reads. Component is absent from selected candidate; this is not a claim the upstream flaw is patched."
+    },
+    {
+      "id": "R7",
+      "status": "OPEN",
+      "risk": "GPU wheel/driver/native-library behavior is untested. CPU PyTorch 2.15.0 is not evidence of CUDA compatibility.",
+      "gate": "Official cu132 Windows cp313 wheel identified; check Windows driver requirements and scope a separate GPU test environment after approval."
+    }
+  ],
+  "cpu_contracts": {
+    "import_seconds": 25.087,
+    "torch_cuda_build": null,
+    "artifact_verification_seconds": 2.162,
+    "verified_artifacts": 11,
+    "tests_run": 18,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "no_model_weights_loaded": true,
+    "no_cuda_initialized": true,
+    "no_audio_decoded_or_generated": true
+  },
+  "accelerate_source_contract": {
+    "version": "1.15.0",
+    "synthetic_index_only": true,
+    "checkpoint_reader_mocked": true,
+    "actual_weights_read": false,
+    "reader_reached": true,
+    "path_escaped_scope": true
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://immortility.local/schemas/task.v1.json",
+  "title": "Immortility Task",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "task_id",
+    "session_id",
+    "request_id",
+    "created_at",
+    "status",
+    "privacy_class",
+    "input",
+    "capabilities",
+    "budget"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "parent_task_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "workspace_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "created",
+        "queued",
+        "running",
+        "awaiting_approval",
+        "verifying",
+        "succeeded",
+        "failed",
+        "cancelled",
+        "blocked",
+        "rate_limited",
+        "disconnected"
+      ]
+    },
+    "privacy_class": {
+      "type": "string",
+      "enum": [
+        "public",
+        "project",
+        "personal",
+        "sensitive",
+        "secret"
+      ]
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "type",
+        "content"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_paid_usd",
+        "timeout_ms"
+      ],
+      "properties": {
+        "max_paid_usd": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1000
+        },
+        "max_tokens": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "result": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "error": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  }
+}

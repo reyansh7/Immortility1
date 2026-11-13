@@ -1,0 +1,57 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+*.pem
+*.pfx
+*.key
+*.token
+secrets/
+
+# Python
+.venv/
+.venv-tts/
+immortility's_voice/
+.tools/
+.cache/
+relocation-manifest.local.json
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.py[cod]
+.coverage
+htmlcov/
+
+# JS / TS
+node_modules/
+.pnpm-store/
+dist/
+build/
+.next/
+coverage/
+*.tsbuildinfo
+
+# Tauri / Rust
+**/src-tauri/target/
+**/src-tauri/gen/schemas/
+
+# User content and runtime state
+data/*
+!data/.gitkeep
+workspace/*
+!workspace/.gitkeep
+*.log
+logs/
+artifacts/
+checkpoints/
+models/
+*.safetensors
+*.gguf
+*.ckpt
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/

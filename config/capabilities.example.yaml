@@ -1,0 +1,34 @@
+# Planned capability registry; disabled until implemented, reviewed and tested.
+capabilities:
+  - id: chat.respond
+    phase: 1
+    mode: local_or_free_cloud
+    enabled: false
+  - id: screen.inspect_active_window
+    phase: 3
+    requires: [screen_capture_consent]
+    enabled: false
+  - id: files.read_allowed
+    phase: 3
+    requires: [approved_root]
+    enabled: false
+  - id: files.write_allowed
+    phase: 3
+    requires: [approved_root, authorization]
+    enabled: false
+  - id: cursor.delegate_coding
+    phase: 5
+    requires: [approved_git_workspace]
+    enabled: false
+  - id: browser.navigate
+    phase: 3
+    requires: [domain_policy]
+    enabled: false
+  - id: documents.create_pptx
+    phase: 6
+    requires: [output_root]
+    enabled: false
+  - id: media.generate_image
+    phase: 6
+    requires: [resource_budget, output_root]
+    enabled: false
