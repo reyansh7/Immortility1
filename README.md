@@ -61,6 +61,13 @@ Select LJ or Joe in Settings for the Piper implementation verified in this chat.
 Use Read aloud on a completed response. Speech speed, volume, language, device and
 voice-response length are configurable. Continuous listening and wake words stay off.
 
+An optional local **INFERNAL** voice now supports Kokoro American Onyx, restrained
+metallic processing and conversational timing. The user selected the subtler A
+audition; defaults remain unchanged and `INFERNAL_VOICE_ENABLED=false`. See the
+[voice refinement evidence and opt-in commands](docs/research/INFERNAL_VOICE_REFINEMENT.md)
+for preserved A/B previews, real Windows playback/Stop results, licenses and
+remaining acceptance gates. Qwen remains disabled.
+
 The current real route is **Hermes → local inference guard → OpenRouter
 `openrouter/free`**. Each outgoing request verifies the live catalog price and
 forces a zero-price route. Gemini and Groq are displayed but blocked because this
@@ -137,7 +144,7 @@ See `docs/IMPLEMENTATION_STATUS.md` for evidence and remaining release gates, `d
 Paste **`prompts/START_CODING_WITH_CURSOR.md`** into Cursor (or another coding agent) *from the root of this repository*. The prompt explicitly asks for Phase 0 + Phase 1 only. Don't ask it to generate every future module simultaneously.
 
 ## Current credentials
-You already have **Gemini API, Groq API, OpenRouter API** access, **Cursor Pro** and **Grok Bot** access. Place keys in an ignored local `.env` or native credential store. Never paste secrets in tickets, logs, prompts or screenshots.
+You already have **Gemini API, Groq API, OpenRouter API, NVIDIA API** access, **Cursor Pro** and **Grok Bot** access. Place keys in an ignored local `.env` or native credential store. Never paste secrets in tickets, logs, prompts or screenshots. Chat uses only the verified free OpenRouter route; Gemini, Groq and NVIDIA keys stay stored and are not chat routes.
 
 ## Principles
 - Windows-native initially; optional remote control later; offline-tolerant when appropriate.

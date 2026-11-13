@@ -18,6 +18,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .config import ROOT, Settings
 from .contracts import BrokerError, TaskRequest, TERMINAL, uid
+from .infernal import PRESETS
 from .playback import CLONE_PLAYBACK_TEMPO, play_wav
 from .speech_text import for_speech, ready_sentences
 from .store import Store
@@ -57,7 +58,23 @@ class VoiceOptions(BaseModel):
     output_device: int | None = Field(default=None, ge=0, le=1000)
     language: Literal["en", "hi", "es", "fr", "de", "ja", "auto"] = "en"
     stt_device: Literal["cpu", "auto"] = "cpu"
-    voice: Literal["ljspeech", "joe", "friend"] = "ljspeech"
+    voice: Literal["ljspeech", "joe", "friend", "infernal"] = "ljspeech"
+    infernal_base: Literal[
+        "piper_northern", "kokoro_george", "kokoro_fable", "kokoro_onyx", "kokoro_fenrir"
+    ] = "kokoro_george"
+    voice_preset: Literal[
+        "natural",
+        "cinematic",
+        "infernal",
+        "cinematic_v2",
+        "ultron_inspired",
+        "ultron_conversational",
+    ] = "infernal"
+    resonance_style: Literal["classic", "baritone", "clear_baritone"] = "classic"
+    delivery: Literal["steady", "deliberate", "conversational"] = "steady"
+    pitch_semitones: float = Field(default=-2.4, ge=-6, le=2, allow_inf_nan=False)
+    robotic_intensity: float = Field(default=0.45, ge=0, le=1, allow_inf_nan=False)
+    effects_strength: float = Field(default=0.6, ge=0, le=1, allow_inf_nan=False)
     speed: float = Field(default=1.0, ge=0.5, le=2.0)
     volume: float = Field(default=0.7, ge=0, le=1)
     response_length: Literal["brief", "normal", "detailed"] = "brief"
@@ -109,6 +126,8 @@ class VoiceService:
         self.transcript = ""
         self.task_id: str | None = None
         self.process: asyncio.subprocess.Process | None = None
+        self.infernal_process: asyncio.subprocess.Process | None = None
+        self.infernal_used_at = 0.0
         self.worker_lock = asyncio.Lock()
         self.job: asyncio.Task[None] | None = None
         self.stop_requested = False
@@ -170,9 +189,20 @@ class VoiceService:
             "metrics": self.qwen.metrics,
             "options": self.options.model_dump(),
             "experimental_qwen_enabled": self.settings.experimental_qwen_tts,
+            "infernal_enabled": self.settings.infernal_voice_enabled,
+            "infernal_presets": PRESETS,
         }
 
     def _maybe_unload(self) -> None:
+        if (
+            self.infernal_process
+            and self.state == "IDLE"
+            and time.monotonic() - self.infernal_used_at > 60
+        ):
+            idle_process, self.infernal_process = self.infernal_process, None
+            if idle_process.returncode is None:
+                idle_process.kill()
+                asyncio.get_running_loop().create_task(idle_process.wait())
         process = self.qwen.process
         if (
             self.idle_at is None
@@ -192,6 +222,8 @@ class VoiceService:
             return await self._worker(operation, **options)
 
     async def _worker(self, operation: str, **options: Any) -> dict[str, Any]:
+        if options.get("voice") == "infernal":
+            return await self._infernal_worker(operation, options)
         if operation == "speak" and options.get("voice") == "friend":
             await self.play_clone_text(str(options.get("text", "")))
             return {"kind": "done"}
@@ -252,8 +284,12 @@ class VoiceService:
                     if frame["kind"] == "meter":
                         self.level = float(frame["level"])
                     if frame["kind"] == "ready" and operation == "speak":
+                        self.tts_state = "speaking"
                         self.latency["tts_first_audio"] = 1000 * (time.monotonic() - started)
                     if frame["kind"] == "done":
+                        self.level = 0.0
+                        if operation == "speak":
+                            self.tts_state = "cold"
                         return dict(frame)
             raise BrokerError("voice_worker_lost", "Local audio worker exited before completion.")
         except TimeoutError:
@@ -261,7 +297,111 @@ class VoiceService:
         finally:
             await self.stop_worker()
 
+    async def _infernal_worker(self, operation: str, options: dict[str, Any]) -> dict[str, Any]:
+        if not self.settings.infernal_voice_enabled:
+            raise BrokerError(
+                "infernal_disabled", "Enable the optional INFERNAL voice feature first."
+            )
+        python = ROOT / ".venv-infernal/Scripts/python.exe"
+        if not python.is_file():
+            raise BrokerError(
+                "infernal_setup", "Install the isolated INFERNAL runtime and public models first."
+            )
+        process = self.infernal_process
+        if process is None or process.returncode is not None:
+            env = {
+                k: v
+                for k, v in os.environ.items()
+                if k.upper()
+                in {
+                    "SYSTEMROOT",
+                    "WINDIR",
+                    "PATH",
+                    "TEMP",
+                    "TMP",
+                    "USERPROFILE",
+                    "LOCALAPPDATA",
+                    "APPDATA",
+                }
+            }
+            env.update(
+                PYTHONPATH=str(ROOT / "services/broker/src"),
+                PYTHONUTF8="1",
+                PYTHONUNBUFFERED="1",
+                HF_HUB_OFFLINE="1",
+                TRANSFORMERS_OFFLINE="1",
+                HF_HUB_DISABLE_IMPLICIT_TOKEN="1",
+                HF_HUB_DISABLE_TELEMETRY="1",
+                OMP_NUM_THREADS="2",
+            )
+            process = await asyncio.create_subprocess_exec(
+                str(python),
+                "-m",
+                "immortility_broker.voice_worker",
+                cwd=ROOT,
+                env=env,
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.DEVNULL,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            self.infernal_process = process
+        assert process.stdin and process.stdout
+        self.infernal_used_at = time.monotonic()
+        self.tts_state = "loading"
+        started = time.monotonic()
+        try:
+            async with asyncio.timeout(120):
+                process.stdin.write(
+                    (
+                        json.dumps(
+                            {
+                                **options,
+                                "operation": operation,
+                                "models": str(self.models),
+                                "keep_alive": True,
+                                "infernal_authorized": True,
+                            }
+                        )
+                        + "\n"
+                    ).encode()
+                )
+                await process.stdin.drain()
+                while line := await process.stdout.readline():
+                    frame = json.loads(line)
+                    if frame["kind"] == "error":
+                        raise BrokerError(
+                            "infernal_failed",
+                            "INFERNAL audio failed. Check the isolated runtime and pinned public model setup.",
+                        )
+                    if frame["kind"] == "ready":
+                        self.tts_state = "speaking"
+                        self.latency["audio_output_buffer"] = float(
+                            frame.get("output_latency_ms", 0)
+                        )
+                        self.latency["tts_first_audio"] = 1000 * (time.monotonic() - started)
+                    elif frame["kind"] == "meter":
+                        self.level = float(frame["level"])
+                    elif frame["kind"] == "done":
+                        self.level = 0.0
+                        self.tts_state = "ready"
+                        self.infernal_used_at = time.monotonic()
+                        return dict(frame)
+            raise BrokerError("voice_worker_lost", "INFERNAL worker exited before completion.")
+        except BaseException:
+            await self._stop_infernal()
+            raise
+
+    async def _stop_infernal(self) -> None:
+        process, self.infernal_process = self.infernal_process, None
+        if process and process.returncode is None:
+            # This audited worker has no child-process tools or package/model installers.
+            process.kill()
+            await asyncio.wait_for(process.wait(), 3)
+        self.level = 0.0
+
     async def stop_worker(self) -> None:
+        await self._stop_infernal()
         if self.process and self.process.returncode is None:
             if os.name == "nt":
                 killer = await asyncio.create_subprocess_exec(
@@ -422,12 +562,15 @@ class VoiceService:
             )
 
     def apply_options(self, options: VoiceOptions) -> dict[str, Any]:
+        if options.voice == "infernal" and not self.settings.infernal_voice_enabled:
+            raise BrokerError("infernal_disabled", "INFERNAL is optional and currently disabled.")
         if options.voice == "friend" and not options.clone_consent:
             raise BrokerError(
                 "clone_consent_required",
                 "Confirm your friend authorized this cloned voice before enabling it.",
             )
-        write_consent(options.clone_consent)
+        if options.clone_consent != self.options.clone_consent:
+            write_consent(options.clone_consent)
         self.options = options
         save_voice_settings(self.settings.data_dir, options.model_dump())
         self.tts_error = None
@@ -557,6 +700,8 @@ class VoiceService:
 
     def speak_task(self, task_id: str, options: VoiceOptions) -> dict[str, Any]:
         self.ensure_idle()
+        if options.voice == "infernal" and not self.settings.infernal_voice_enabled:
+            raise BrokerError("infernal_disabled", "INFERNAL is optional and currently disabled.")
         task = self.store.get(task_id)
         if task["status"] != "succeeded":
             raise BrokerError(
@@ -564,7 +709,7 @@ class VoiceService:
             )
         if options.voice != "friend" and not ready(self.models):
             raise BrokerError("voice_setup", "Download local speech models first.")
-        if options.clone_consent:
+        if options.voice == "friend" and options.clone_consent:
             write_consent(True)
         self._require_clone_consent(options)
         self.error = None
@@ -614,7 +759,12 @@ class VoiceService:
                 if options.voice == "friend":
                     await self.play_clone_text(PREVIEW_PHRASE)
                 else:
-                    await self.worker("speak", text=PREVIEW_PHRASE, **options.model_dump())
+                    phrase = (
+                        "All systems are online. I am ready to assist. Your instructions remain in control."
+                        if options.voice == "infernal"
+                        else PREVIEW_PHRASE
+                    )
+                    await self.worker("speak", text=phrase, **options.model_dump())
                 if self.state == "SPEAKING":
                     self.transition("IDLE")
             except asyncio.CancelledError:
@@ -666,4 +816,5 @@ class VoiceService:
         if self.task_id and self.store.get(self.task_id)["status"] not in TERMINAL:
             await self.cancel_task(self.task_id)
         self.level = 0.0
+        self.tts_state = "cold"
         return self.snapshot()

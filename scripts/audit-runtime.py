@@ -14,7 +14,13 @@ sys.path.insert(0, str(ROOT / "services/broker/src"))
 def audit(openmausbot: Path | None) -> dict:
     from immortility_broker.config import Settings
     from immortility_broker.hermes import isolated_config, runtime_check
-    settings = Settings(_env_file=None, openrouter_api_key="", gemini_api_key="", groq_api_key="")
+    settings = Settings(
+        _env_file=None,
+        openrouter_api_key="",
+        gemini_api_key="",
+        groq_api_key="",
+        nvidia_api_key="",
+    )
     hermes = runtime_check(settings)
     source = settings.hermes_source
     present = {

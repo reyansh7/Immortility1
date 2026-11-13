@@ -1,0 +1,46 @@
+{
+  "kokoro_revision": "f3ff3571791e39611d31c381e3a41a3af07b4987",
+  "piper_revision": "2f358b6a560e3a913ebf509b2f3344f20b367f94",
+  "files": {
+    "kokoro/config.json": {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/config.json",
+      "bytes": 2351,
+      "sha256": "5abb01e2403b072bf03d04fde160443e209d7a0dad49a423be15196b9b43c17f"
+    },
+    "kokoro/kokoro-v1_0.pth": {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/kokoro-v1_0.pth",
+      "bytes": 327212226,
+      "sha256": "496dba118d1a58f5f3db2efc88dbdc216e0483fc89fe6e47ee1f2c53f18ad1e4"
+    },
+    "kokoro/bm_fable.pt": {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/bm_fable.pt",
+      "bytes": 523425,
+      "sha256": "d44935f3135257a9064df99f007fc1342ff1aa767552b4a4fa4c3b2e6e59079c"
+    },
+    "kokoro/bm_george.pt": {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/bm_george.pt",
+      "bytes": 523430,
+      "sha256": "f1bc812213dc59774769e5c80004b13eeb79bd78130b11b2d7f934542dab811b"
+    },
+    "piper/en_GB-northern_english_male-medium.onnx": {
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/2f358b6a560e3a913ebf509b2f3344f20b367f94/en/en_GB/northern_english_male/medium/en_GB-northern_english_male-medium.onnx",
+      "bytes": 63201294,
+      "sha256": "57a219ae8e638873db7d18893304be5069c42868f392bb95c3ff17f0690d0689"
+    },
+    "piper/en_GB-northern_english_male-medium.onnx.json": {
+      "url": "https://huggingface.co/rhasspy/piper-voices/resolve/2f358b6a560e3a913ebf509b2f3344f20b367f94/en/en_GB/northern_english_male/medium/en_GB-northern_english_male-medium.onnx.json",
+      "bytes": 4847,
+      "sha256": "69557ed3d974463453e9b0c09dd99a7ed0e52b8b87b64b357dbeeb2540a97d47"
+    },
+    "kokoro/am_fenrir.pt": {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_fenrir.pt",
+      "bytes": 523430,
+      "sha256": "98e507eca1db08230ae3b6232d59c10aec9630022d19accac4f5d12fcec3c37a"
+    },
+    "kokoro/am_onyx.pt": {
+      "url": "https://huggingface.co/hexgrad/Kokoro-82M/resolve/f3ff3571791e39611d31c381e3a41a3af07b4987/voices/am_onyx.pt",
+      "bytes": 523420,
+      "sha256": "e8452be16cd0f6da7b4579eaf7b1e4506e92524882053d86d72b96b9a7fed584"
+    }
+  }
+}

@@ -11,6 +11,7 @@ secrets/
 # Python
 .venv/
 .venv-tts/
+.venv-infernal/
 immortility's_voice/
 .tools/
 .cache/

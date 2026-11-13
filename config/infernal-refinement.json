@@ -1,0 +1,26 @@
+{
+  "status": "audition_only_pending_user_approval",
+  "text": "All systems are online. I am ready to assist. Give me a task, and I will handle it with precision. Your instructions remain in control.",
+  "candidates": {
+    "A-Subtle": {
+      "voice_preset": "ultron_inspired",
+      "infernal_base": "kokoro_onyx",
+      "pitch_semitones": 0.0,
+      "robotic_intensity": 0.36,
+      "effects_strength": 0.45,
+      "speed": 1.0,
+      "resonance_style": "clear_baritone",
+      "delivery": "conversational"
+    },
+    "B-Colder": {
+      "voice_preset": "ultron_inspired",
+      "infernal_base": "kokoro_onyx",
+      "pitch_semitones": 0.0,
+      "robotic_intensity": 0.52,
+      "effects_strength": 0.45,
+      "speed": 1.0,
+      "resonance_style": "clear_baritone",
+      "delivery": "conversational"
+    }
+  }
+}

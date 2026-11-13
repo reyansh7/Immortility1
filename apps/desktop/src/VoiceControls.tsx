@@ -140,22 +140,147 @@ export function VoiceControls({
           <label>
             Voice
             <select
-              value={options.voice === "friend" ? "friend" : "ljspeech"}
+              value={options.voice}
               onChange={(e) => {
                 const friend = e.target.value === "friend";
                 if (friend && !options.clone_consent) return;
                 setOptions({
                   ...options,
-                  voice: friend ? "friend" : "ljspeech",
+                  voice: e.target.value as typeof options.voice,
                 });
               }}
             >
-              <option value="ljspeech">Default voice</option>
-              <option value="friend" disabled={!options.clone_consent}>
+              <option value="ljspeech">LJ · Piper</option>
+              <option value="joe">Joe · Piper male</option>
+              <option value="infernal" disabled={!status.infernal_enabled}>
+                IMMORTILITY — INFERNAL · optional
+              </option>
+              <option
+                value="friend"
+                disabled={
+                  !options.clone_consent || !status.experimental_qwen_enabled
+                }
+              >
                 Custom friend voice
               </option>
             </select>
           </label>
+          {options.voice === "infernal" && (
+            <fieldset>
+              <legend>Original robotic baritone</legend>
+              <label>
+                Voice source
+                <select
+                  value={options.infernal_base}
+                  disabled={active}
+                  onChange={(e) =>
+                    setOptions({
+                      ...options,
+                      infernal_base: e.target
+                        .value as typeof options.infernal_base,
+                    })
+                  }
+                >
+                  <option value="piper_northern">
+                    Piper · Northern British male
+                  </option>
+                  <option value="kokoro_george">Kokoro · British George</option>
+                  <option value="kokoro_fable">Kokoro · British Fable</option>
+                  <option value="kokoro_onyx">Kokoro · American Onyx</option>
+                  <option value="kokoro_fenrir">
+                    Kokoro · American Fenrir
+                  </option>
+                </select>
+              </label>
+              <label>
+                Character
+                <select
+                  value={options.voice_preset}
+                  disabled={active}
+                  onChange={(e) => {
+                    const preset = e.target
+                      .value as typeof options.voice_preset;
+                    setOptions({
+                      ...options,
+                      ...status.infernal_presets?.[preset],
+                      voice_preset: preset,
+                    });
+                  }}
+                >
+                  <option value="natural">Natural</option>
+                  <option value="cinematic">Cinematic</option>
+                  <option value="infernal">Infernal</option>
+                  <option value="cinematic_v2">
+                    Cinematic · natural baritone
+                  </option>
+                  <option value="ultron_inspired">
+                    Ultron-inspired · original baritone
+                  </option>
+                  <option value="ultron_conversational">
+                    INFERNAL · conversational Onyx (A)
+                  </option>
+                </select>
+              </label>
+              <label>
+                Pitch · {options.pitch_semitones.toFixed(1)} semitones
+                <input
+                  type="range"
+                  min="-6"
+                  max="2"
+                  step="0.1"
+                  disabled={active}
+                  value={options.pitch_semitones}
+                  onChange={(e) =>
+                    setOptions({
+                      ...options,
+                      pitch_semitones: Number(e.target.value),
+                    })
+                  }
+                />
+              </label>
+              <label>
+                Robotic intensity ·{" "}
+                {Math.round(options.robotic_intensity * 100)}%
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  disabled={active}
+                  value={options.robotic_intensity}
+                  onChange={(e) =>
+                    setOptions({
+                      ...options,
+                      robotic_intensity: Number(e.target.value),
+                    })
+                  }
+                />
+              </label>
+              <label>
+                Effects strength · {Math.round(options.effects_strength * 100)}%
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  disabled={active}
+                  value={options.effects_strength}
+                  onChange={(e) =>
+                    setOptions({
+                      ...options,
+                      effects_strength: Number(e.target.value),
+                    })
+                  }
+                />
+              </label>
+              <p className="hint">
+                Stock licensed TTS voices with original effects. New baritone
+                presets keep natural pitch and use deliberate phrase timing. No
+                actor imitation or voice cloning. Test voice previews the
+                current settings; stop before retuning.
+              </p>
+            </fieldset>
+          )}
           {options.voice === "friend" && (
             <p className="hint">
               Speaking with the cloned voice from the local reference recording,

@@ -9,7 +9,7 @@ MODEL = "openrouter/free"
 
 
 def route_model(requested: str | None) -> str:
-    """Only the verified free router is selectable. Stored Gemini and Groq keys are not routes."""
+    """Only the verified free router is selectable. Stored Gemini, Groq and NVIDIA keys are not routes."""
     if requested not in {None, "", MODEL}:
         raise BrokerError("inference_denied", "Only the verified free router is enabled.", 403)
     return MODEL

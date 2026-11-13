@@ -3,8 +3,8 @@
   "productName":"Immortility", "version":"0.1.0", "identifier":"local.immortility.companion",
   "build":{"beforeDevCommand":"pnpm dev","devUrl":"http://127.0.0.1:1420","beforeBuildCommand":"pnpm build","frontendDist":"../dist"},
   "app":{
-    "windows":[{"label":"main","title":"Immortility","width":104,"height":112,"decorations":false,"transparent":true,"alwaysOnTop":true,"resizable":false,"shadow":false,"skipTaskbar":true}],
-    "security":{"csp":"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src ipc: http://ipc.localhost; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"}
+    "windows":[{"label":"main","title":"Immortility","width":148,"height":176,"decorations":false,"transparent":true,"alwaysOnTop":true,"resizable":false,"shadow":false,"skipTaskbar":true}],
+    "security":{"csp":"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'"}
   },
   "bundle":{"active":false,"icon":["icons/icon.ico"]}
 }

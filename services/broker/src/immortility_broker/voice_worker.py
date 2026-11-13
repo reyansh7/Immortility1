@@ -16,9 +16,13 @@ from typing import Any, Protocol
 
 from .voice_models import prepare, voice_path
 
+PROTOCOL: Any = None
+
 
 def emit(kind: str, **data: Any) -> None:
-    print(json.dumps({"kind": kind, **data}), flush=True)
+    output = PROTOCOL or sys.stdout
+    output.write(json.dumps({"kind": kind, **data}) + "\n")
+    output.flush()
 
 
 class SpeechToText(Protocol):
@@ -165,25 +169,36 @@ def speak(options: dict[str, Any], render: bool = False) -> None:
     import numpy as np
     import sounddevice as sd
 
-    tts = PiperTTS(
-        Path(options["models"]),
-        options.get("voice", "ljspeech"),
-        float(options.get("speed", 1)),
-        float(options.get("volume", 0.7)),
-    )
     text = str(options["text"])[:6000]
-    if render:
-        from piper import SynthesisConfig
+    infernal = options.get("voice") == "infernal"
+    if infernal:
+        if options.get("infernal_authorized") is not True:
+            raise ValueError("infernal_disabled")
+        from .infernal_tts import chunks as infernal_chunks
 
+        generated = infernal_chunks(Path(options["models"]) / "infernal", text, options)
+    else:
+        tts = PiperTTS(
+            Path(options["models"]),
+            options.get("voice", "ljspeech"),
+            float(options.get("speed", 1)),
+            float(options.get("volume", 0.7)),
+        )
+        generated = tts.chunks(text)
+    if render:
         with wave.open(options["path"], "wb") as output:
-            tts.voice.synthesize_wav(text, output, syn_config=SynthesisConfig())
+            for render_chunk in generated:
+                output.setnchannels(render_chunk.sample_channels)
+                output.setsampwidth(2)
+                output.setframerate(render_chunk.sample_rate)
+                output.writeframes(render_chunk.audio_int16_bytes)
         emit("done")
         return
     chunks: queue.Queue[Any] = queue.Queue(maxsize=3)
 
     def produce() -> None:
         try:
-            for chunk in tts.chunks(text):
+            for chunk in generated:
                 chunks.put(chunk)
         except Exception:
             chunks.put(False)
@@ -208,9 +223,9 @@ def speak(options: dict[str, Any], render: bool = False) -> None:
                     latency="low",
                 )
                 stream.start()
-                emit("ready")
+                emit("ready", output_latency_ms=round(float(stream.latency) * 1000, 3))
             raw = chunk.audio_int16_bytes
-            step = max(2, int(chunk.sample_rate * 0.05) * 2)
+            step = max(2, int(chunk.sample_rate * 0.02) * 2 * chunk.sample_channels)
             for offset in range(0, len(raw), step):
                 block = raw[offset : offset + step]
                 stream.write(block)
@@ -224,11 +239,11 @@ def speak(options: dict[str, Any], render: bool = False) -> None:
         if stream is not None:
             stream.abort()
             stream.close()
+        emit("meter", level=0.0)
 
 
-def main() -> None:
+def handle(options: dict[str, Any]) -> None:
     try:
-        options = json.loads(sys.stdin.readline())
         mode = options["operation"]
         if mode == "devices":
             emit("done", devices=devices())
@@ -248,6 +263,22 @@ def main() -> None:
     except Exception:
         # Never forward exception payloads or model text to process logs.
         emit("error", code="audio_device_or_engine_unavailable")
+
+
+def main() -> None:
+    global PROTOCOL
+    PROTOCOL = sys.stdout
+    for line in sys.stdin:
+        try:
+            options = json.loads(line)
+            if not isinstance(options, dict):
+                raise ValueError("invalid_request")
+        except (ValueError, TypeError):
+            emit("error", code="invalid_request")
+            return
+        handle(options)
+        if options.get("voice") != "infernal" or options.get("keep_alive") is not True:
+            return
 
 
 if __name__ == "__main__":

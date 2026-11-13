@@ -29,6 +29,6 @@ strict = true
 files = ["services/broker/src"]
 
 [[tool.mypy.overrides]]
-module = ["faster_whisper.*", "ctranslate2.*", "sounddevice.*", "immortility_tts.*"]
+module = ["faster_whisper.*", "ctranslate2.*", "sounddevice.*", "immortility_tts.*", "pedalboard.*", "torch.*", "spacy.*", "kokoro.*"]
 ignore_missing_imports = true
 

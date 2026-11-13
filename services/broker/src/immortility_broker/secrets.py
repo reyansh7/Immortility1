@@ -33,6 +33,7 @@ _TARGETS = {
     "openrouter": "OpenRouter",
     "gemini": "Gemini",
     "groq": "Groq",
+    "nvidia": "NVIDIA",
 }
 
 
@@ -129,6 +130,7 @@ def migrate_env(path: Path, vault: CredentialManager) -> None:
     extras = {
         "gemini": ("GEMINI_API_KEY", values.get("GEMINI_API_KEY")),
         "groq": ("GROQ_API_KEY", values.get("GROQ_API_KEY")),
+        "nvidia": ("NVIDIA_API_KEY", values.get("NVIDIA_API_KEY")),
     }
     if not openrouter and not vault.read() and not any(secret for _, secret in extras.values()):
         raise CredentialError("No OpenRouter credential is configured.")

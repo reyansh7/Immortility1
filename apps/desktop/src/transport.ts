@@ -111,7 +111,13 @@ export async function windowAction(
     | "hide"
     | "quit"
     | "nudge_up"
-    | "nudge_down",
+    | "nudge_down"
+    | "command"
+    | "overlay"
+    | "minimize"
+    | "maximize"
+    | "drag_free"
+    | "context_menu",
 ): Promise<void> {
   await invoke("window_action", { action });
 }

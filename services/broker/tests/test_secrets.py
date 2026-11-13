@@ -50,6 +50,7 @@ def test_migration_moves_gemini_and_groq_without_leaving_plaintext(tmp_path, mon
         "OPENROUTER_API_KEY=dummy-open\n"
         "GEMINI_API_KEY=dummy-gemini-value\n"
         "GROQ_API_KEY=dummy-groq-value\n"
+        "NVIDIA_API_KEY=dummy-nvidia-value\n"
         "KEEP=1\n"
     )
     vault = MemoryVault()
@@ -58,6 +59,7 @@ def test_migration_moves_gemini_and_groq_without_leaving_plaintext(tmp_path, mon
     assert vault.read() == "dummy-open"
     assert stored["gemini"] == "dummy-gemini-value"
     assert stored["groq"] == "dummy-groq-value"
+    assert stored["nvidia"] == "dummy-nvidia-value"
     assert "dummy-" not in text
     assert "KEEP=1\n" in text
 

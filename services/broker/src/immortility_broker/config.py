@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     openrouter_api_key: SecretStr = SecretStr("")
     gemini_api_key: SecretStr = SecretStr("")
     groq_api_key: SecretStr = SecretStr("")
+    nvidia_api_key: SecretStr = SecretStr("")
     hermes_source: Path = Path.home() / "AppData/Local/hermes/hermes-agent"
     # A reviewed, tested release. Never silently follow upstream main.
     hermes_revision: str = "04b88a4c"
@@ -21,6 +22,7 @@ class Settings(BaseSettings):
     credential_source: str = "local environment"
     # Off until the isolated runtime's security and native verification gates are resolved.
     experimental_qwen_tts: bool = False
+    infernal_voice_enabled: bool = False
     # Specialists stay off until the user turns them on. Side-effect tools stay disabled.
     delegation_enabled: bool = False
     local_tools_enabled: bool = False
@@ -64,6 +66,7 @@ class Settings(BaseSettings):
             ("openrouter", "openrouter_api_key"),
             ("gemini", "gemini_api_key"),
             ("groq", "groq_api_key"),
+            ("nvidia", "nvidia_api_key"),
         ):
             try:
                 value = CredentialManager(provider=provider).read()

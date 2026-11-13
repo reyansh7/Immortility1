@@ -3,6 +3,7 @@
 ## Existing access
 - `GEMINI_API_KEY`: certain models have free tier; model IDs and quotas are verified per Google account and API eligibility. **Do not assume newest model is free.**
 - `GROQ_API_KEY`: GroqCloud free-plan models such as `openai/gpt-oss-120b` are subject to published rate and token limits; provider returns 429 when exceeded.
+- `NVIDIA_API_KEY`: stored in Windows Credential Manager like Gemini and Groq. NVIDIA NIM catalog prices are not verified as $0, so the key is not a chat route and is not passed to Hermes.
 - `OPENROUTER_API_KEY`: use `openrouter/free` or vetted `:free` model; free-account quotas are small and change. Key with $0 credit limit may need testing; do not add credits by default.
 - Cursor Pro subscription: Cursor CLI authenticates via supported login; not a general-purpose free model API; separate quota applies.
 - Grok Bot: access is not equivalent to xAI API. Direct `XAI_API_KEY` **disabled** unless explicitly purchased and approved.

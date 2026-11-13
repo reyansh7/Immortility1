@@ -12,6 +12,8 @@ export type VoiceState =
   | "CANCELLED"
   | "ERROR";
 export interface VoiceStatus {
+  infernal_enabled?: boolean;
+  infernal_presets?: Record<string, Partial<VoiceOptions>>;
   experimental_qwen_enabled?: boolean;
   state: VoiceState;
   level: number;
@@ -40,7 +42,25 @@ export interface VoiceOptions {
   output_device: number | null;
   language: string;
   stt_device: "cpu" | "auto";
-  voice: "ljspeech" | "joe" | "friend";
+  voice: "ljspeech" | "joe" | "friend" | "infernal";
+  infernal_base:
+    | "piper_northern"
+    | "kokoro_george"
+    | "kokoro_fable"
+    | "kokoro_onyx"
+    | "kokoro_fenrir";
+  voice_preset:
+    | "natural"
+    | "cinematic"
+    | "infernal"
+    | "cinematic_v2"
+    | "ultron_inspired"
+    | "ultron_conversational";
+  resonance_style: "classic" | "baritone" | "clear_baritone";
+  delivery: "steady" | "deliberate" | "conversational";
+  pitch_semitones: number;
+  robotic_intensity: number;
+  effects_strength: number;
   speed: number;
   volume: number;
   response_length: "brief" | "normal" | "detailed";
@@ -54,6 +74,13 @@ const defaults: VoiceOptions = {
   language: "en",
   stt_device: "cpu",
   voice: "ljspeech",
+  infernal_base: "kokoro_george",
+  voice_preset: "infernal",
+  resonance_style: "classic",
+  delivery: "steady",
+  pitch_semitones: -2.4,
+  robotic_intensity: 0.45,
+  effects_strength: 0.6,
   speed: 1,
   volume: 0.7,
   response_length: "brief",
@@ -131,7 +158,7 @@ export function useVoice(
             !current.current.preparing &&
             !["loading", "speaking"].includes(current.current.tts_state)
             ? 3000
-            : 200,
+            : 80,
         );
     }
     void poll();
@@ -177,6 +204,12 @@ export function useVoice(
   }
   async function cancel() {
     setMicConsent(false);
+    setStatus((previous) => ({
+      ...previous,
+      state: "CANCELLED",
+      tts_state: "cold",
+      level: 0,
+    }));
     try {
       setStatus(await api<VoiceStatus>("/v1/voice/cancel", {}));
     } catch {

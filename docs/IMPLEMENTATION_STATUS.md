@@ -138,7 +138,7 @@ startup, before the native handshake. No synchronous Git probe runs in a turn.
 Only OpenRouter `openrouter/free` is enabled. Every outgoing model call rechecks live
 zero prices; its request is rebuilt with no tools, plugins or paid fallback, and
 zero provider max prices. No automatic retry is sent after a provider rejection.
-Gemini/Groq are shown as blocked because account-level free eligibility is unverified.
+Gemini, Groq and NVIDIA keys can be stored in Windows Credential Manager. They are shown as stored, not as chat routes, because account-level free eligibility and NVIDIA NIM prices are unverified.
 There is no paid xAI path, automatic top-up or extra subscription.
 
 Hermes has an isolated temporary profile, explicit empty built-in toolset, disabled

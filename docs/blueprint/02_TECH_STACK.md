@@ -9,7 +9,7 @@
 | Backend broker | Python 3.11+ validated, FastAPI, Pydantic v2, Uvicorn, httpx | Tool adapters, auth, policy, streaming, local orchestrator glue |
 | Agent runtime | **Nous Research Hermes Agent** | Existing agent lifecycle, memory, skills, MCP, subagents; official programmatic gateway |
 | Model routing | Hermes provider integration first; custom zero-spend preflight policy | Avoid two competing orchestrators; LiteLLM only after a proved need |
-| Cloud providers | Gemini API, GroqCloud, OpenRouter :free | User already has keys; free tier varies, must verify |
+| Cloud providers | Gemini API, GroqCloud, OpenRouter :free; NVIDIA key stored only | User already has keys; free tier varies, must verify. NVIDIA is not a chat route |
 | Local inference | Ollama optional with Qwen-class small models | Offline fallback; do not preload on 8 GB VRAM |
 | Coding execution | Cursor Agent CLI in sandboxed Git worktree | Use existing paid Cursor entitlement when supported |
 | Cloud collaborator | Grok Bot optional shared MCP/task bridge | Not assumed to expose direct remote job API |
@@ -38,6 +38,7 @@
 
 ## No extra subscription policy
 - `GEMINI_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY`: allowed only for **account-confirmed free eligible models**.
+- `NVIDIA_API_KEY`: stored locally. It is not sent to Hermes and is not a chat route until a model ID and a live $0 price are verified.
 - `XAI_API_KEY`: **not required** for Grok Bot and is disabled to avoid unexpected pay-as-you-go spend.
 - Cursor CLI login uses existing subscription; availability and quota must be checked.
 - Self-hosted ComfyUI/Docling/FFmpeg/Piper have no required cloud API key; compute and third-party content terms still apply.

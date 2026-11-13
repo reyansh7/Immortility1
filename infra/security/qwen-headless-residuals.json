@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-13T14:41:01.538930+00:00",
+  "generated_at": "2026-11-13T17:44:26.097866+00:00",
   "candidate": "immortility-qwen-tts-headless==0.1.1.post1+immortility.2",
   "recommendation": "BLOCKED for activation; CPU research gates passed",
   "original_environment_changed": false,
@@ -805,11 +805,11 @@
     }
   ],
   "cpu_contracts": {
-    "import_seconds": 25.087,
+    "import_seconds": 35.857,
     "torch_cuda_build": null,
-    "artifact_verification_seconds": 2.162,
+    "artifact_verification_seconds": 2.512,
     "verified_artifacts": 11,
-    "tests_run": 18,
+    "tests_run": 19,
     "failures": 0,
     "errors": 0,
     "skipped": 0,

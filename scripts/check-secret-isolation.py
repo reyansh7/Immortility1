@@ -11,6 +11,7 @@ keys=[
     settings.openrouter_api_key.get_secret_value(),
     settings.gemini_api_key.get_secret_value(),
     settings.groq_api_key.get_secret_value(),
+    settings.nvidia_api_key.get_secret_value(),
 ]
 keys=[key for key in keys if key]
 assert '.env' in (root/'.gitignore').read_text()

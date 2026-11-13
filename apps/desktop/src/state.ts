@@ -22,14 +22,57 @@ export interface TaskEvent {
   schema_version: "1.0";
   task_id: string;
   sequence: number;
+  timestamp?: string;
   type: string;
   data: Record<string, unknown>;
+}
+export interface LogEntry {
+  sequence: number;
+  type: string;
+  at: string;
+  data: Record<string, string | number | boolean>;
+}
+const visibleKeys = [
+  "status",
+  "role",
+  "name",
+  "path",
+  "url",
+  "title",
+  "route_mode",
+  "calls",
+  "latency_ms",
+  "first_token_ms",
+  "prompt_tokens",
+  "completion_tokens",
+  "decision",
+  "code",
+  "message",
+  "provider",
+  "model",
+  "delegation",
+  "tools_enabled",
+] as const;
+const secretLike = /(sk-[A-Za-z0-9_-]{8,}|bearer\s+\S+|api[_-]?key\S*)/gi;
+export function redact(
+  data: Record<string, unknown>,
+): Record<string, string | number | boolean> {
+  const kept: Record<string, string | number | boolean> = {};
+  for (const key of visibleKeys) {
+    const value = data[key];
+    if (typeof value === "number" || typeof value === "boolean")
+      kept[key] = value;
+    else if (typeof value === "string")
+      kept[key] = value.replace(secretLike, "[redacted]").slice(0, 240);
+  }
+  return kept;
 }
 export interface Transcript {
   text: string;
   sequence: number;
   status: Status;
   events: string[];
+  log?: LogEntry[];
   error?: string;
   preview?: string;
   metrics?: {
@@ -82,6 +125,15 @@ export function reduceEvent(state: Transcript, event: TaskEvent): Transcript {
           ? String(event.data.status)
           : event.type;
     next.events = [...state.events.slice(-19), role];
+    next.log = [
+      ...(state.log ?? []).slice(-119),
+      {
+        sequence: event.sequence,
+        type: event.type,
+        at: event.timestamp ?? new Date().toISOString(),
+        data: redact(event.data),
+      },
+    ];
   }
   return next;
 }

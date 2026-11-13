@@ -20,6 +20,9 @@ providers:
   xai:
     enabled: false
     reason: direct API is separate from Grok Bot access and may bill
+  nvidia:
+    enabled: false
+    reason: the key can be stored; NIM prices are not verified as $0, so chat stays on openrouter/free
   local:
     enabled: optional
     engine: ollama

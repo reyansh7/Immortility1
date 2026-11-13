@@ -42,6 +42,8 @@ struct Supervisor {
     root: PathBuf,
 }
 
+const COMPACT: (f64, f64) = (148., 176.);
+
 #[derive(Serialize, Deserialize)]
 struct Placement {
     monitor: Option<String>,
@@ -55,10 +57,13 @@ fn placement_file(app: &tauri::AppHandle) -> Option<PathBuf> {
         .map(|p| p.join("placement.json"))
 }
 fn save_placement(window: &tauri::WebviewWindow) {
-    // Opening the tall panel must not overwrite the compact orb's saved anchor.
+    // Only the compact face owns the saved anchor; chat, overlay and command center do not.
     if window
         .outer_size()
-        .map(|size| size.height as f64 / window.scale_factor().unwrap_or(1.) > 150.)
+        .map(|size| {
+            let scale = window.scale_factor().unwrap_or(1.);
+            size.width as f64 / scale > COMPACT.0 + 8. || size.height as f64 / scale > COMPACT.1 + 8.
+        })
         .unwrap_or(true)
     {
         return;
@@ -481,6 +486,22 @@ fn primary_mouse_down() -> bool {
     }
 }
 
+fn command_size(work_width: f64, work_height: f64) -> (f64, f64) {
+    (
+        (work_width - 48.).clamp(640., 1600.).min(work_width),
+        (work_height - 40.).clamp(480., 980.).min(work_height),
+    )
+}
+
+fn leave_workspace(window: &tauri::WebviewWindow) -> tauri::Result<()> {
+    if window.is_maximized()? {
+        window.unmaximize()?;
+    }
+    window.set_min_size(None::<tauri::Size>)?;
+    window.set_resizable(false)?;
+    window.set_skip_taskbar(true)
+}
+
 #[tauri::command]
 fn window_action(window: tauri::WebviewWindow, action: String) -> Result<(), String> {
     let error = |_| "Window action unavailable.".to_string();
@@ -528,16 +549,17 @@ fn window_action(window: tauri::WebviewWindow, action: String) -> Result<(), Str
             Ok(())
         }
         "expand" | "collapse" => {
+            leave_workspace(&window).map_err(error)?;
             let height = window
                 .current_monitor()
                 .map_err(error)?
-                .map(|m| (m.work_area().size.height as f64 / m.scale_factor() - 16.).min(730.))
+                .map(|m| (m.work_area().size.height as f64 / m.scale_factor() - 16.).min(760.))
                 .unwrap_or(730.);
             window
                 .set_size(if action == "expand" {
-                    LogicalSize::new(430., height)
+                    LogicalSize::new(440., height)
                 } else {
-                    LogicalSize::new(104., 112.)
+                    LogicalSize::new(COMPACT.0, COMPACT.1)
                 })
                 .map_err(error)?;
             if action == "collapse" {
@@ -545,6 +567,67 @@ fn window_action(window: tauri::WebviewWindow, action: String) -> Result<(), Str
             } else {
                 snap(&window)
             }
+        }
+        "command" => {
+            let monitor = window
+                .current_monitor()
+                .map_err(error)?
+                .ok_or("Monitor unavailable.")?;
+            let scale = monitor.scale_factor();
+            let work = monitor.work_area();
+            let (width, height) = command_size(
+                work.size.width as f64 / scale,
+                work.size.height as f64 / scale,
+            );
+            window.set_always_on_top(false).map_err(error)?;
+            window.set_skip_taskbar(false).map_err(error)?;
+            window.set_resizable(true).map_err(error)?;
+            window
+                .set_min_size(Some(LogicalSize::new(width.min(900.), height.min(600.))))
+                .map_err(error)?;
+            window.set_size(LogicalSize::new(width, height)).map_err(error)?;
+            let x = work.position.x + ((work.size.width as f64 - width * scale) / 2.) as i32;
+            let y = work.position.y + ((work.size.height as f64 - height * scale) / 2.) as i32;
+            window.set_position(PhysicalPosition::new(x, y)).map_err(error)?;
+            window.set_focus().map_err(error)
+        }
+        "overlay" => {
+            leave_workspace(&window).map_err(error)?;
+            let monitor = window
+                .current_monitor()
+                .map_err(error)?
+                .ok_or("Monitor unavailable.")?;
+            let scale = monitor.scale_factor();
+            let work = monitor.work_area();
+            window.set_size(LogicalSize::new(340., 136.)).map_err(error)?;
+            let x = work.position.x + work.size.width as i32 - (352. * scale) as i32;
+            window
+                .set_position(PhysicalPosition::new(x, work.position.y + (12. * scale) as i32))
+                .map_err(error)?;
+            window.set_always_on_top(true).map_err(error)
+        }
+        "minimize" => window.minimize().map_err(error),
+        "maximize" => {
+            if window.is_maximized().map_err(error)? {
+                window.unmaximize().map_err(error)
+            } else {
+                window.maximize().map_err(error)
+            }
+        }
+        "drag_free" => window.start_dragging().map_err(error),
+        "context_menu" => {
+            let app = window.app_handle();
+            let chat = MenuItem::with_id(app, "ctx-chat", "Open quick chat", true, None::<&str>)
+                .map_err(error)?;
+            let command =
+                MenuItem::with_id(app, "ctx-command", "Open command center", true, None::<&str>)
+                    .map_err(error)?;
+            let stop = MenuItem::with_id(app, "ctx-stop", "Stop active task", true, None::<&str>)
+                .map_err(error)?;
+            let quit = MenuItem::with_id(app, "ctx-quit", "Quit Immortility", true, None::<&str>)
+                .map_err(error)?;
+            let menu = Menu::with_items(app, &[&chat, &command, &stop, &quit]).map_err(error)?;
+            window.popup_menu(&menu).map_err(error)
         }
         "pin" => window.set_always_on_top(true).map_err(error),
         "unpin" => window.set_always_on_top(false).map_err(error),
@@ -576,6 +659,20 @@ fn main() {
             broker: Mutex::new(None),
             root,
         })
+        .on_menu_event(|app, event| match event.id.as_ref() {
+            "ctx-chat" => {
+                let _ = app.emit("companion-mode", "chat");
+            }
+            "ctx-command" => {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.show();
+                }
+                let _ = app.emit("companion-mode", "command");
+            }
+            "ctx-stop" => stop_all(app),
+            "ctx-quit" => app.exit(0),
+            _ => {}
+        })
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, shortcut, event| {
@@ -600,9 +697,11 @@ fn main() {
                 .ok_or("Main window missing")?;
             restore_placement(&window)?;
             let open = MenuItem::with_id(app, "open", "Open companion", true, None::<&str>)?;
+            let command =
+                MenuItem::with_id(app, "command", "Open command center", true, None::<&str>)?;
             let stop = MenuItem::with_id(app, "stop", "Stop all tasks", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit Immortility", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&open, &stop, &quit])?;
+            let menu = Menu::with_items(app, &[&open, &command, &stop, &quit])?;
             let icon = app
                 .default_window_icon()
                 .ok_or("Window icon missing")?
@@ -618,6 +717,12 @@ fn main() {
                             let _ = window.set_focus();
                         }
                         let _ = app.emit("toggle-chat", ());
+                    }
+                    "command" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.show();
+                        }
+                        let _ = app.emit("companion-mode", "command");
                     }
                     "stop" => stop_all(app),
                     "quit" => app.exit(0),
@@ -658,6 +763,13 @@ mod tests {
         assert!(!may_snap_after_drag(true, false));
         assert!(!may_snap_after_drag(false, false));
         assert!(may_snap_after_drag(false, true));
+    }
+    #[test]
+    fn command_center_fits_inside_the_work_area() {
+        assert_eq!(command_size(2560., 1400.), (1600., 980.));
+        assert_eq!(command_size(1280., 680.), (1232., 640.));
+        let (width, height) = command_size(600., 400.);
+        assert!(width <= 600. && height <= 400.);
     }
     #[test]
     fn native_bridge_denies_non_chat_operations() {

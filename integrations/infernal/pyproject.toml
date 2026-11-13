@@ -1,0 +1,14 @@
+[project]
+name = "immortility-infernal-runtime"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "piper-tts==1.8.0", "pedalboard==0.9.26", "sounddevice==0.5.6",
+  "kokoro==0.9.4", "misaki[en]==0.9.4", "torch==2.15.0",
+  "transformers==5.15.1", "setuptools==84.2.1", "numpy==2.5.4",
+  "psutil==7.2.2"
+  ,"en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
+]
+
+[tool.uv]
+package = false
