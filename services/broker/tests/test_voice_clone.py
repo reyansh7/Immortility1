@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -157,6 +158,10 @@ def test_speak_task_rejects_friend_without_consent(setup) -> None:  # type: igno
     assert voice.state == "IDLE"
 
 
+@pytest.mark.skipif(
+    shutil.which("ffmpeg") is None,
+    reason="ffmpeg is not available in this environment",
+)
 def test_clone_playback_tempo_shortens_audio(tmp_path: Path) -> None:
     import wave
 

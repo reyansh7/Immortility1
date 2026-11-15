@@ -12,9 +12,17 @@ from pydantic import ValidationError
 from immortility_broker.app import create_app
 from immortility_broker.config import Settings
 from immortility_broker.contracts import BrokerError
+from immortility_broker.standard_mcp import reviewed_runtime
 from immortility_broker.store import Store
 from immortility_broker.workflows import WorkflowRequest
 from test_workspace import AUTH, TOKEN
+
+try:
+    reviewed_runtime()
+except BrokerError:
+    REVIEWED_MCP_RUNTIME_AVAILABLE = False
+else:
+    REVIEWED_MCP_RUNTIME_AVAILABLE = True
 
 
 def configured(tmp_path, **kwargs):
@@ -57,6 +65,10 @@ def wait(client, task_id, states):
     pytest.fail("Workflow did not reach expected state")
 
 
+@pytest.mark.skipif(
+    not REVIEWED_MCP_RUNTIME_AVAILABLE,
+    reason="Reviewed MCP runtime is unavailable in this environment",
+)
 def test_real_broker_dag_uses_registered_sdk_clock_and_zero_model_calls(tmp_path):
     app = create_app(configured(tmp_path, standard_mcp_enabled=True), TOKEN)
     with TestClient(app) as client:

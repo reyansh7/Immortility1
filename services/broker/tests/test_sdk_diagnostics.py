@@ -3,7 +3,15 @@ import json
 
 import pytest
 
-from immortility_broker.standard_mcp import SdkProbe, sdk_request
+from immortility_broker.contracts import BrokerError
+from immortility_broker.standard_mcp import SdkProbe, reviewed_runtime, sdk_request
+
+try:
+    reviewed_runtime()
+except BrokerError:
+    REVIEWED_MCP_RUNTIME_AVAILABLE = False
+else:
+    REVIEWED_MCP_RUNTIME_AVAILABLE = True
 
 
 def test_probe_never_retains_arbitrary_stderr_or_invalid_measurements():
@@ -25,6 +33,10 @@ def test_probe_never_retains_arbitrary_stderr_or_invalid_measurements():
     assert "PRIVATE_CANARY" not in repr(probe)
 
 
+@pytest.mark.skipif(
+    not REVIEWED_MCP_RUNTIME_AVAILABLE,
+    reason="Reviewed MCP runtime is unavailable in this environment",
+)
 async def test_real_probe_reports_phases_and_owned_job_cleanup():
     probe = SdkProbe()
     assert await sdk_request("add", 7, 8, enabled=True, probe=probe) == {"result": {"result": 15}}
@@ -57,6 +69,10 @@ async def test_real_probe_reports_phases_and_owned_job_cleanup():
 
 
 @pytest.mark.parametrize("cancel", [True, False])
+@pytest.mark.skipif(
+    not REVIEWED_MCP_RUNTIME_AVAILABLE,
+    reason="Reviewed MCP runtime is unavailable in this environment",
+)
 async def test_diagnostic_failure_or_cancellation_cannot_skip_owned_cleanup(monkeypatch, cancel):
     import immortility_broker.standard_mcp as module
 
