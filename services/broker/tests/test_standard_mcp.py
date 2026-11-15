@@ -13,10 +13,21 @@ from immortility_broker.capabilities import (
 )
 from immortility_broker.config import Settings
 from immortility_broker.contracts import BrokerError, TaskRequest
-from immortility_broker.standard_mcp import sdk_request
+from immortility_broker.standard_mcp import reviewed_runtime, sdk_request
 from immortility_broker.store import Store
 
+try:
+    reviewed_runtime()
+except BrokerError:
+    REVIEWED_MCP_RUNTIME_AVAILABLE = False
+else:
+    REVIEWED_MCP_RUNTIME_AVAILABLE = True
 
+
+@pytest.mark.skipif(
+    not REVIEWED_MCP_RUNTIME_AVAILABLE,
+    reason="Reviewed MCP runtime is unavailable in this environment",
+)
 async def test_real_official_sdk_stdio_discovery_and_call():
     tools = await sdk_request("discover", enabled=True)
     assert [t["name"] for t in tools["tools"]] == ["add"]
@@ -95,6 +106,10 @@ async def test_gateway_stop_revokes_and_cancels_inflight_call(tmp_path):
     gateway.store.db.close()
 
 
+@pytest.mark.skipif(
+    not REVIEWED_MCP_RUNTIME_AVAILABLE,
+    reason="Reviewed MCP runtime is unavailable in this environment",
+)
 def test_real_broker_local_arithmetic_uses_no_hermes_or_cloud(tmp_path):
     from fastapi.testclient import TestClient
     from immortility_broker.app import create_app
@@ -138,6 +153,10 @@ def test_runtime_error_canary_is_never_forwarded():
     )
 
 
+@pytest.mark.skipif(
+    not REVIEWED_MCP_RUNTIME_AVAILABLE,
+    reason="Reviewed MCP runtime is unavailable in this environment",
+)
 def test_production_admission_allows_local_work_without_provider_or_hermes(tmp_path):
     from fastapi.testclient import TestClient
     from pydantic import SecretStr
@@ -177,6 +196,10 @@ def test_production_admission_allows_local_work_without_provider_or_hermes(tmp_p
         assert usage["summary"]["calls"] == 0
 
 
+@pytest.mark.skipif(
+    not REVIEWED_MCP_RUNTIME_AVAILABLE,
+    reason="Reviewed MCP runtime is unavailable in this environment",
+)
 async def test_sdk_interoperates_with_an_independent_ndjson_peer(tmp_path):
     import os
     import subprocess

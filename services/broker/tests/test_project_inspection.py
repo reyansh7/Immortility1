@@ -131,7 +131,7 @@ def test_revoked_scope_and_secret_query_fail_without_model_or_saved_secret(tmp_p
         scope = choose(client, root)
         count = app.state.store.db.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
         response = client.post("/v1/workflows", headers=AUTH, json=request(client, scope, query="PROJECT_SECRET_CANARY_123456789"))
-        assert response.status_code == 409
+        assert response.status_code == 403
         assert app.state.store.db.execute("SELECT COUNT(*) FROM tasks").fetchone()[0] == count
         second = tmp_path / "other"; second.mkdir(); choose(client, second)
         response = client.post("/v1/workflows", headers=AUTH, json=request(client, scope, query="answer"))

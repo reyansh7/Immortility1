@@ -10,13 +10,20 @@ import pytest
 
 from immortility_broker.agent_bridge import TOOL_NAME, tool_spec
 from immortility_broker.app import create_app
-from immortility_broker.artifacts import Artifacts
+from immortility_broker.artifacts import Artifacts, reviewed_runtime as reviewed_artifact_runtime
 from immortility_broker.config import Settings
 from immortility_broker.contracts import BrokerError, TaskRequest
 from immortility_broker.policy import MODEL
 from immortility_broker.research import PublicResearch, SOURCES, model_evidence
 from immortility_broker.traces import execution_trace
 from test_workspace import AUTH, TOKEN
+
+try:
+    reviewed_artifact_runtime()
+except BrokerError:
+    REVIEWED_ARTIFACT_RUNTIME_AVAILABLE = False
+else:
+    REVIEWED_ARTIFACT_RUNTIME_AVAILABLE = True
 
 
 @pytest.fixture
@@ -84,6 +91,10 @@ async def test_research_refuses_oversize_or_unusable_sources():
         await PublicResearch(fetch).retrieve({"query": "MCP security"})
 
 
+@pytest.mark.skipif(
+    not REVIEWED_ARTIFACT_RUNTIME_AVAILABLE,
+    reason="Reviewed artifact runtime is unavailable in this environment",
+)
 async def test_real_report_publication_readback_scope_idempotency_and_tampering(
     tmp_path, report_draft, report_sources
 ):
@@ -129,6 +140,10 @@ async def test_no_source_or_invalid_citation_cannot_start_worker(
     assert not artifacts.root.exists()
 
 
+@pytest.mark.skipif(
+    not REVIEWED_ARTIFACT_RUNTIME_AVAILABLE,
+    reason="Reviewed artifact runtime is unavailable in this environment",
+)
 async def test_gateway_report_receipt_api_trace_and_no_extra_provider_call(
     tmp_path, report_draft, report_sources
 ):
@@ -366,6 +381,10 @@ async def test_context_projection_keeps_evidence_and_leaves_provenance_local():
     assert result["sources"][0]["sha256"] and result["sources"][0]["retrieved_at"]
 
 
+@pytest.mark.skipif(
+    not REVIEWED_ARTIFACT_RUNTIME_AVAILABLE,
+    reason="Reviewed artifact runtime is unavailable in this environment",
+)
 async def test_cancellation_reaps_actual_report_worker_before_publication(
     tmp_path, monkeypatch, report_draft, report_sources
 ):

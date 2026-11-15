@@ -105,7 +105,7 @@ def test_provider_key_is_stored_and_never_returned(settings, monkeypatch):
         health = client.get("/health/ready", headers=AUTH)
         assert secret not in health.text
         assert health.json()["providers"]["gemini"] == (
-            "key stored locally; chat stays on the free OpenRouter route"
+            "key stored locally; dispatch requires a broker-verified free route"
         )
         nvidia = "dummy-nvidia-key-value"
         nvidia_response = client.post(
@@ -118,7 +118,7 @@ def test_provider_key_is_stored_and_never_returned(settings, monkeypatch):
         health = client.get("/health/ready", headers=AUTH)
         assert nvidia not in health.text
         assert health.json()["providers"]["nvidia"] == (
-            "key stored locally; chat stays on the free OpenRouter route"
+            "key stored locally; dispatch requires a broker-verified free route"
         )
         assert health.json()["model"] == "openrouter/free"
         rejected = client.post(
