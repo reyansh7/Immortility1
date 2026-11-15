@@ -4,6 +4,8 @@
 
 > Status: **P0/P1 developer preview with integrated P2 local voice**, not production-ready. Hermes text streaming, history, cancellation, Windows Credential Manager, local Whisper/Piper and content-free traces are implemented. Real microphone and remaining Windows interaction/performance gates are tracked in `docs/P1_P2_VALIDATION.md`. P3–P8 remain planned. No runtime mock mode is silently enabled.
 
+> **Architecture update (2026-11-15):** forward routing uses Hermes native capabilities and direct Gemini/Groq/NVIDIA adapters, subject to broker eligibility and zero-spend checks. OpenRouter and OmniRoute are excluded; the historical fallback gate defaults off. No direct production route is qualified yet, and on-demand local Qwen is not installed. Default cloud admission therefore remains blocked. See [current architecture constraint](docs/implementation/ARCHITECTURE_UPDATE_2026-11-15.md) and [engineering status](docs/implementation/CURRENT_STATUS.md).
+
 The current master prompt's consolidation rules are recorded in
 [`docs/architecture/CONSOLIDATION.md`](docs/architecture/CONSOLIDATION.md).
 Hermes stays primary; the broker stays authoritative for permissions and task
@@ -92,10 +94,10 @@ enabled; choose **IMMORTILITY · Mechanical reference** in Settings and enable
 in this slice and its model/output license is non-commercial. See
 [reference voice evaluation and measured runtime](docs/research/REFERENCE_VOICE_EVALUATION.md).
 
-The current real route is **Hermes → local inference guard → OpenRouter
-`openrouter/free`**. Each outgoing request verifies the live catalog price and
-forces a zero-price route. Gemini and Groq are displayed but blocked because this
-implementation cannot establish account-level free eligibility. Paid inference,
+The historical checked route was **Hermes → local inference guard → OpenRouter
+`openrouter/free`**; it is retained for evidence and compatibility fixtures and is
+disabled by default under the new architecture. Direct Gemini, Groq and NVIDIA
+adapters remain blocked pending concrete model/account/tool-call qualification. Paid inference,
 agent tools, model training, screen capture and OS automation remain blocked. Local
 Whisper/Piper inference requires no cloud speech subscription.
 

@@ -146,8 +146,8 @@ export function Messages({
             {localOnly
               ? "Local background mode. Open Settings to run a local task; chat and voice need the desktop runtime."
               : ready
-                ? "A conversation with Hermes on the free OpenRouter route. Tools stay off unless you enable them in Settings."
-                : "Add an OpenRouter key in Settings, then check the connection. A verified Hermes installation is also required."}
+                ? "A conversation with Hermes on a broker-authorized free route. Tools stay off unless you enable them in Settings."
+                : "No eligible cloud route is ready. Review provider status in Settings. A verified Hermes installation is also required."}
           </p>
         </div>
       )}
@@ -156,7 +156,9 @@ export function Messages({
         const { status, text, notice } = taskOutcome(task, live);
         const model = task.result
           ? `${task.result.provider} · ${task.result.model}`
-          : "Hermes · OpenRouter / free";
+          : task.input.no_cloud
+            ? "Local task · no cloud"
+            : "Hermes · route pending";
         return (
           <article key={task.task_id}>
             <div className="user-message">

@@ -29,12 +29,16 @@ export function ModelHubView({
   active,
   onSelect,
   activeModel,
+  connected = true,
+  issue,
 }: {
   catalog: ModelCatalog;
   busy: boolean;
   active: boolean;
   onSelect: (value: ModelSelection) => void;
   activeModel?: ActiveModel | null;
+  connected?: boolean;
+  issue?: string | null;
 }) {
   const selection = catalog.selection;
   const local =
@@ -42,12 +46,19 @@ export function ModelHubView({
   return (
     <section aria-label="Model Hub">
       <h3>Model Hub</h3>
+      {issue && <p role="alert">{issue}</p>}
       <p role="status">
         {activeModel
           ? `Active route: ${activeModel.provider} · ${activeModel.model}`
           : "No model request active. The broker records the selected route when inference begins."}
       </p>
-      <fieldset disabled={busy || active}>
+      {!connected && (
+        <p role="status">
+          Broker disconnected. Model status is last known; reconnect before
+          changing mode.
+        </p>
+      )}
+      <fieldset disabled={busy || active || !connected}>
         <label>
           Model mode
           <select
@@ -95,7 +106,9 @@ export function ModelHubView({
         )}
       </fieldset>
       {active && (
-        <p className="hint">Stop the active task before changing model mode.</p>
+        <p className="hint">
+          Stop the active task or voice turn before changing model mode.
+        </p>
       )}
       {selection.mode === "manual_cloud" &&
         selection.route_id === "openrouter/free" && (
@@ -144,6 +157,7 @@ export function ModelHubView({
 }
 
 export function ModelHub({
+  connected = true,
   active,
   localOnly,
   onChanged,
@@ -152,44 +166,50 @@ export function ModelHub({
 }: {
   active: boolean;
   localOnly: boolean;
+  connected?: boolean;
   onChanged: () => void;
   onError: (message: string) => void;
   activeModel?: ActiveModel | null;
 }) {
   const [catalog, setCatalog] = useState<ModelCatalog | null>(null);
   const [busy, setBusy] = useState(false);
+  const [issue, setIssue] = useState<string | null>(null);
   const selecting = useRef(false);
   useEffect(() => {
-    if (localOnly) return;
+    if (localOnly || !connected) return;
     let mounted = true;
     void api<ModelCatalog>("/v1/models")
       .then((result) => {
         if (mounted) setCatalog(result);
       })
       .catch((issue: unknown) => {
-        if (mounted)
-          onError(
+        if (mounted) {
+          const message =
             issue instanceof Error
               ? issue.message
-              : "Model status unavailable.",
-          );
+              : "Model status unavailable.";
+          setIssue(message);
+          onError(message);
+        }
       });
     return () => {
       mounted = false;
     };
-  }, [localOnly, onError]);
+  }, [localOnly, onError, connected]);
 
   async function select(value: ModelSelection) {
-    if (selecting.current || active) return;
+    if (selecting.current || active || !connected) return;
     selecting.current = true;
+    setIssue(null);
     setBusy(true);
     try {
       setCatalog(await api<ModelCatalog>("/v1/settings/model-mode", value));
       onChanged();
     } catch (issue) {
-      onError(
-        issue instanceof Error ? issue.message : "Model mode was not changed.",
-      );
+      const message =
+        issue instanceof Error ? issue.message : "Model mode was not changed.";
+      setIssue(message);
+      onError(message);
     } finally {
       selecting.current = false;
       setBusy(false);
@@ -202,9 +222,19 @@ export function ModelHub({
         Model routing is disabled in the local background runtime.
       </p>
     );
-  if (!catalog) return <p role="status">Loading broker model status…</p>;
+  if (!catalog)
+    return (
+      <p role={issue ? "alert" : "status"}>
+        {issue ??
+          (connected
+            ? "Loading broker model status…"
+            : "Broker disconnected. Reconnect to load model status.")}
+      </p>
+    );
   return (
     <ModelHubView
+      issue={issue}
+      connected={connected}
       catalog={catalog}
       busy={busy}
       active={active}

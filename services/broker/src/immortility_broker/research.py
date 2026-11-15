@@ -2,6 +2,7 @@
 
 import asyncio
 import hashlib
+import json
 import re
 import time
 from collections import OrderedDict
@@ -55,10 +56,10 @@ class ResearchOutput(StrictModel):
     source_trust: Literal["untrusted-data"] = "untrusted-data"
 
 
-def model_evidence(result: dict[str, Any]) -> dict[str, Any]:
+def model_evidence(result: dict[str, Any], *, max_bytes: int | None = None) -> dict[str, Any]:
     """Keep full provenance in the broker; send only evidence needed for drafting."""
     checked = ResearchOutput.model_validate(result)
-    return {
+    context: dict[str, Any] = {
         "sources": [
             {"source_id": source.source_id, "title": source.title, "excerpt": source.excerpt}
             for source in checked.sources
@@ -67,6 +68,22 @@ def model_evidence(result: dict[str, Any]) -> dict[str, Any]:
         "search_mode": checked.search_mode,
         "source_trust": checked.source_trust,
     }
+    if max_bytes is not None:
+        context["context_bounded"] = True
+        while len(json.dumps(context, separators=(",", ":")).encode()) > max_bytes:
+            candidates = [source for source in context["sources"] if len(source["excerpt"]) > 80]
+            if not candidates:
+                raise BrokerError(
+                    "report_budget_infeasible",
+                    "Source evidence cannot fit its bounded drafting context.",
+                    403,
+                )
+            source = max(candidates, key=lambda value: len(json.dumps(value["excerpt"]).encode()))
+            excerpt = source["excerpt"]
+            end = max(80, len(excerpt) - 48)
+            boundary = excerpt.rfind(" ", max(80, end - 48), end)
+            source["excerpt"] = excerpt[: boundary if boundary >= 80 else end].rstrip()
+    return context
 
 
 async def fetch_source(source_id: str) -> bytes:

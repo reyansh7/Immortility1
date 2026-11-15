@@ -3,6 +3,7 @@ import contextlib
 import hmac
 import json
 import logging
+import re
 import time
 import hashlib
 import os
@@ -26,7 +27,7 @@ from .delegation import apply_delegation_file, orchestrate, project_notes, save_
 from .hermes import Hermes, runtime_check
 from .local_tools import AUTHORIZED, apply_local_tools_file, call_local_tool, save_local_tools_file
 from .memory import prior_task_notes, retrieve, trim_history
-from .policy import MODEL, guard_secret_egress, inference_payload, route_model, verify_catalog
+from .policy import MODEL, guard_secret_egress, inference_payload, route_model
 from .providers import (
     PROVIDERS,
     ModelRegistry,
@@ -38,9 +39,10 @@ from .providers import (
     task_class,
     verify_dispatch,
 )
-from .provider_stream import sse_data
+from .provider_stream import sse_data, StreamCounters, provider_error_category
+from .semantic_stream import SemanticToolStream
 from .routing import Plan, classify, wants_edit
-from .ledger import input_upper_bound
+from .ledger import prompt_byte_components
 from .capabilities import (
     AddInput,
     AddOutput,
@@ -68,9 +70,10 @@ from .voice import RecordRequest, VoiceOptions, VoiceService
 from .secrets import CredentialError, CredentialManager, migrate_env, remove_env_assignments
 from .config import ROOT
 from .mcp_bridge import call_add, discover
-from .agent_bridge import ToolProposal, APPROVED_CAPABILITIES, validate_stream
+from .agent_bridge import ToolProposal, APPROVED_CAPABILITIES
 from .artifacts import Artifacts, ReportInput, ReportOutput
 from .research import PublicResearch, ResearchInput, ResearchOutput, model_evidence
+from . import project_inspection as projects
 from .traces import execution_trace
 from .web import research_page_async
 from .request_limits import BodyLimitMiddleware
@@ -152,7 +155,7 @@ def _provider_status(present: bool, chat: bool) -> str:
         return "missing key"
     if chat:
         return "key present; live price checked on send"
-    return "key stored locally; chat stays on the free OpenRouter route"
+    return "key stored locally; dispatch requires a broker-verified free route"
 
 
 class Runtime(Protocol):
@@ -163,11 +166,26 @@ class Runtime(Protocol):
 
 
 class Engine:
+    _active: str | None
+
+    @property
+    def active(self) -> str | None:
+        return self._active
+
+    @active.setter
+    def active(self, value: str | None) -> None:
+        if value != self._active:
+            self._active = value
+            self.runtime_changes.notify()
+
     def __init__(self, store: Store, factory: Callable[[], Runtime], settings: Settings):
+        from .runtime_status import RuntimeChanges
+
+        self.runtime_changes = RuntimeChanges()
         self.store, self.factory, self.settings = store, factory, settings
         self.worker: asyncio.Task[Any] | None = None
         self.runtime: Runtime | None = None
-        self.active: str | None = None
+        self._active = None
         self.calls = 0
         self.call_limit = 2
         self.bridge_calls = 0
@@ -283,6 +301,32 @@ class Engine:
                 lambda: settings.local_tools_enabled,
             )
         )
+
+        async def search_project(arguments: dict[str, Any]) -> dict[str, Any]:
+            return await projects.invoke(settings, "search", arguments)
+
+        async def read_project(arguments: dict[str, Any]) -> dict[str, Any]:
+            return await projects.invoke(settings, "read", arguments)
+
+        for name, input_model, output_model, execute in [
+            ("project.search.v1", projects.SearchInput, projects.SearchOutput, search_project),
+            ("project.read.v1", projects.ReadInput, projects.ReadOutput, read_project),
+        ]:
+            self.gateway.register(
+                Registration(
+                    Capability(
+                        name=name,
+                        provider="local-python",
+                        max_payload_bytes=2048,
+                        max_output_bytes=64000,
+                        deadline_ms=5000,
+                    ),
+                    input_model,
+                    output_model,
+                    execute,
+                    lambda: settings.project_read_enabled and settings.workspace_root is not None,
+                )
+            )
         self.gateway.register(
             Registration(
                 Capability(
@@ -534,7 +578,9 @@ class Engine:
         return result
 
     def start_workflows(self) -> None:
-        if self.settings.durable_workflows_enabled:
+        if self.workflow_runner is None and (
+            self.settings.durable_workflows_enabled or self.settings.project_read_enabled
+        ):
             self.workflow_runner = asyncio.create_task(self._workflow_loop())
 
     async def shutdown(self) -> None:
@@ -562,7 +608,7 @@ class Engine:
         self.observation_results.clear()
 
     def submit_workflow(self, request: WorkflowRequest) -> dict[str, Any]:
-        if not self.settings.durable_workflows_enabled:
+        if not self.workflow_authorized(request):
             raise BrokerError("tool_denied", "Durable local workflows are disabled.", 403)
         prior = self.workflows.existing(request)
         if prior is not None:
@@ -580,6 +626,15 @@ class Engine:
             self.store.state(task["task_id"], "queued")
         self.workflow_wake.set()
         return self.store.get(task["task_id"])
+
+    def workflow_authorized(self, request: WorkflowRequest) -> bool:
+        return self.settings.durable_workflows_enabled or (
+            self.settings.project_read_enabled
+            and all(
+                step.capability in {"project.search.v1", "project.read.v1"}
+                for step in request.steps
+            )
+        )
 
     async def _workflow_loop(self) -> None:
         while not self.closing:
@@ -606,7 +661,7 @@ class Engine:
         try:
             self.store.state(task_id, "running")
             request, body = self.workflows.load(task_id)
-            if not self.settings.durable_workflows_enabled or body["expires_at"] <= time.time():
+            if not self.workflow_authorized(request) or body["expires_at"] <= time.time():
                 raise BrokerError(
                     "grant_expired", "Local workflow authorization expired or was revoked.", 403
                 )
@@ -627,7 +682,7 @@ class Engine:
                     arguments[target] = outputs[reference.step_id][reference.field]
                 while True:
                     remaining = body["expires_at"] - time.time()
-                    if remaining <= 0 or not self.settings.durable_workflows_enabled:
+                    if remaining <= 0 or not self.workflow_authorized(request):
                         raise BrokerError(
                             "grant_expired",
                             "Local workflow authorization expired or was revoked.",
@@ -1277,7 +1332,15 @@ def create_app(
 
             path = request.url.path
             read_route = (
-                path in {"/health/live", "/health/ready", "/v1/sessions", "/v1/capabilities"}
+                path
+                in {
+                    "/health/live",
+                    "/health/ready",
+                    "/v1/sessions",
+                    "/v1/capabilities",
+                    "/v1/runtime/status",
+                    "/v1/projects/scope",
+                }
                 or re.fullmatch(
                     r"/v1/(?:tasks|workflows)/[a-f0-9-]{36}(?:/(?:events|trace|usage))?", path
                 )
@@ -1379,6 +1442,7 @@ def create_app(
             "microphone_enabled": voice.state == "LISTENING",
             "credential_source": settings.credential_source,
             "active_task": engine.active,
+            "voice_state": voice.state,
             "providers": {
                 "openrouter": _provider_status(key, True),
                 "gemini": _provider_status(gemini, False),
@@ -1407,6 +1471,17 @@ def create_app(
                 and not settings.local_only_mode
                 and (ROOT / ".venv-observer/Scripts/python.exe").is_file()
             ),
+        }
+
+    @app.get("/v1/runtime/status")
+    async def runtime_status(after: int | None = None) -> dict[str, Any]:
+        if after is not None and not 0 <= after <= 9007199254740991:
+            raise BrokerError("invalid_cursor", "Invalid runtime revision.", 400)
+        await engine.runtime_changes.wait(after)
+        return {
+            "revision": engine.runtime_changes.revision,
+            "health": await ready(),
+            "voice_state": voice.state,
         }
 
     @app.post("/v1/observations")
@@ -1541,6 +1616,18 @@ def create_app(
 
     @app.post("/v1/workflows")
     async def submit_workflow(body: WorkflowRequest) -> dict[str, Any]:
+        guard_secret_egress(
+            [{"content": body.model_dump_json()}],
+            [
+                key.get_secret_value()
+                for key in (
+                    settings.openrouter_api_key,
+                    settings.groq_api_key,
+                    settings.gemini_api_key,
+                    settings.nvidia_api_key,
+                )
+            ],
+        )
         return engine.submit_workflow(body)
 
     @app.get("/v1/workflows/{task_id}")
@@ -1551,7 +1638,9 @@ def create_app(
     async def trace(task_id: str) -> dict[str, Any]:
         return execution_trace(store, task_id)
 
-    voice = VoiceService(settings, store, create, engine.cancel)
+    voice = VoiceService(
+        settings, store, create, engine.cancel, on_state_change=engine.runtime_changes.notify
+    )
     engine.on_user_text = voice.note_assistant_text
     app.state.voice = voice
 
@@ -1670,6 +1759,21 @@ def create_app(
             await engine.cancel(task_id)
         save_workspace_file(settings, body.enabled, body.root)
         return {"enabled": settings.workspace_tools_enabled}
+
+    @app.get("/v1/projects/scope")
+    async def project_scope() -> dict[str, Any]:
+        return projects.scope(settings)
+
+    @app.post("/v1/settings/project")
+    async def select_project(body: projects.ProjectChoice) -> dict[str, Any]:
+        if engine.active or voice.state not in {"IDLE", "ERROR", "CANCELLED"}:
+            raise BrokerError("busy", "Stop active work before changing project permission.", 409)
+        for task_id in list(engine.approvals):
+            await engine.cancel(task_id)
+        result = projects.select(settings, body)
+        engine.start_workflows()
+        engine.runtime_changes.notify()
+        return result
 
     @app.post("/v1/tasks/{task_id}/approval")
     async def resolve_approval(task_id: str, body: ApprovalDecision) -> dict[str, Any]:
@@ -1840,7 +1944,10 @@ def create_app(
             raise BrokerError(
                 "busy", "Stop the active task or voice turn before changing model mode.", 409
             )
+        previous = engine.registry.selection()
         engine.registry.set_selection(body)
+        if body != previous:
+            engine.runtime_changes.notify()
         return engine.registry.view()
 
     def artifact_scope(task_id: str) -> None:
@@ -1915,24 +2022,56 @@ def create_app(
         store.event(task_id, "tool.completed", {"name": "rollback", "status": "ok"})
         return {"restored": True}
 
+    def cancellation_notice(task_id: str, request: Request, route: str, reason: str) -> None:
+        if store.get(task_id)["status"] in TERMINAL:
+            return
+        reported = request.headers.get("x-immortility-action-source", "")
+        source = (
+            reported
+            if reported
+            in {
+                "native-ipc-stop",
+                "native-ipc-cancel",
+                "native-context-stop",
+                "native-hotkey-stop",
+                "native-tray-stop",
+            }
+            else "authenticated-local-request"
+        )
+        store.event(
+            task_id,
+            "audit.notice",
+            {
+                "name": "cancellation.requested",
+                "route": route,
+                "task_id": task_id,
+                "reason": reason,
+                "source_tag": source,
+            },
+        )
+
     @app.post("/v1/tasks/{task_id}/cancel")
-    async def cancel(task_id: str) -> dict[str, Any]:
+    async def cancel(task_id: str, request: Request) -> dict[str, Any]:
+        cancellation_notice(task_id, request, "/v1/tasks/{task_id}/cancel", "task_cancel_request")
         await engine.cancel(task_id)
         await voice.interrupt(task_id)
         return store.get(task_id)
 
     @app.post("/v1/stop")
-    async def stop() -> dict[str, bool]:
+    async def stop(request: Request) -> dict[str, bool]:
         engine.stopping_workflows = True
         audio_failed = False
         try:
             if engine.active:
+                cancellation_notice(engine.active, request, "/v1/stop", "global_stop_request")
                 await engine.cancel(engine.active)
             for row in store.db.execute(
                 "SELECT task_id FROM workflows WHERE status IN ('queued','running')"
             ).fetchall():
+                cancellation_notice(row["task_id"], request, "/v1/stop", "global_stop_request")
                 await engine.cancel(row["task_id"])
             for pending in list(engine.approvals):
+                cancellation_notice(pending, request, "/v1/stop", "global_stop_request")
                 await engine.cancel(pending)
             try:
                 await voice.cancel()
@@ -1950,14 +2089,14 @@ def create_app(
             engine.workflow_wake.set()
 
     @app.post("/v1/runtime/shutdown")
-    async def runtime_shutdown() -> dict[str, bool]:
+    async def runtime_shutdown(request: Request) -> dict[str, bool]:
         if not settings.local_only_mode or stop_runtime is None:
             raise BrokerError(
                 "tool_denied",
                 "Only an explicitly started background runtime can be shut down here.",
                 403,
             )
-        await stop()
+        await stop(request)
         stop_runtime()
         return {"shutdown_requested": True}
 
@@ -2038,7 +2177,12 @@ def create_app(
             raise BrokerError("tool_denied", "Tool scope was revoked.", 403)
         return {
             "capability": proposal.capability,
-            "result": model_evidence(result)
+            "result": model_evidence(
+                result,
+                max_bytes=1600
+                if settings.typed_tool_schemas_enabled and "report.create.v1" in allowed
+                else None,
+            )
             if proposal.capability == "public.research.v1"
             else result,
             "verified": True,
@@ -2127,7 +2271,18 @@ def create_app(
             raise engine.provider_error
         request.state.inference_scope = (engine.active, engine.inference_key)
         approved = store.get(engine.active)["input"].get("allowed_capabilities", [])
-        payload = inference_payload(await request.json(), approved_capabilities=approved)
+        visible = approved
+        if settings.typed_tool_schemas_enabled and {
+            "public.research.v1",
+            "report.create.v1",
+        } <= set(approved):
+            visible = ["report.create.v1"] if engine.source_refs else ["public.research.v1"]
+        payload = inference_payload(
+            await request.json(),
+            approved_capabilities=approved,
+            typed_tools=settings.typed_tool_schemas_enabled,
+            schema_capabilities=visible,
+        )
         guard_secret_egress(
             [{"content": json.dumps(payload["messages"])}],
             [
@@ -2141,13 +2296,35 @@ def create_app(
             ],
         )
         task_id, attempt_id, grant_key = engine.active, engine.attempt_id, engine.inference_key
-        input_tokens = input_upper_bound(payload["messages"])
-        if approved:
-            input_tokens += len(json.dumps(payload.get("tools", [])).encode()) + sum(
-                len(json.dumps(m.get("tool_calls", [])).encode()) for m in payload["messages"]
-            )
+        components = prompt_byte_components(payload)
+        input_tokens = sum(components.values())
         used = store.ledger.summary(task_id)["charged_tokens"]
         available = engine.token_cap - used - input_tokens
+        if "report.create.v1" in approved:
+            from .artifacts import minimum_report_output_reservation
+
+            floor = minimum_report_output_reservation()
+            if settings.typed_tool_schemas_enabled:
+                floor = max(floor, 1200)
+            if min(available, payload["max_tokens"]) < floor:
+                store.event(
+                    task_id,
+                    "audit.notice",
+                    {
+                        "name": "report.admission",
+                        "status": "denied",
+                        "required_output": floor,
+                        "available_output": min(available, payload["max_tokens"]),
+                        "prompt_byte_components": components,
+                        "schema_capabilities": visible,
+                        "dispatch_attempted": False,
+                    },
+                )
+                raise BrokerError(
+                    "report_budget_infeasible",
+                    "Remaining budget cannot reserve even a minimum validated report proposal. No provider request sent.",
+                    403,
+                )
         if available < 128:
             raise BrokerError(
                 "budget_exhausted", "Required context exceeds task token budget.", 403
@@ -2203,14 +2380,80 @@ def create_app(
             )
         call_id = store.ledger.reserve(attempt_id, input_tokens, payload["max_tokens"])
         engine.calls += 1
+        dispatch_started = time.perf_counter()
+
+        def early_notice(termination: str, *, sent: bool, status: int | None = None) -> None:
+            store.event(
+                task_id,
+                "audit.notice",
+                {
+                    "name": "provider_call_diagnostics",
+                    "diagnostic_schema_version": "1.0",
+                    "call_id": call_id,
+                    "provider": route.provider,
+                    "model": route.model_id,
+                    "served_model": None,
+                    "http_status": status,
+                    "termination": termination,
+                    "dispatch_attempted": sent,
+                    "event_count": 0,
+                    "read_chunks": 0,
+                    "raw_bytes": 0,
+                    "semantic_bytes": 0,
+                    "tool_argument_bytes": 0,
+                    "max_tokens": payload["max_tokens"],
+                    "input_reserved": input_tokens,
+                    "usage_status": "unknown" if sent else "not_sent",
+                    "elapsed_ms": round((time.perf_counter() - dispatch_started) * 1000, 3),
+                    "finish_reason": None,
+                    "accepted_proposals": 0,
+                    "rejected_proposals": 0,
+                },
+            )
+
         try:
-            if route.provider == "openrouter" and route.model_id == MODEL:
-                await verify_catalog(http)  # fresh price on every request, no cached bypass
-            else:
-                await verify_dispatch(http, route)
-        except BrokerError as error:
+            quota = await verify_dispatch(
+                http,
+                route,
+                key=getattr(
+                    settings, PROVIDERS[route.provider].credential_field
+                ).get_secret_value(),
+                minimum_requests=2
+                if "report.create.v1" in approved and not engine.source_refs
+                else 1,
+                still_authorized=lambda: (
+                    engine.inference_allowed
+                    and engine.active == task_id
+                    and engine.inference_key == grant_key
+                    and credential_identity(settings, route.provider) == dispatch_identity
+                    and time.time() < engine.inference_deadline
+                    and engine.registry.rejection(route, need) is None
+                ),
+            )
+            store.event(
+                task_id,
+                "audit.notice",
+                {
+                    "name": "provider.quota_verified",
+                    "provider": route.provider,
+                    "remaining_requests_observed": quota,
+                    "source": "official-current-key-api",
+                    "validity": "this dispatch only",
+                },
+            )
+        except BaseException as error:
             store.ledger.settle(call_id, None, sent=False)
-            if engine.active == task_id and engine.inference_key == grant_key:
+            early_notice(
+                "preflight_cancelled"
+                if isinstance(error, asyncio.CancelledError)
+                else "preflight_denied",
+                sent=False,
+            )
+            if (
+                isinstance(error, BrokerError)
+                and engine.active == task_id
+                and engine.inference_key == grant_key
+            ):
                 engine.provider_error = error
             raise
         if (
@@ -2222,6 +2465,7 @@ def create_app(
             or engine.registry.rejection(route, need) is not None
         ):
             store.ledger.settle(call_id, None, sent=False)
+            early_notice("revoked_preflight", sent=False)
             raise BrokerError(
                 "inference_closed", "Inference grant was revoked during preflight.", 403
             )
@@ -2234,6 +2478,10 @@ def create_app(
             # Once dispatch begins, a transport error/cancel cannot prove no bytes
             # reached the provider. Keep the full reservation charged as unknown.
             store.ledger.settle(call_id, None)
+            early_notice(
+                "cancelled" if isinstance(error, asyncio.CancelledError) else "stream_transport",
+                sent=True,
+            )
             if isinstance(error, asyncio.CancelledError):
                 raise
             issue = BrokerError(
@@ -2249,8 +2497,11 @@ def create_app(
                 upstream.headers.get("retry-after"),
                 credential=dispatch_identity,
             )
-            await upstream.aclose()
-            store.ledger.settle(call_id, None)
+            try:
+                await upstream.aclose()
+            finally:
+                store.ledger.settle(call_id, None)
+                early_notice("http_rejected", sent=True, status=upstream.status_code)
             code = "quota_exhausted" if upstream.status_code == 429 else "provider_rejected"
             message = (
                 "Free quota exhausted. Retry later; no paid fallback attempted."
@@ -2264,30 +2515,78 @@ def create_app(
 
         async def relay() -> AsyncIterator[str]:
             reported_usage: dict[str, Any] | None = None
-            buffered: list[dict[str, Any]] = []
-            buffered_bytes = 0
+            semantic = SemanticToolStream()
             stream_done = False
+            counters = StreamCounters()
+            source = sse_data(upstream, engine.inference_deadline, counters)
+            termination = "interrupted"
+            finish_reason: str | None = None
+            served_model: str | None = None
+            accepted_proposals = 0
+            rejected_proposals = 0
+            provider_reason: str | None = None
             try:
-                async for data in sse_data(upstream, engine.inference_deadline):
+                async for data in source:
                     line = "data: " + data
                     if (
                         not engine.inference_allowed
                         or engine.active != task_id
                         or engine.inference_key != grant_key
                     ):
+                        termination = "revoked"
                         break
                     if line.startswith("data:"):
                         data = line[5:].strip()
                         if data != "[DONE]":
                             chunk = json.loads(data)
+                            if isinstance(chunk, dict):
+                                model = chunk.get("model")
+                                if isinstance(model, str) and re.fullmatch(
+                                    r"[A-Za-z0-9._:/-]{1,160}", model
+                                ):
+                                    # Provider metadata is untrusted too. An echoed
+                                    # credential is not a model identity or a log field.
+                                    if any(
+                                        (
+                                            secret := getattr(
+                                                settings, provider.credential_field
+                                            ).get_secret_value()
+                                        )
+                                        and secret in model
+                                        for provider in PROVIDERS.values()
+                                    ):
+                                        chunk.pop("model", None)
+                                    else:
+                                        served_model = model
+                                for choice in chunk.get("choices") or []:
+                                    if (
+                                        isinstance(choice, dict)
+                                        and choice.get("finish_reason") is not None
+                                    ):
+                                        finish_reason = (
+                                            choice["finish_reason"]
+                                            if choice["finish_reason"]
+                                            in {
+                                                "stop",
+                                                "tool_calls",
+                                                "length",
+                                                "content_filter",
+                                                "error",
+                                                "function_call",
+                                            }
+                                            else "other"
+                                        )
                             usage = chunk.get("usage")
                             if isinstance(usage, dict):
                                 reported_usage = usage
                             if chunk.get("error"):
+                                provider_reason = provider_error_category(chunk["error"])
+                                termination = "provider_error"
                                 engine.provider_error = BrokerError(
                                     "provider_stream_failed",
                                     "Provider interrupted the response. No fallback attempted.",
                                     503,
+                                    diagnostic=provider_reason,
                                 )
                                 break
                             # Tool calls are blocked before Hermes can see or execute them.
@@ -2296,20 +2595,22 @@ def create_app(
                                 or c.get("delta", {}).get("function_call")
                                 for c in chunk.get("choices", [])
                             ):
+                                termination = "tool_denied"
+                                rejected_proposals += 1
                                 engine.provider_error = BrokerError(
                                     "tool_denied", "Unsafe provider output blocked.", 403
                                 )
                                 break
                             if approved:
-                                buffered_bytes += len(data.encode())
-                                if buffered_bytes > 128000:
-                                    raise ValueError("Bridge output limit")
-                                buffered.append(chunk)
+                                semantic.add(chunk)
                                 continue
                         elif approved:
                             try:
-                                buffered = validate_stream(buffered, approved)
+                                buffered = semantic.normalized(visible, reported_usage)
+                                accepted_proposals = len(semantic.calls)
                             except BrokerError as error:
+                                termination = error.diagnostic or "stream_shape"
+                                rejected_proposals += 1
                                 engine.provider_error = error
                                 store.event(
                                     task_id,
@@ -2323,10 +2624,10 @@ def create_app(
                                 break
                             for chunk in buffered:
                                 yield "data: " + json.dumps(chunk) + "\n\n"
-                            buffered.clear()
                         yield line + "\n\n"
                         if data == "[DONE]":
                             stream_done = True
+                            termination = "completed"
                             break
                 if (
                     not stream_done
@@ -2341,6 +2642,9 @@ def create_app(
                         503,
                         diagnostic="truncated_sse",
                     )
+            except asyncio.CancelledError:
+                termination = "cancelled"
+                raise
             except (
                 ValueError,
                 TypeError,
@@ -2348,19 +2652,23 @@ def create_app(
                 httpx.HTTPError,
                 BrokerError,
                 TimeoutError,
+                RecursionError,
             ) as error:
                 if engine.active == task_id and engine.inference_key == grant_key:
                     reason = (
                         error.diagnostic
                         if isinstance(error, BrokerError)
                         else "json_decode"
-                        if isinstance(error, json.JSONDecodeError)
+                        if isinstance(error, (json.JSONDecodeError, RecursionError))
                         else "stream_timeout"
                         if isinstance(error, (TimeoutError, httpx.TimeoutException))
                         else "stream_transport"
                         if isinstance(error, httpx.HTTPError)
                         else "stream_envelope"
                     )
+                    termination = reason or "stream_envelope"
+                    if approved:
+                        rejected_proposals += 1
                     engine.provider_error = BrokerError(
                         "provider_stream_failed",
                         "Provider response was interrupted or malformed. No fallback attempted.",
@@ -2373,18 +2681,70 @@ def create_app(
                         {"name": "provider_stream_contract", "status": "denied", "reason": reason},
                     )
             finally:
-                await upstream.aclose()
-                if (
-                    engine.active == task_id
-                    and engine.inference_key == grant_key
-                    and engine.provider_error is not None
-                ):
-                    engine.registry.failure(route, 503, credential=dispatch_identity)
                 try:
-                    store.ledger.settle(call_id, reported_usage)
-                except BrokerError as error:
-                    if engine.active == task_id and engine.inference_key == grant_key:
-                        engine.provider_error = error
+                    await source.aclose()
+                finally:
+                    try:
+                        await upstream.aclose()
+                    finally:
+                        if (
+                            engine.active == task_id
+                            and engine.inference_key == grant_key
+                            and engine.provider_error is not None
+                        ):
+                            engine.registry.failure(route, 503, credential=dispatch_identity)
+                        try:
+                            store.ledger.settle(call_id, reported_usage)
+                        except BrokerError as error:
+                            if engine.active == task_id and engine.inference_key == grant_key:
+                                engine.provider_error = error
+                        row = store.db.execute(
+                            "SELECT status FROM usage_calls WHERE id=?", (call_id,)
+                        ).fetchone()
+                        store.event(
+                            task_id,
+                            "audit.notice",
+                            {
+                                "name": "provider_call_diagnostics",
+                                "diagnostic_schema_version": "1.0",
+                                "call_id": call_id,
+                                "provider": route.provider,
+                                "model": route.model_id,
+                                "served_model": served_model,
+                                "http_status": upstream.status_code,
+                                "dispatch_attempted": True,
+                                "termination": termination,
+                                "provider_error_category": provider_reason,
+                                "event_count": counters.events,
+                                "read_chunks": counters.read_chunks,
+                                "raw_bytes": counters.raw_bytes,
+                                "semantic_bytes": semantic.semantic_bytes if approved else None,
+                                "tool_argument_bytes": semantic.argument_bytes if approved else 0,
+                                "reasoning_events_discarded": semantic.reasoning_events_discarded,
+                                "elapsed_ms": round(
+                                    (time.perf_counter() - counters.started) * 1000, 3
+                                ),
+                                "max_tokens": payload["max_tokens"],
+                                "input_reserved": input_tokens,
+                                "prompt_byte_components": components,
+                                "schema_capabilities": visible,
+                                "input_estimator": "conservative_utf8_bytes_plus_envelope; no model-specific tokenizer verified",
+                                "usage_status": row["status"] if row else "unknown",
+                                "reported_prompt_tokens": reported_usage.get("prompt_tokens")
+                                if reported_usage is not None
+                                and type(reported_usage.get("prompt_tokens")) is int
+                                else None,
+                                "reported_completion_tokens": reported_usage.get(
+                                    "completion_tokens"
+                                )
+                                if reported_usage is not None
+                                and type(reported_usage.get("completion_tokens")) is int
+                                else None,
+                                "finish_reason": finish_reason,
+                                "accepted_proposals": accepted_proposals,
+                                "rejected_proposals": rejected_proposals,
+                            },
+                        )
 
         return StreamingResponse(relay(), media_type="text/event-stream")
 

@@ -1,3 +1,5 @@
+from provider_fixtures import free_account_response
+
 import json
 
 import httpx
@@ -12,6 +14,7 @@ from pydantic import SecretStr
 
 
 def grant(app):
+    app.state.engine.settings.openrouter_fallback_enabled = True
     if not app.state.engine.settings.openrouter_api_key.get_secret_value():
         app.state.engine.settings.openrouter_api_key = SecretStr("synthetic-offline-credential")
     store = app.state.store
@@ -29,6 +32,8 @@ def test_real_http_policy_no_paid_fallback_or_upstream_error_leak(tmp_path, prov
 
     def upstream(request):
         outbound.append(request)
+        if request.url.path == "/api/v1/key":
+            return free_account_response(request)
         if request.method == "GET":
             return httpx.Response(
                 200, json={"data": [{"id": MODEL, "pricing": {"prompt": "0", "completion": "0"}}]}
@@ -53,8 +58,12 @@ def test_real_http_policy_no_paid_fallback_or_upstream_error_leak(tmp_path, prov
         )
         assert response.status_code == 503
         assert "private" not in response.text
-        assert len(outbound) == 2
-        sent = json.loads(outbound[1].content)
+        assert [request.url.path for request in outbound] == [
+            "/api/v1/models",
+            "/api/v1/key",
+            "/api/v1/chat/completions",
+        ]
+        sent = json.loads(outbound[2].content)
         assert sent["model"] == MODEL and "models" not in sent and "plugins" not in sent
         assert app.state.engine.provider_error.code == (
             "quota_exhausted" if provider_status == 429 else "provider_rejected"

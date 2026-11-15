@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     monthly_paid_budget_usd: Literal[0] = 0
     # Deployment policy may lower a route's call budget, never increase it.
     model_call_cap: int = Field(default=6, ge=1, le=6)
+    # Optional fallback only; a stored key never opts the user in.
+    openrouter_fallback_enabled: bool = False
     openrouter_api_key: SecretStr = SecretStr("")
     gemini_api_key: SecretStr = SecretStr("")
     groq_api_key: SecretStr = SecretStr("")
@@ -30,6 +32,7 @@ class Settings(BaseSettings):
     delegation_enabled: bool = False
     local_tools_enabled: bool = False
     workspace_tools_enabled: bool = False
+    project_read_enabled: bool = False
     workspace_root: Path | None = None
     # Public web research is off until the user enables the allowlisted fetcher.
     web_research_enabled: bool = False
@@ -38,6 +41,8 @@ class Settings(BaseSettings):
     # Separate standard SDK gate; never inferred from the legacy demo checkbox.
     standard_mcp_enabled: bool = False
     artifact_tools_enabled: bool = False
+    # Experimental provider schema export; native MCP identity/grants are unchanged.
+    typed_tool_schemas_enabled: bool = False
     # No autorun/service install. Only explicit, local read workflows may recover.
     durable_workflows_enabled: bool = False
     local_only_mode: bool = False

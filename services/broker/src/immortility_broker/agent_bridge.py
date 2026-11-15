@@ -42,10 +42,59 @@ class ToolProposal(StrictModel):
     arguments: dict[str, Any]
 
 
-def tool_spec(names: list[str]) -> dict[str, Any]:
+def capability_input(name: str) -> type[StrictModel]:
+    from .capabilities import AddInput, EmptyInput
+    from .artifacts import ReportInput
+    from .research import ResearchInput
+
+    models: dict[str, type[StrictModel]] = {
+        "arithmetic.add.v1": AddInput,
+        "clock.now.v1": EmptyInput,
+        "public.research.v1": ResearchInput,
+        "report.create.v1": ReportInput,
+    }
+    return models[name]
+
+
+def _compact_schema(schema: dict[str, Any]) -> dict[str, Any]:
+    definitions = schema.get("$defs", {})
+
+    def compact(value: Any) -> Any:
+        if isinstance(value, list):
+            return [compact(item) for item in value]
+        if not isinstance(value, dict):
+            return value
+        if "$ref" in value:
+            reference = value["$ref"]
+            if not isinstance(reference, str) or not reference.startswith("#/$defs/"):
+                raise BrokerError("tool_denied", "Unreviewed schema reference.", 403)
+            target = definitions.get(reference.removeprefix("#/$defs/"))
+            if not isinstance(target, dict):
+                raise BrokerError("tool_denied", "Unresolved schema reference.", 403)
+            resolved = compact(target)
+            siblings = compact({key: child for key, child in value.items() if key != "$ref"})
+            # JSON Schema reference siblings also constrain the instance. Merging
+            # dictionaries could overwrite either constraint and weaken the schema.
+            return {"allOf": [resolved, siblings]} if siblings else resolved
+        return {
+            key: (
+                {name: compact(item) for name, item in child.items()}
+                if key == "properties"
+                else compact(child)
+            )
+            for key, child in value.items()
+            if key not in {"title", "description", "default", "$defs"}
+        }
+
+    result = compact(schema)
+    assert isinstance(result, dict)
+    return result
+
+
+def tool_spec(names: list[str], *, typed: bool = False) -> dict[str, Any]:
     if not names or not set(names) <= APPROVED_CAPABILITIES:
         raise BrokerError("tool_denied", "No approved broker tool scope.", 403)
-    return {
+    result: dict[str, Any] = {
         "type": "function",
         "function": {
             "name": TOOL_NAME,
@@ -61,6 +110,23 @@ def tool_spec(names: list[str]) -> dict[str, Any]:
             },
         },
     }
+    if typed:
+        branches = [
+            {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["capability", "arguments"],
+                "properties": {
+                    "capability": {"type": "string", "const": name},
+                    "arguments": _compact_schema(capability_input(name).model_json_schema()),
+                },
+            }
+            for name in sorted(set(names))
+        ]
+        result["function"]["parameters"] = (
+            branches[0] if len(branches) == 1 else {"type": "object", "oneOf": branches}
+        )
+    return result
 
 
 def validate_calls(calls: Any, names: list[str]) -> list[dict[str, Any]]:
@@ -100,6 +166,8 @@ def validate_calls(calls: Any, names: list[str]) -> list[dict[str, Any]]:
             reason = "capability_scope"
             if proposal.capability not in names or proposal.capability not in APPROVED_CAPABILITIES:
                 raise ValueError
+            reason = "capability_arguments"
+            capability_input(proposal.capability).model_validate(proposal.arguments, strict=True)
             ids.add(ident)
             clean.append(
                 {
@@ -118,10 +186,62 @@ def validate_calls(calls: Any, names: list[str]) -> list[dict[str, Any]]:
     return clean
 
 
-def bridge_messages(messages: list[Any], names: list[str]) -> list[dict[str, Any]]:
+def compact_broker_tool_text(text: str, capability: str) -> str:
+    """Remove only the pinned MCP JSON-string envelope; retain its trust warning.
+
+    This changes presentation of an already paired tool result, never model
+    arguments, permissions, verification authority, source IDs or call IDs.
+    """
+    prefix = f'<untrusted_tool_result source="{TOOL_NAME}">\n'
+    suffix = "\n</untrusted_tool_result>"
+    if not text.startswith(prefix) or not text.endswith(suffix):
+        return text
+    warning, separator, raw = text[len(prefix) : -len(suffix)].partition("\n\n")
+    if not separator:
+        return text
+    try:
+        envelope = json.loads(
+            raw,
+            object_pairs_hook=_unique_object,
+            parse_constant=_nonfinite,
+            parse_float=_finite_float,
+        )
+        if (
+            not isinstance(envelope, dict)
+            or set(envelope) != {"result"}
+            or not isinstance(envelope["result"], str)
+        ):
+            return text
+        result = json.loads(
+            envelope["result"],
+            object_pairs_hook=_unique_object,
+            parse_constant=_nonfinite,
+            parse_float=_finite_float,
+        )
+        if (
+            not isinstance(result, dict)
+            or set(result) != {"capability", "result", "verified", "source_trust"}
+            or result["capability"] != capability
+            or result["verified"] is not True
+            or result["source_trust"] != "untrusted-data"
+        ):
+            return text
+        encoded = json.dumps(result, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+        encoded = re.sub(
+            "untrusted_tool_result", "untrusted-tool-result", encoded, flags=re.IGNORECASE
+        )
+        compact = prefix + warning + "\n\n" + encoded + suffix
+        return compact if len(compact.encode()) < len(text.encode()) else text
+    except (ValueError, TypeError, RecursionError):
+        return text
+
+
+def bridge_messages(
+    messages: list[Any], names: list[str], *, compact_results: bool = False
+) -> list[dict[str, Any]]:
     """Accept only matching tool-call/result pairs in a bounded Hermes transcript."""
     clean: list[dict[str, Any]] = []
-    pending: set[str] = set()
+    pending: dict[str, str] = {}
     for message in messages:
         if not isinstance(message, dict):
             raise BrokerError("tool_denied", "Invalid tool conversation.", 403)
@@ -130,13 +250,18 @@ def bridge_messages(messages: list[Any], names: list[str]) -> list[dict[str, Any
             if pending or text is not None and not isinstance(text, str):
                 raise BrokerError("tool_denied", "Unresolved tool batch.", 403)
             calls = validate_calls(message["tool_calls"], names)
-            pending = {call["id"] for call in calls}
+            pending = {
+                call["id"]: json.loads(call["function"]["arguments"])["capability"]
+                for call in calls
+            }
             clean.append({"role": role, "content": text or "", "tool_calls": calls})
         elif role == "tool":
             ident = message.get("tool_call_id")
             if ident not in pending or not isinstance(text, str) or len(text.encode()) > 64000:
                 raise BrokerError("tool_denied", "Unmatched or oversized tool result.", 403)
-            pending.remove(ident)
+            capability = pending.pop(ident)
+            if compact_results:
+                text = compact_broker_tool_text(text, capability)
             clean.append({"role": role, "content": text, "tool_call_id": ident})
         elif (
             role in {"system", "user", "assistant"}

@@ -13,6 +13,7 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/"services/broker/src"))
 from immortility_broker import hermes as hermes_module
+from immortility_broker.evidence import write_engineering_evidence, implementation_provenance, engineering_output_path
 
 spec = importlib.util.spec_from_file_location("report_smoke", ROOT/"scripts/smoke-research-report.py")
 smoke = importlib.util.module_from_spec(spec)
@@ -83,8 +84,7 @@ async def sample():
     hermes_module.Hermes.send, hermes_module.Hermes.frames = send, frames
     hermes_module.reap, smoke.httpx.MockTransport = reap, Transport
     try:
-        await smoke.main(public_sources=False, live=False)
-        result = json.loads((ROOT/"docs/implementation/M2_REPORT_OFFLINE_SMOKE.json").read_text())
+        result = await smoke.main(public_sources=False, live=False)
         path = Path(result["directory"]).resolve()
         assert path.is_relative_to((ROOT/".cache/report-workflows").resolve())
         receipt = json.loads((path/"receipt.json").read_text())
@@ -100,7 +100,8 @@ async def sample():
         hermes_module.reap, smoke.httpx.MockTransport = original_reap, original_transport
 
 
-async def main(samples):
+async def main(samples,output):
+    output=engineering_output_path('report-workflow-benchmark',output)
     out=ROOT/"docs/implementation"
     before=out/"M3_HARDENING_REPORT_BEFORE.json"
     if not before.exists():
@@ -116,11 +117,15 @@ async def main(samples):
         "cold_warm":"Fresh Hermes/MCP/report workers per task; shared warm broker imports after first sample; OS caches uncontrolled",
         "resource_units":"Owned Windows job CPU seconds and peak private commit bytes, not physical RSS/VRAM",
         "cloud_calls":0,"source_sha256":{name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in ['scripts/smoke-research-report.py','integrations/artifacts/report_worker.py']}}
-    (out/"M3_REPORT_PHASE_BENCHMARK.json").write_text(json.dumps(record,indent=2)+'\n')
+    record['implementation']=implementation_provenance()
+    saved=write_engineering_evidence(record,'report-workflow-benchmark',output)
+    record['evidence_path']=str(saved)
     print(json.dumps({"samples":len(rows),"successes":sum(r["status"]=="passed" for r in rows),"p50_ms":record["p50_ms"],"p95_nearest_rank_ms":record["p95_nearest_rank_ms"],"cloud_calls":0}))
 
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
     parser.add_argument('--samples',type=int,choices=range(5,11),default=5)
-    asyncio.run(main(parser.parse_args().samples))
+    parser.add_argument('--output',type=Path)
+    args=parser.parse_args()
+    asyncio.run(main(args.samples,args.output))

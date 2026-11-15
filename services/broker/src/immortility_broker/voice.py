@@ -119,6 +119,8 @@ class VoiceService:
         store: Store,
         admit: Callable[[TaskRequest], Awaitable[dict[str, Any]]],
         cancel_task: Callable[[str], Awaitable[None]],
+        *,
+        on_state_change: Callable[[], None] | None = None,
     ):
         self.settings, self.store, self.admit, self.cancel_task = (
             settings,
@@ -126,7 +128,8 @@ class VoiceService:
             admit,
             cancel_task,
         )
-        self.state: VoiceState = "IDLE"
+        self._state: VoiceState = "IDLE"
+        self.on_state_change = on_state_change
         self.models = settings.data_dir / "models"
         self.level = 0.0
         self.error: str | None = None
@@ -174,6 +177,17 @@ class VoiceService:
                 and (path / ".voice-capture").is_file()
             ):
                 shutil.rmtree(path)
+
+    @property
+    def state(self) -> VoiceState:
+        return self._state
+
+    @state.setter
+    def state(self, state: VoiceState) -> None:
+        if state != self._state:
+            self._state = state
+            if self.on_state_change is not None:
+                self.on_state_change()
 
     def transition(self, state: VoiceState) -> None:
         if state not in TRANSITIONS[self.state]:

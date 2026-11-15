@@ -39,6 +39,8 @@ async def main(live=False):
 
     def provider(request):
         nonlocal evidence_seen
+        if request.url.path == "/api/v1/key":
+            return httpx.Response(200,json={"data":{"free_model_daily_requests":{"limit":50,"used":0,"remaining":50}}})
         if request.method == "GET":
             return httpx.Response(200, json={"data": [{"id": MODEL, "pricing": {"prompt": "0", "completion": "0"}}]})
         body = json.loads(request.content)
@@ -71,14 +73,14 @@ async def main(live=False):
                 if len(calls) == 2:
                     evidence_seen = any('62' in m.get("content", "") and "arithmetic.add.v1" in m.get("content", "") for m in body["messages"] if m.get("role") == "tool")
             else:
-                assert request.method == "GET" and request.url.path == "/api/v1/models"
+                assert request.method == "GET" and request.url.path in {"/api/v1/models", "/api/v1/key"}
             return await self.transport.handle_async_request(request)
 
         async def aclose(self):
             await self.transport.aclose()
 
     with tempfile.TemporaryDirectory(prefix="agent-bridge-", dir=ROOT / ".cache") as folder:
-        settings = Settings(_env_file=None, data_dir=Path(folder), openrouter_api_key=SecretStr("offline-fixture"), local_tools_enabled=not live, standard_mcp_enabled=live, model_call_cap=2)
+        settings = Settings(_env_file=None, data_dir=Path(folder), openrouter_fallback_enabled=True, openrouter_api_key=SecretStr("offline-fixture"), local_tools_enabled=not live, standard_mcp_enabled=live, model_call_cap=2)
         if live:
             from immortility_broker.secrets import CredentialManager
             key = CredentialManager(provider="openrouter").read()

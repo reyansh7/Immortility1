@@ -63,7 +63,11 @@ async def verify_catalog(client: httpx.AsyncClient) -> None:
 
 
 def inference_payload(
-    body: dict[str, Any], *, approved_capabilities: list[str] | None = None
+    body: dict[str, Any],
+    *,
+    approved_capabilities: list[str] | None = None,
+    typed_tools: bool = False,
+    schema_capabilities: list[str] | None = None,
 ) -> dict[str, Any]:
     if not isinstance(body, dict):
         raise BrokerError("inference_denied", "Invalid inference envelope.", 403)
@@ -90,7 +94,7 @@ def inference_payload(
         ):
             raise BrokerError("tool_denied", "Only the reviewed broker bridge is available.", 403)
         # Rebuild schemas from trusted broker code; never forward arbitrary definitions.
-        clean = bridge_messages(messages, approved_capabilities)
+        clean = bridge_messages(messages, approved_capabilities, compact_results=typed_tools)
         for index, message in enumerate(clean):
             if message["role"] == "system":
                 clean[index] = inference_payload({"model": MODEL, "messages": [message]})[
@@ -100,7 +104,10 @@ def inference_payload(
             {"model": MODEL, "messages": [{"role": "system", "content": ""}]}
         )
         payload["messages"] = clean
-        payload["tools"] = [tool_spec(approved_capabilities)]
+        visible = approved_capabilities if schema_capabilities is None else schema_capabilities
+        if not visible or not set(visible) <= set(approved_capabilities):
+            raise BrokerError("tool_denied", "Provider schema exceeds task scope.", 403)
+        payload["tools"] = [tool_spec(visible, typed=typed_tools)]
         payload["parallel_tool_calls"] = False
         return payload
     clean = []

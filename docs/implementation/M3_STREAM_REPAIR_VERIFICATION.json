@@ -1,0 +1,177 @@
+{
+  "classification": "OFFLINE VERIFIED K-32 semantic buffering / F-04 per-read deadlines; historical live cause remains hypothesis",
+  "pre_fix_600_chunk_regression": {
+    "status": "failed",
+    "error": "provider_stream_failed",
+    "diagnostic": "stream_envelope",
+    "seconds": 2.16,
+    "reproduction": "test_semantic_stream.py::test_many_valid_small_chunks_reach_hermes_without_envelope_overflow[600]"
+  },
+  "focused_after_fix": {
+    "passed": 52,
+    "seconds": 2.83,
+    "files": [
+      "test_provider_stream.py",
+      "test_semantic_stream.py",
+      "test_tool_streams.py",
+      "test_inference_grants.py",
+      "test_usage_ledger.py"
+    ]
+  },
+  "real_pinned_hermes_fragmented_fixture": {
+    "implementation": {
+      "diagnostic_schema_version": "1.0",
+      "captured_at": "2026-11-15T10:28:00.541167+00:00",
+      "git_head": "a2fbdbe47e8664ecf87149470b60732999bf88f6",
+      "working_tree_dirty": true,
+      "source_sha256": {
+        "services/broker/src/immortility_broker/app.py": "7daa161aecc3ea176385cca3173b1f7846e44d3633b216893661a48cb8bba9b9",
+        "services/broker/src/immortility_broker/agent_bridge.py": "d71b731bc0a6b6194688bc82a1bb4bb02572a776af84eab1d86e89e031756cf5",
+        "services/broker/src/immortility_broker/semantic_stream.py": "c6ede6890fe7e8a1b05f2da309b5dd68d2bfb7a9a028d69d6cac6a8cc167b0a6",
+        "services/broker/src/immortility_broker/provider_stream.py": "80ea4bc3ecf4ed3f451cc03d18f07d56b520184a7c7e329e550cc1f286bf3801",
+        "services/broker/src/immortility_broker/policy.py": "4fe5d46ef3c2cf3a05395dc54072dbc59c221b2f416e6970a14303f168f06dbf",
+        "services/broker/src/immortility_broker/ledger.py": "9143eafe876b2729b889aecdcd97dbda8f1fee9603c62eafef5e8a78a0d233d6",
+        "services/broker/src/immortility_broker/providers.py": "4f05771fbe22c405ac543000f2ff9e864060515c235b4c9b37299a46ced2bc60",
+        "services/broker/src/immortility_broker/hermes.py": "737794587fba99db3171499470c2d361f8d8928e9cd43d42a138d93fe44b7dd0",
+        "services/broker/src/immortility_broker/artifacts.py": "f57cd9e6ebccbbb7ec04987bba492739c45c4069c5c9aaed265213ff6db84082",
+        "services/broker/src/immortility_broker/evidence.py": "1a50848a021e47737b0d2bc72968934acbb7b37f5634f85fc2e61165a0838431",
+        "scripts/smoke-research-report.py": "122afb81f67773907e842408439f53b22230d3d431795286b15b4c4d96cece48",
+        "integrations/artifacts/report_worker.py": "1e34bf7d0208ecedef9b876e087d813b356624b2f57ccb281c06b248f6a22165",
+        "integrations/mcp-standard/agent_bridge.py": "7ccd6da1beaadfb193b7896273ac99f6a5e4ae47cd59c3eafd2ce74ae7f90acd",
+        "packages/contracts/schemas/task-request.schema.json": "a1a5b4ed264c5cb9e6a8476011d86ddd7226e34ef53d3da63df1a7eb0769b2bf",
+        "packages/contracts/schemas/event.schema.json": "a9ac826d94fadc7b0a805e23a79a1eece2b8f7e42e4f7a602e68054b8dc9170c",
+        "config/agent-bridge-runtime.json": "812e1f304f8d5277107c80dc9a729ea3ca22f10d3d3af3f5b924425496a0cc1b"
+      },
+      "contract_version": "1.0",
+      "database_schema_version": 4,
+      "python": "3.13.11",
+      "platform": "Windows",
+      "packages": {
+        "httpx": "0.28.1",
+        "pydantic": "2.11.4",
+        "fastapi": "0.162.5"
+      }
+    },
+    "fragmented_fixture": true,
+    "provider_call_diagnostics": [
+      {
+        "name": "provider_call_diagnostics",
+        "diagnostic_schema_version": "1.0",
+        "call_id": "c0dac9e6-eda1-4407-833f-1323a09557f8",
+        "provider": "openrouter",
+        "model": "openrouter/free",
+        "served_model": "openrouter/free",
+        "http_status": 200,
+        "termination": "completed",
+        "provider_error_category": null,
+        "event_count": 602,
+        "read_chunks": 85,
+        "raw_bytes": 347784,
+        "semantic_bytes": 136,
+        "tool_argument_bytes": 136,
+        "reasoning_events_discarded": 600,
+        "elapsed_ms": 32.926,
+        "max_tokens": 2048,
+        "input_reserved": 3887,
+        "usage_status": "reported",
+        "finish_reason": "tool_calls",
+        "accepted_proposals": 1,
+        "rejected_proposals": 0
+      },
+      {
+        "name": "provider_call_diagnostics",
+        "diagnostic_schema_version": "1.0",
+        "call_id": "f3d6c6af-f65a-495e-9d68-4f07ef2ea2a5",
+        "provider": "openrouter",
+        "model": "openrouter/free",
+        "served_model": "openrouter/free",
+        "http_status": 200,
+        "termination": "completed",
+        "provider_error_category": null,
+        "event_count": 602,
+        "read_chunks": 86,
+        "raw_bytes": 349558,
+        "semantic_bytes": 1886,
+        "tool_argument_bytes": 1886,
+        "reasoning_events_discarded": 600,
+        "elapsed_ms": 34.131,
+        "max_tokens": 973,
+        "input_reserved": 6277,
+        "usage_status": "reported",
+        "finish_reason": "tool_calls",
+        "accepted_proposals": 1,
+        "rejected_proposals": 0
+      }
+    ],
+    "status": "passed",
+    "classification": "VERIFIED LOCAL INTEGRATION; synthetic provider selection and draft",
+    "source_transport": "synthetic bytes",
+    "directory": "C:\\Users\\reyan\\OneDrive\\Desktop\\IMMORTILITY\\.cache\\report-workflows\\24d6e33a-a706-4c2c-8a73-1e5c3d038a10\\artifacts\\f2c71686-608b-4a83-bc34-5e8f8d3fef2c",
+    "seconds": 22.827,
+    "cloud_calls": 0,
+    "synthetic_provider_calls": 2,
+    "usage": {
+      "calls": 2,
+      "dispatch_attempts": 2,
+      "not_sent_calls": 0,
+      "pending_reservations": 0,
+      "charged_tokens": 1500,
+      "unknown_calls": 0,
+      "prompt_tokens": 1000,
+      "completion_tokens": 500
+    },
+    "real_gateway_operations": 2,
+    "local_finalization": true,
+    "private_history_canary_absent": true,
+    "source_refs": [
+      {
+        "source_id": "mcp-security",
+        "title": "MCP Security Best Practices",
+        "url": "https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/docs/2026-07-28/tutorials/security/security_best_practices.mdx",
+        "sha256": "640e0d4944424ec3b20897737b2fbb40ef99ffba0c47b2f61b0dbd7821b3cee1",
+        "retrieved_at": "2026-11-15T10:28:12.978485+00:00"
+      },
+      {
+        "source_id": "owasp-mcp",
+        "title": "OWASP MCP Security Cheat Sheet",
+        "url": "https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/MCP_Security_Cheat_Sheet.md",
+        "sha256": "ec2c3a4c86c4b5cf1c3d41bc625b4edc6f69293710f244ed7570e050e4e799c5",
+        "retrieved_at": "2026-11-15T10:28:12.978735+00:00"
+      }
+    ],
+    "artifacts": [
+      {
+        "artifact_id": "report.md",
+        "size": 2370,
+        "sha256": "27dccd00f5abf52f66a81b4b3e9c4881e1a88c49da655d989f55541509228af9",
+        "verification": "reopened"
+      },
+      {
+        "artifact_id": "report.pdf",
+        "size": 2632,
+        "sha256": "aa498fc58417d3144d2fe5da093c5bc005a447d6788d746ec8cb9c6b0f719d2d",
+        "verification": "reopened-and-rendered"
+      }
+    ],
+    "docx_publication": "disabled"
+  },
+  "live_authorization": "consumed; zero new live provider calls",
+  "limits": {
+    "event_bytes": 128000,
+    "semantic_bytes": 128000,
+    "argument_bytes_per_call": 16000,
+    "tool_calls": 4,
+    "events": 32768,
+    "decompressed_transport_bytes": 8000000
+  },
+  "audit_reconciliation": {
+    "F38": "Confirmed current-checkout raw-buffer reproduction and repaired; exact historical live failure not established",
+    "F04": "Per-read deadlines replace scope across yield; consumer-suspension and UTF-8 fixtures pass",
+    "F33_K24": "Stream/tool/call diagnostic categories now captured by smoke; safe per-call stats persisted",
+    "F39": "Current smoke records HEAD/dirty state/source hashes/versions without committing",
+    "SDK_failures": "Intermittent; own unchanged four-test run passed, own fresh pair series 7/10, auditor reports 40/40 in separate scratch environment; neither result proves OneDrive causality",
+    "K05": "Universal tokenizer calibration unresolved for an unpinned virtual route; conservative reservations retained",
+    "K06": "Minimum-proposal headroom guard pending",
+    "K07": "Typed-tool schema expansion must be tested against constrained context before activation"
+  }
+}

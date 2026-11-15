@@ -1,3 +1,5 @@
+from provider_fixtures import free_account_response
+
 import asyncio
 import json
 
@@ -16,6 +18,7 @@ from pydantic import SecretStr
 def grant(app, name):
     # These fixtures use an injected MockTransport, never a real credential.
     app.state.engine.settings.openrouter_api_key = SecretStr("synthetic-offline-credential")
+    app.state.engine.settings.openrouter_fallback_enabled = True
     session = app.state.store.session()["id"]
     task, _ = app.state.store.create(
         TaskRequest(session_id=session, request_id=name, content="synthetic", cloud_consent=True)
@@ -123,6 +126,8 @@ def test_secrets_in_documents_or_prompts_are_denied_without_echo(value):
 
 async def test_transport_error_is_unknown_and_usage_endpoint_contains_no_content(tmp_path):
     def provider(request):
+        if request.url.path == "/api/v1/key":
+            return free_account_response(request)
         if request.method == "GET":
             return httpx.Response(
                 200, json={"data": [{"id": MODEL, "pricing": {"prompt": "0", "completion": "0"}}]}

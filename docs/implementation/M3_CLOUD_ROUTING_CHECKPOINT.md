@@ -1,4 +1,103 @@
-# M2 repair and M3 cloud routing foundation — 2026-11-15
+# M3 hardening checkpoint — 2026-11-15
+
+## Latest integration and architecture supersession
+
+**M3 release gate remains NOT PASSED / BLOCKED.** Latest user direction excludes OpenRouter and OmniRoute from future engineering/adoption. Default legacy fallback is off. Intended routing is Hermes native routing/fallback with direct Gemini/Groq/NVIDIA APIs, plus optional on-demand Qwen when installed and qualified. No direct production model is currently eligible; default cloud admission is blocked. See `ARCHITECTURE_UPDATE_2026-11-15.md`. Earlier provider/live recommendations below are historical and superseded.
+
+Current complete checks: **425 Python passed (97.74 s), 68 frontend passed (2.30 s), 12 Rust passed (0.91 s)**. Contracts, lint/format (99 Python files), mypy (49 sources), TypeScript/ESLint/Prettier, frontend build (3.02 s), offline native build (1.58 s warm build), secret isolation and whitespace passed. Previous 409/68/12 and 393/63/11 checkpoints are preserved. No SDK deadline/security expectation was relaxed. Main log: `.cache/verification/m3-optional-provider-check-20261115.log` (filename predates exclusion).
+
+**NATIVE VERIFIED, keyless fixture:** 180.009-second task transport with planned disconnect/replay and exactly one completion; separate 95-second silence triggered read-idle recovery at 90.286 seconds followed by explicit cancellation with partial replay. Safe notices identify normalized route, UUID, action reason and native source tag. Early 36-second cancellation remains unpassed history. Settings selection error is visible/recoverable, delayed selection creates one request, task/voice notifications lock controls, and scratch broker crash recovers the stored Manual selection. All owned native/preview/broker children were reaped. No physical voice, real model or general desktop-control acceptance is implied.
+
+**IMPLEMENTED / OFFLINE VERIFIED, typed schema flag OFF:** phase-specific exact capability schemas; strict arguments; paired historical calls retained; bounded excerpts preserve IDs/full local provenance; content-free prompt accounting; compact pinned MCP result shell retaining the full untrusted warning. Two initial typed report budget failures are preserved. Latest local demonstration: **15.763 s**, actual Hermes/MCP/broker research and report operations, Markdown reopened/PDF rendered and read back, two synthetic provider turns, zero cloud calls. Typed output headroom **1,262** conservative units versus its **1,200** floor; model-specific tokenizer/quality remain unverified. Two calls/8,000 tokens unchanged. This demonstration predates final provider exclusion and remains historical compatibility evidence.
+
+**Warm Hermes feasibility, production OFF:** a real canonical gateway completed two sequential named scratch profiles with separate local fixture credentials/history, empty inventories, acknowledged closes and confirmed cleanup. Two positive runs: first-session readiness **9.8519 / 6.7309 s**, second-session readiness **0.7390 / 1.2618 s**. These are two exploratory pairs, not percentile or production speedup evidence. Current-source positive evidence: `.cache/verification/hermes-session-reuse-probe-efcab0c5-8991-43e0-afe7-fea07bc35089.json`. No added permanent process or service; no provider account, inference or tool call. MCP isolation, cancellation/crash and idle-memory qualification remain required before reuse activation.
+
+**Next eligible work:** complete keyless warm-session MCP/credential/cancellation/recovery qualification and direct-provider concrete-model/free-entitlement contracts. Use the existing Store for context; native Hermes delegation for specialists. No replacement gateway or parallel orchestrator. Fresh live acceptance must name a qualified direct provider/model and receive separate authorization. No legacy-provider acceptance will be requested.
+
+## Prior integration evidence (preserved)
+
+**Offline regression gate PASSED. M3 release gate NOT PASSED / BLOCKED.** Current executable evidence is `M3_VERIFICATION.json`. The earlier foundation report is retained below as history; its failure counts and pending-state descriptions are superseded by this section, not erased.
+
+## Implemented and demonstrated repairs
+
+The 600-chunk tool-stream failure was reproduced against the real broker relay before repair. Repeated JSON envelope bytes, rather than actual model output, exhausted the old 128 KB buffer. `semantic_stream.py` now retains bounded content and exact tool metadata/arguments, discards private reasoning, and reuses strict final validation before exposing calls to Hermes. Four-call / 16 KB argument limits, capability identity, grants and completion checks remain. Actual semantic overflow produces `bridge_output_limit`; transport remains separately bounded. The old live failure's exact cause remains unproved because its reason/source evidence was not retained.
+
+`provider_stream.py` no longer leaves an asyncio cancellation scope active while yielding to a consumer. Per-read timing preserves the original absolute deadline. Split UTF-8 and CRLF, truncated events, malformed/deep JSON, provider errors, empty/interleaved fragments, repeated metadata, changed IDs, transport interruption, timeout, cancellation and missing usage have offline coverage. New per-call diagnostics contain bounded categories, counts, timings, status, usage and accepted/rejected proposal totals; no response bodies, private arguments or reasoning. A provider echo of a configured credential in the observed model identifier is withheld. No arbitrary JSON argument repair or identity aliasing was introduced.
+
+Hermes readiness-before-create was reproduced separately: an early verified readiness notice was lost and the prompt never submitted. The adapter now waits for both signals in either order and submits once. Lazy notices do not grant readiness; unexpected tool inventories remain blocked. The existing 70-second frame-read bound now returns `hermes_timeout` instead of leaking an unclassified timeout. Exact process ownership/cleanup remains.
+
+The native event client previously imposed a 100-second total HTTP lifetime despite broker task plans up to 300 seconds. An accelerated real local HTTP fixture reproduced the defect. Task events now use five-second connect and 90-second read-idle bounds with no total HTTP lifetime; proxy and redirect restrictions remain. Healthy bodies can span multiple idle intervals and stalled peers still expire. Broker/SDK/permission/task deadlines are unchanged. This is **OFFLINE VERIFIED**, not a real 100–300-second Windows task acceptance.
+
+Report admission now rejects tasks with less than **826 conservative output reservation units** before preflight, reservation or model dispatch. This is a minimum schema-valid report proposal floor, not calibrated tokenization or a quality guarantee. The actual local short-report demonstration succeeds with second-call `max_tokens=973`. Input reservation remains conservative for an unknown virtual-route tokenizer. Two calls / 8,000 tokens are unchanged; no third drafting request, paid fallback or retries were added.
+
+Engineering smoke/benchmark scripts now validate a new scoped `--output` before operation and create JSON exclusively; defaults are unique cache paths. Evidence contains HEAD, dirty flag, source hashes, schema and package versions. The initial legacy smoke updated `M2_REPORT_OFFLINE_SMOKE.json`; subsequent new evidence uses separate files. Historical failed live/full-run records are intact.
+
+## Exact verification
+
+| Check | Result |
+| --- | --- |
+| `./scripts/check.ps1` | **393 Python passed, 90.85 s; 63 frontend passed, 2.14 s; exit 0** |
+| Contracts, lint, formatting, types | Passed; 91 Python files formatted, mypy 48 sources; TypeScript/ESLint/Prettier passed |
+| Frontend production build | Passed, 2.86 s; existing large avatar chunk warning retained |
+| Final provider/stream/readiness focused run | 92 passed, 7.52 s |
+| Readiness/integrity/firewall focused run | 13 passed, 3.58 s; before-fix ordering and timeout failures retained in the report |
+| Offline Rust tests | **11 passed, 0.91 s**, compile 5.83 s; includes actual HTTP body/idle cases |
+| Offline native application build | Passed, 10.76 s; new binary not interactively retested after event-client change |
+| Current-source Hermes/MCP/research/report | **Passed, 14.394 s**, two 600-fragment synthetic turns, two actual gateway operations, Markdown reopened and PDF rendered/read back, **zero cloud calls** |
+| Fixture scope API integration | Passed, 1.685 s; task creation denied before Engine admission, local mode persisted, provider explanations verified, owned children reaped |
+| Configured-key isolation | Passed; local comparison only; no key values printed or sent |
+| Whitespace / six engineering scripts | `git diff --check` and Python compilation passed |
+
+The full suite includes all four historically failing SDK/arithmetic/workflow paths and the corrected authentication fixtures. This closes the missing clean regression gate, not the startup performance problem. Default standard MCP remains off. SDK timing/grant checks and retry expectations were not relaxed.
+
+Evidence: `M3_HARDENING_OFFLINE_REPORT_FINAL.json`, `M3_HARDENING_ROUTER_BENCHMARK_FINAL.json`, `M3_NATIVE_MODEL_HUB_ACCEPTANCE.json`, `M3_NATIVE_FIXTURE_SCOPE_VERIFICATION.json`; complete check log `.cache/verification/m3-final-check-20261115.log`, hashed in `M3_VERIFICATION.json`.
+
+## Performance and token interpretation
+
+Earlier ten-pair local SDK series: 7/10 fresh process pairs met the unchanged 10-second policy; observed p50 6.763 s / descriptive p95 10.549 s. A transient connection completed 100/100 warmed RPCs, p50 1.43 ms / p95 2.13 ms, about 112 MB peak private job commit. This is not a production persistent-worker implementation. Client/server imports dominate measured startup; manifest validation was roughly 24–137 ms and discovery roughly 1.6–2.9 ms. The auditor's separate 40/40 TEMP series is separate evidence. OneDrive, antivirus or another host process was not established as the cause.
+
+Earlier five-task serial native report series: 5/5, p50 13.113 s / descriptive p95 15.779 s. Hermes/MCP readiness dominates; report dependency import roughly 1.1–1.25 s, construction/readback/rendering tens of milliseconds. Small sample p95 is descriptive, not a population guarantee. The 14.394 s final fragmented run is functional acceptance, not a measured code speedup against the historical 62.776 s sample.
+
+Current router benchmark: 1,000 warm classification/selection samples, p50 **0.052 ms / p95 0.0604 ms**; 1,000 synthetic quality-ranking samples, p50 0.0748 ms / p95 0.0985 ms. No real model quality or cloud latency was measured. Owned-job CPU and private commit from earlier series include exited children/launchers; pre-reap active counts are not leaks. Physical RSS, GPU/VRAM, idle dashboard CPU and live time-to-first-token are unmeasured here.
+
+The final smoke reports **1,500 synthetic fixture tokens**, not calibrated provider consumption. Both model requests are local fixtures; real tool dispatch/artifact construction is not mocked. The historical failed live task remains one call, no tools/files, **6,002 conservative unknown tokens**. Unknown usage is never refunded on an assumed failure. Proved-unsent cancellation is separately tested. Local daily ceilings remain 50 reservations / 100,000 charged-or-reserved tokens per provider, not provider allowances.
+
+## Native Model Hub and provider readiness
+
+**NATIVE VERIFIED subset:** actual existing Tauri controls against a keyless scratch broker/profile/database. Auto/unknown quotas, unavailable local modes, Heretic restart persistence, Manual free-alias warning, exact unavailable concrete fixture selection/restart, acknowledged mode-change clearing of cloud/tool/artifact checkboxes, synthetic task/voice busy guards and idle recovery were observed. Same-value Auto reselection did not add another POST. Native initial-error/reconnect recovery was observed. No real model, physical audio, screen capture or user database was used; owned fixture processes were reaped.
+
+Rapid overlapping distinct selections, real unavailable-provider inference presentation and long-running native stream/reconnect remain pending. The frontend's 15-second health poll can delay the visible busy state; server guards remain immediate. The header can conflate missing Hermes with disconnection. New event-client code is Rust-verified; the earlier native interaction binary/hash is recorded separately. Do not label the whole matrix complete.
+
+Only preserved `openrouter/free` can dispatch through existing fresh price and outbound zero-price checks. Groq/Gemini/NVIDIA remain blocked. Existing Model Hub status strings now identify distinct missing account/model evidence. The official OpenRouter current-key API documents account quota metadata; none was fetched. No verifier was invented around nonexistent account entitlement fields. `M3_PROVIDER_READINESS_2026-11-15.md` records public/protected evidence, expiry/rotation limitations and the separately authorized attestation/product decisions needed where supported billing proof is unavailable.
+
+## Files, security and next steps
+
+Current changed source hashes/list are in `M3_VERIFICATION.json`: broker `app.py`, `artifacts.py`, `hermes.py`, `provider_stream.py`, `providers.py`, new `semantic_stream.py`/`evidence.py`; six stream/provider/evidence/readiness test files; six engineering smoke/benchmark/native fixture scripts; native `src/main.rs`. No dependencies/locks, avatar, voice or dashboard rendering were changed in this continuation. Prior startup instrumentation and transport error improvements remain intact.
+
+Hermes stays primary; Engine/Store remains the sole durable owner, broker remains the permission/credential/provider boundary and SQLite stays v4. Isolated migration/backup/owner/restart tests passed; no production database was migrated or replaced. `%SystemDrive%/` and unrelated work are preserved. No install/download, paid or credential-backed inference, account connection, system configuration, project Git staging/commit/push/reset or destructive cleanup occurred. Existing integrity tests create disposable temporary Git fixtures; the existing vault test uses a uniquely named dummy entry. Configured-key isolation reads local keys only to compare bytes and prints no values. Existing dependency advisory reachability still needs review; a green suite is not a clean security bill.
+
+Next: finish native long-task/reconnect and rapid-selection acceptance; export typed capability schemas with prompt/headroom measurements; qualify a concrete model/context/tokenizer under existing budgets; add documented provider-specific fixtures and feasible account evidence; then prepare fresh public-only live acceptance. Warm worker/Hermes reuse requires scope/account/expiry/cancel isolation tests first. No automatic live retry while the user is away. DOCX publication remains gated; no M4–M8 activation.
+
+Reproduction (new output names required if paths already exist):
+
+```powershell
+& .venv/Scripts/python.exe -m pytest -q services/broker/tests/test_standard_mcp.py::test_real_official_sdk_stdio_discovery_and_call services/broker/tests/test_standard_mcp.py::test_real_broker_local_arithmetic_uses_no_hermes_or_cloud services/broker/tests/test_standard_mcp.py::test_production_admission_allows_local_work_without_provider_or_hermes services/broker/tests/test_workflows.py::test_real_broker_dag_uses_registered_sdk_clock_and_zero_model_calls
+& .venv/Scripts/python.exe -m pytest -q services/broker/tests/test_providers.py services/broker/tests/test_provider_stream.py services/broker/tests/test_tool_streams.py services/broker/tests/test_semantic_stream.py services/broker/tests/test_stream_termination.py services/broker/tests/test_hermes_readiness.py
+& .venv/Scripts/python.exe scripts/smoke-research-report.py --fragmented-fixture
+& .venv/Scripts/python.exe scripts/benchmark-model-router.py
+& ./scripts/check.ps1
+. ./scripts/dev-env.ps1
+cargo test --offline --manifest-path apps/desktop/src-tauri/Cargo.toml
+cargo build --offline --manifest-path apps/desktop/src-tauri/Cargo.toml
+& .venv/Scripts/python.exe scripts/check-secret-isolation.py
+git diff --check
+```
+
+For controlled new performance series, run `benchmark-sdk-startup.py --samples 10` or `benchmark-report-workflow.py --samples 5` serially, with no overlapping heavy work. Neither uses cloud inference. Native scratch UI: `smoke-model-hub-native.py`; its explicit debug fixture never connects accounts or executes model tasks. Do not add `--live-consent`: prior authorization is consumed. A future public report acceptance is at most two model calls/8,000 tokens, reviewed public sources only, local files only, no private data/paid fallback/retry, and requires fresh explicit approval plus prerequisite gates.
+
+---
+
+# Historical M2/M3 foundation checkpoint (superseded, preserved)
 
 ## Scope and preserved architecture
 

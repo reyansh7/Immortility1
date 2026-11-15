@@ -1,0 +1,145 @@
+{
+  "implementation": {
+    "diagnostic_schema_version": "1.0",
+    "captured_at": "2026-11-15T11:13:16.622366+00:00",
+    "git_head": "a2fbdbe47e8664ecf87149470b60732999bf88f6",
+    "working_tree_dirty": true,
+    "source_sha256": {
+      "services/broker/src/immortility_broker/app.py": "adb7674ddf7d38544682e5787ea42d4b6b487fc8ddb16f762462751b7a2c0c8c",
+      "services/broker/src/immortility_broker/agent_bridge.py": "d71b731bc0a6b6194688bc82a1bb4bb02572a776af84eab1d86e89e031756cf5",
+      "services/broker/src/immortility_broker/semantic_stream.py": "612e77042d43fbfc693c84a96d5be3a10e75516497206c6d042a3b8dc1754eb0",
+      "services/broker/src/immortility_broker/provider_stream.py": "7f5aa8168a29b6729e20cadf6d20da28fcbec8cda007c98ce630bdc266a7575d",
+      "services/broker/src/immortility_broker/policy.py": "4fe5d46ef3c2cf3a05395dc54072dbc59c221b2f416e6970a14303f168f06dbf",
+      "services/broker/src/immortility_broker/ledger.py": "9143eafe876b2729b889aecdcd97dbda8f1fee9603c62eafef5e8a78a0d233d6",
+      "services/broker/src/immortility_broker/providers.py": "bf844ab47dbefe7dba01f974eda3fa88049062449808bc305ba40cd2a5a0b831",
+      "services/broker/src/immortility_broker/hermes.py": "601446f2138f72cb5880c0dd564cb6ef6ede84a731790935d78ef41819ab80cc",
+      "services/broker/src/immortility_broker/artifacts.py": "71a8340ca1f9562cfcff5d29bd23c8bf7c9083067de8d579c3b0df7ae4134d74",
+      "services/broker/src/immortility_broker/evidence.py": "e42777a2dce97a6e4c66b1ed0bf2bbdc7082ec33b16c81bdda79c31fd1f2effb",
+      "scripts/smoke-research-report.py": "c945502e4c0bbef58cdb0ab24b1eb0dbbf121a1784e350d9767d8cca605f6c67",
+      "integrations/artifacts/report_worker.py": "1e34bf7d0208ecedef9b876e087d813b356624b2f57ccb281c06b248f6a22165",
+      "integrations/mcp-standard/agent_bridge.py": "7ccd6da1beaadfb193b7896273ac99f6a5e4ae47cd59c3eafd2ce74ae7f90acd",
+      "packages/contracts/schemas/task-request.schema.json": "a1a5b4ed264c5cb9e6a8476011d86ddd7226e34ef53d3da63df1a7eb0769b2bf",
+      "packages/contracts/schemas/event.schema.json": "a9ac826d94fadc7b0a805e23a79a1eece2b8f7e42e4f7a602e68054b8dc9170c",
+      "config/agent-bridge-runtime.json": "812e1f304f8d5277107c80dc9a729ea3ca22f10d3d3af3f5b924425496a0cc1b"
+    },
+    "contract_version": "1.0",
+    "database_schema_version": 4,
+    "python": "3.13.11",
+    "platform": "Windows",
+    "packages": {
+      "httpx": "0.28.1",
+      "pydantic": "2.11.4",
+      "fastapi": "0.162.5"
+    }
+  },
+  "fragmented_fixture": true,
+  "provider_call_diagnostics": [
+    {
+      "name": "provider_call_diagnostics",
+      "diagnostic_schema_version": "1.0",
+      "call_id": "a000ace1-e80c-43b2-99d6-a4842da64ca3",
+      "provider": "openrouter",
+      "model": "openrouter/free",
+      "served_model": "openrouter/free",
+      "http_status": 200,
+      "dispatch_attempted": true,
+      "termination": "completed",
+      "provider_error_category": null,
+      "event_count": 602,
+      "read_chunks": 85,
+      "raw_bytes": 347784,
+      "semantic_bytes": 136,
+      "tool_argument_bytes": 136,
+      "reasoning_events_discarded": 600,
+      "elapsed_ms": 38.953,
+      "max_tokens": 2048,
+      "input_reserved": 3887,
+      "input_estimator": "conservative_utf8_bytes_plus_envelope; no model-specific tokenizer verified",
+      "usage_status": "reported",
+      "reported_prompt_tokens": 500,
+      "reported_completion_tokens": 250,
+      "finish_reason": "tool_calls",
+      "accepted_proposals": 1,
+      "rejected_proposals": 0
+    },
+    {
+      "name": "provider_call_diagnostics",
+      "diagnostic_schema_version": "1.0",
+      "call_id": "0c1bd93f-6795-40cb-b388-534277f6113b",
+      "provider": "openrouter",
+      "model": "openrouter/free",
+      "served_model": "openrouter/free",
+      "http_status": 200,
+      "dispatch_attempted": true,
+      "termination": "completed",
+      "provider_error_category": null,
+      "event_count": 602,
+      "read_chunks": 86,
+      "raw_bytes": 349558,
+      "semantic_bytes": 1886,
+      "tool_argument_bytes": 1886,
+      "reasoning_events_discarded": 600,
+      "elapsed_ms": 51.812,
+      "max_tokens": 973,
+      "input_reserved": 6277,
+      "input_estimator": "conservative_utf8_bytes_plus_envelope; no model-specific tokenizer verified",
+      "usage_status": "reported",
+      "reported_prompt_tokens": 500,
+      "reported_completion_tokens": 250,
+      "finish_reason": "tool_calls",
+      "accepted_proposals": 1,
+      "rejected_proposals": 0
+    }
+  ],
+  "status": "passed",
+  "classification": "VERIFIED LOCAL INTEGRATION; synthetic provider selection and draft",
+  "source_transport": "synthetic bytes",
+  "directory": "C:\\Users\\reyan\\OneDrive\\Desktop\\IMMORTILITY\\.cache\\report-workflows\\f0ecf759-e9d8-461c-a7a6-a8901b246397\\artifacts\\eb3ff7b2-8f43-456a-a88b-fafb5c3ead61",
+  "seconds": 14.394,
+  "cloud_calls": 0,
+  "synthetic_provider_calls": 2,
+  "usage": {
+    "calls": 2,
+    "dispatch_attempts": 2,
+    "not_sent_calls": 0,
+    "pending_reservations": 0,
+    "charged_tokens": 1500,
+    "unknown_calls": 0,
+    "prompt_tokens": 1000,
+    "completion_tokens": 500
+  },
+  "real_gateway_operations": 2,
+  "local_finalization": true,
+  "private_history_canary_absent": true,
+  "source_refs": [
+    {
+      "source_id": "mcp-security",
+      "title": "MCP Security Best Practices",
+      "url": "https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/docs/2026-07-28/tutorials/security/security_best_practices.mdx",
+      "sha256": "640e0d4944424ec3b20897737b2fbb40ef99ffba0c47b2f61b0dbd7821b3cee1",
+      "retrieved_at": "2026-11-15T11:13:27.605130+00:00"
+    },
+    {
+      "source_id": "owasp-mcp",
+      "title": "OWASP MCP Security Cheat Sheet",
+      "url": "https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/MCP_Security_Cheat_Sheet.md",
+      "sha256": "ec2c3a4c86c4b5cf1c3d41bc625b4edc6f69293710f244ed7570e050e4e799c5",
+      "retrieved_at": "2026-11-15T11:13:27.605420+00:00"
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "report.md",
+      "size": 2370,
+      "sha256": "0b26ef2efcb50b8e129653cbb4e24dab513cc74268774210e49e5c94eeadd3be",
+      "verification": "reopened"
+    },
+    {
+      "artifact_id": "report.pdf",
+      "size": 2632,
+      "sha256": "e6ab8496470baf5093d6e383e03bc026b13bd1c3a2b9e88ad70f17537bc01c6c",
+      "verification": "reopened-and-rendered"
+    }
+  ],
+  "docx_publication": "disabled"
+}

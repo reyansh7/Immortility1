@@ -6,6 +6,8 @@ import type { VoiceController } from "./useVoice";
 import { VoiceControls } from "./VoiceControls";
 import { invoke } from "@tauri-apps/api/core";
 import { ModelHub, type ActiveModel } from "./ModelHub";
+import { ProjectInspector } from "./ProjectInspector";
+import type { ModelSelection } from "./contracts.generated";
 
 export interface Health {
   credential_source?: string;
@@ -14,6 +16,8 @@ export interface Health {
   providers: Record<string, string>;
   free_only: boolean;
   active_task: string | null;
+  voice_state?: string;
+  model_selection?: ModelSelection;
   delegation_enabled?: boolean;
   local_tools_enabled?: boolean;
   workspace_tools_enabled?: boolean;
@@ -248,6 +252,8 @@ export interface InterfacePrefs {
 
 export function SettingsPanel({
   health,
+  connected = true,
+  taskBusy = false,
   session,
   voice,
   prefs,
@@ -259,6 +265,8 @@ export function SettingsPanel({
   onModelChange,
 }: {
   health: Health | undefined;
+  connected?: boolean;
+  taskBusy?: boolean;
   session: string;
   voice: VoiceController;
   prefs: InterfacePrefs;
@@ -407,6 +415,7 @@ export function SettingsPanel({
             enabled={health?.workspace_tools_enabled === true}
             onSaved={onRefresh}
           />
+          <ProjectInspector session={session} connected={connected} busy={taskBusy || !!health?.active_task || !["IDLE", "ERROR", "CANCELLED"].includes(health?.voice_state ?? "IDLE")} />
           <LocalTools
             session={session}
             mcp={health?.mcp_enabled === true}
@@ -427,9 +436,14 @@ export function SettingsPanel({
         <>
           <h3>Providers</h3>
           <ModelHub
+            connected={connected}
             activeModel={health?.active_model}
             active={
+              taskBusy ||
               health?.active_task != null ||
+              !["IDLE", "ERROR", "CANCELLED"].includes(
+                health?.voice_state ?? "IDLE",
+              ) ||
               !["IDLE", "ERROR", "CANCELLED"].includes(voice.status.state)
             }
             localOnly={localOnly}

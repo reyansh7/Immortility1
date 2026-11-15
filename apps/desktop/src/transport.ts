@@ -17,7 +17,19 @@ export function operation(
   post: boolean,
 ): { operation: string; id?: string } {
   if (path === "/health/ready" && !post) return { operation: "health" };
+  const runtime = /^\/v1\/runtime\/status(?:\?after=(\d{1,16}))?$/.exec(path);
+  if (
+    runtime &&
+    !post &&
+    (runtime[1] === undefined || Number.isSafeInteger(Number(runtime[1])))
+  )
+    return {
+      operation: "runtime_status",
+      ...(runtime[1] === undefined ? {} : { id: runtime[1] }),
+    };
   if (path === "/v1/models" && !post) return { operation: "model_catalog" };
+  if (path === "/v1/projects/scope" && !post) return { operation: "project_scope" };
+  if (path === "/v1/settings/project" && post) return { operation: "set_project" };
   if (path === "/v1/settings/model-mode" && post)
     return { operation: "set_model_mode" };
   if (path === "/v1/sessions")

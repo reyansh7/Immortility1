@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT / "services/broker/src"))
 from immortility_broker.contracts import BrokerError
 from immortility_broker.process_owner import reap, spawn_owned
 from immortility_broker.standard_mcp import SdkProbe, reviewed_runtime, sdk_request
+from immortility_broker.evidence import write_engineering_evidence, implementation_provenance, engineering_output_path
 
 
 def distribution(values):
@@ -29,7 +30,8 @@ def distribution(values):
     }
 
 
-async def main(samples):
+async def main(samples,output):
+    output=engineering_output_path('sdk-startup-benchmark',output)
     rows = []
     for index in range(samples):
         probe = SdkProbe()
@@ -83,13 +85,15 @@ async def main(samples):
         "metadata_cache_enabled": False,
         "cloud_calls": 0,
     }
-    path = ROOT/"docs/implementation/M3_SDK_PHASE_BENCHMARK.json"
-    path.write_text(json.dumps(record, indent=2)+"\n", encoding="utf-8")
-    print(json.dumps({"evidence":str(path.relative_to(ROOT)),"successes":record["successes"],"samples":samples,"fresh_pair_total":record["fresh_pair_total"]}))
+    record['implementation']=implementation_provenance()
+    path = write_engineering_evidence(record,'sdk-startup-benchmark',output)
+    print(json.dumps({"evidence":str(path),"successes":record["successes"],"samples":samples,"fresh_pair_total":record["fresh_pair_total"]}))
     return 0 if record["successes"] == samples else 1
 
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
     parser.add_argument("--samples", type=int, choices=range(5,21), default=10)
-    raise SystemExit(asyncio.run(main(parser.parse_args().samples)))
+    parser.add_argument('--output',type=Path)
+    args=parser.parse_args()
+    raise SystemExit(asyncio.run(main(args.samples,args.output)))

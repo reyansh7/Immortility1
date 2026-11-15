@@ -1,0 +1,39 @@
+{
+  "status": "NATIVE VERIFIED subset; full native acceptance PARTIAL",
+  "date": "2026-11-15",
+  "scope": "Actual Tauri/WebView2 application, existing controls and real broker/store; isolated keyless fixture and scratch profile/database. UI inputs through Computer Use only.",
+  "binary_sha256_at_interaction": "f30371399787265be2f41e4cbbad51fe2c845aa4c256e8741183b758ececb041",
+  "acceptance_precedes_latest_Rust_idle_read_repair": true,
+  "verified": [
+    "Auto Cloud Primary selected; four missing-credential/blocked provider labels; quotas unknown",
+    "Local Qwen selected and persisted; Local Heretic unavailable/cloud-blocked and restored across native restart",
+    "Manual Cloud showed free-alias variability warning; exact registered unavailable concrete fixture route selected and restored across restart",
+    "Three synthetic cloud/tool/artifact permission checkboxes were enabled in the network-disabled tester and all cleared after acknowledged switch to Auto; no task submitted",
+    "Injected stored running task disabled model controls; injected TRANSCRIBING voice state disabled controls with no active task; idle re-enabled controls",
+    "Reselecting the same Auto value did not add a mode request: scratch counter remained one",
+    "Initial local service failure visible; native reconnect recovered after scratch launcher path repair",
+    "Scratch harness confirmed owned native/broker/preview processes reaped; Computer Use final native window inventory empty"
+  ],
+  "synthetic_not_real": [
+    "Concrete model is unavailable fixture, not a qualified provider",
+    "Busy states injected through fixed scratch controller; no physical audio or real agent task",
+    "Permission checkbox transitions do not authorize or execute any cloud operation"
+  ],
+  "pending": [
+    "Rapid overlapping distinct mode changes",
+    "Real model unavailable/failure presentation and no-fallback operation",
+    "Long-running 100-300 second native stream and reconnect after Rust idle-read repair",
+    "Physical active-voice interaction"
+  ],
+  "limitations": [
+    "Health poll can delay frontend busy-state display by approximately its 15-second interval; broker guards remain immediate",
+    "Header Disconnected coexists with Setup required when Hermes missing; broker connection and runtime readiness presentation are not fully separated"
+  ],
+  "cloud_calls": 0,
+  "provider_credentials_loaded": false,
+  "vault_loaded": false,
+  "private_user_database_touched": false,
+  "screen_capture_by_Immortility": false,
+  "microphone_started": false,
+  "fixture_scope_followup": "M3_NATIVE_FIXTURE_SCOPE_VERIFICATION.json"
+}

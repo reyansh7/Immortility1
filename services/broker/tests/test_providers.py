@@ -33,6 +33,7 @@ def registry(tmp_path):
     settings = Settings(
         _env_file=None,
         data_dir=tmp_path,
+        openrouter_fallback_enabled=True,
         openrouter_api_key=SecretStr("fixture-openrouter"),
         groq_api_key=SecretStr("fixture-groq"),
         gemini_api_key=SecretStr("fixture-gemini"),
@@ -61,6 +62,19 @@ def offer(registry, provider, **overrides):
     )
     values.update(overrides)
     return ModelOffer(**values)
+
+
+def test_model_hub_explains_provider_specific_missing_evidence_without_exposing_credentials(
+    registry,
+):
+    value, _ = registry
+    view = value.view()
+    statuses = {provider["id"]: provider["status"] for provider in view["providers"]}
+    assert "account-plan zero-cost evidence missing" in statuses["groq"]
+    assert "project/model-specific free-tier billing evidence missing" in statuses["gemini"]
+    assert "zero-cost production entitlement missing" in statuses["nvidia"]
+    assert "fresh preflight" in statuses["openrouter"]
+    assert all("fixture-" + provider not in json.dumps(view) for provider in PROVIDERS)
 
 
 @pytest.mark.parametrize("provider", ["groq", "gemini", "nvidia", "openrouter"])
@@ -329,8 +343,11 @@ async def test_broker_task_uses_selected_route_and_shared_accounting(
     sent, verified = [], []
     app = None
 
-    async def fixture_preflight(client, route):
+    async def fixture_preflight(client, route, *, key, minimum_requests, still_authorized):
+        assert key == "fixture-" + route.provider
+        assert minimum_requests == 1 and still_authorized()
         verified.append(route.provider)
+        return 50
 
     monkeypatch.setattr(app_module, "verify_dispatch", fixture_preflight)
 
@@ -396,6 +413,7 @@ async def test_broker_task_uses_selected_route_and_shared_accounting(
     settings = Settings(
         _env_file=None,
         data_dir=tmp_path,
+        openrouter_fallback_enabled=True,
         **{PROVIDERS[provider].credential_field: SecretStr("fixture-" + provider)},
     )
     transport = httpx.AsyncClient(transport=httpx.MockTransport(upstream))

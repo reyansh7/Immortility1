@@ -34,6 +34,27 @@ class ReportInput(StrictModel):
     sections: list[ReportSection] = Field(min_length=2, max_length=5)
 
 
+def minimum_report_output_reservation() -> int:
+    """Conservative headroom for one minimum ASCII proposal, not token calibration.
+
+    500 prose characters, two distinct paragraphs, longest reviewed citation ID,
+    JSON scaffolding, and the existing 64+32 envelope allowance. This is only an
+    admission floor; it cannot guarantee a model produces a complete good report.
+    """
+    draft = ReportInput(
+        title="Report",
+        summary="S" * 80,
+        sections=[
+            ReportSection(
+                heading=heading, paragraphs=[letter * 210], citations=["mcp-authorization"]
+            )
+            for heading, letter in (("One", "A"), ("Two", "B"))
+        ],
+    )
+    proposal = {"capability": "report.create.v1", "arguments": draft.model_dump()}
+    return len(json.dumps(proposal, separators=(",", ":"), ensure_ascii=False).encode()) + 96
+
+
 class ArtifactRef(StrictModel):
     artifact_id: Literal["report.md", "report.pdf"]
     size: int = Field(ge=1, le=8000000)

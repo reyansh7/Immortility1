@@ -2,6 +2,22 @@ import { it, expect, vi } from "vitest";
 import { invoke } from "@tauri-apps/api/core";
 import { connect, operation } from "./transport";
 vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn(), Channel: class {} }));
+it("allows only bounded read-only runtime revision requests", () => {
+  expect(operation("/v1/runtime/status", false)).toEqual({
+    operation: "runtime_status",
+  });
+  expect(operation("/v1/runtime/status?after=12", false)).toEqual({
+    operation: "runtime_status",
+    id: "12",
+  });
+  for (const path of [
+    "/v1/runtime/status?after=-1",
+    "/v1/runtime/status?after=9007199254740992",
+    "/v1/runtime/status?after=../inference",
+  ])
+    expect(() => operation(path, false)).toThrow();
+  expect(() => operation("/v1/runtime/status", true)).toThrow();
+});
 
 it("preserves safe native startup failures as visible recoverable errors", async () => {
   vi.mocked(invoke).mockRejectedValueOnce("Synthetic native startup failure.");

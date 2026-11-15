@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "classification": "real scratch broker HTTP integration; no native UI or inference",
+  "task_submission": "denied before engine admission",
+  "model_selection": "persisted local_qwen",
+  "provider_specific_status": "verified",
+  "cloud_calls": 0,
+  "vault_load": false,
+  "seconds": 1.685,
+  "harness_setup_failure": "Initial ad-hoc environment omitted USERPROFILE: Path.home() failed before broker startup. Corrected to explicit scratch home; production launcher already provides one.",
+  "owned_process_cleanup": "confirmed"
+}

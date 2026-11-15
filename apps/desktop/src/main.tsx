@@ -11,6 +11,7 @@ import {
 import { createRoot } from "react-dom/client";
 import { listen } from "@tauri-apps/api/event";
 import { api, connect, stream, windowAction } from "./transport";
+import { followRuntimeStatus } from "./runtimeStatus";
 import { reduceEvent, terminal, type Task, type Transcript } from "./state";
 import "./style.css";
 import { useVoice } from "./useVoice";
@@ -159,6 +160,7 @@ function App() {
     dragged = useRef(false),
     clickTimer = useRef<number | undefined>(undefined);
   const tasksRef = useRef(tasks);
+  const runtimeModelChoice = useRef<string | undefined>(undefined);
   tasksRef.current = tasks;
   modeRef.current = mode;
   prefsRef.current = prefs;
@@ -393,14 +395,25 @@ function App() {
       void windowAction("collapse")
         .then(() => windowAction(prefsRef.current.pin ? "pin" : "unpin"))
         .catch(() => {});
-    const timer = setInterval(() => {
-      void api<Health>("/health/ready")
-        .then((h) => {
-          setHealth(h);
-          setConnected(true);
-        })
-        .catch(() => setConnected(false));
-    }, 15000);
+    const runtimeController = new AbortController();
+    void followRuntimeStatus(
+      runtimeController.signal,
+      (snapshot) => {
+        const selected = JSON.stringify(snapshot.health.model_selection);
+        if (
+          runtimeModelChoice.current !== undefined &&
+          selected !== runtimeModelChoice.current
+        ) {
+          setConsentState(false);
+          setToolConsent(false);
+          setArtifactConsent(false);
+        }
+        runtimeModelChoice.current = selected;
+        setHealth({ ...snapshot.health, voice_state: snapshot.voice_state });
+        setConnected(true);
+      },
+      () => setConnected(false),
+    );
     const listeners = [
       listen("toggle-chat", () => {
         if (modeRef.current !== "command") void changeMode("chat");
@@ -417,7 +430,7 @@ function App() {
       }),
     ];
     return () => {
-      clearInterval(timer);
+      runtimeController.abort();
       streamAbort.current?.abort();
       for (const pending of listeners)
         void pending.then((unlisten) => unlisten()).catch(() => {});
@@ -609,6 +622,8 @@ function App() {
   const settingsPanel = (
     <SettingsPanel
       health={health}
+      connected={connected}
+      taskBusy={!!active || sending}
       session={session}
       voice={voice}
       prefs={prefs}
@@ -639,7 +654,12 @@ function App() {
       </button>
     </div>
   );
-  const tip = `Immortility · ${faceLabel[face]}. Click for chat, double-click for the command center, right-click for more.`;
+  const stateLabel = !connected
+    ? "Broker disconnected"
+    : !health?.ready && focus?.input.no_cloud !== true
+      ? "Setup required"
+      : faceLabel[face];
+  const tip = `Immortility · ${stateLabel}. Click for chat, double-click for the command center, right-click for more.`;
 
   return (
     <MotionProvider reduced={prefs.reduced}>
@@ -711,8 +731,8 @@ function App() {
               <span
                 className={`state-dot ${face}`}
                 role="status"
-                aria-label={faceLabel[face]}
-                title={faceLabel[face]}
+                aria-label={stateLabel}
+                title={stateLabel}
               />
               <button
                 type="button"
@@ -761,9 +781,7 @@ function App() {
                 </div>
                 <div>
                   <strong>IMMORTILITY</strong>
-                  <small className={`state-text ${face}`}>
-                    {faceLabel[face]}
-                  </small>
+                  <small className={`state-text ${face}`}>{stateLabel}</small>
                 </div>
               </div>
               <div className="header-actions">

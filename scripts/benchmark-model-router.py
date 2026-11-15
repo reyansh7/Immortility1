@@ -1,6 +1,7 @@
 """Measure deterministic routing overhead, never cloud quality or inference latency."""
 
 import json
+import argparse
 import math
 import statistics
 import sys
@@ -14,6 +15,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "services/broker/src"))
 from immortility_broker.config import Settings
 from immortility_broker.contracts import TaskRequest
+from immortility_broker.evidence import (
+    engineering_output_path,
+    write_engineering_evidence,
+    implementation_provenance,
+)
 from immortility_broker.providers import (
     PROVIDERS,
     ModelOffer,
@@ -27,6 +33,9 @@ from immortility_broker.store import Store
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path)
+    output = engineering_output_path("router-benchmark", parser.parse_args().output)
     corpus = [
         ("Hello", [], "none"),
         ("Summarize this sentence", [], "none"),
@@ -135,8 +144,9 @@ def main():
                 "cloud_requests": 0,
                 "dependencies_added": 0,
             }
-            (ROOT / "docs/implementation/M3_ROUTER_BENCHMARK.json").write_text(
-                json.dumps(report, indent=2) + "\n"
+            report["implementation"] = implementation_provenance()
+            report["evidence_path"] = str(
+                write_engineering_evidence(report, "router-benchmark", output)
             )
             print(json.dumps(report))
         finally:

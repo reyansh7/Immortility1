@@ -253,3 +253,24 @@ def input_upper_bound(messages: list[dict[str, str]]) -> int:
     # Free router can choose different tokenizers. UTF-8 byte count is deliberately
     # conservative for text BPE models; include envelope/role special-token allowance.
     return 64 + sum(len(m["content"].encode("utf-8")) + 32 for m in messages)
+
+
+def prompt_byte_components(payload: dict[str, Any]) -> dict[str, int]:
+    """Content-free byte accounting; these counts are not provider token usage."""
+    messages = payload["messages"]
+    result = {
+        role + "_bytes": sum(
+            len((m.get("content") or "").encode()) for m in messages if m["role"] == role
+        )
+        for role in ["system", "user", "assistant", "tool"]
+    }
+    result["tool_schema_bytes"] = (
+        len(json.dumps(payload.get("tools", [])).encode()) if payload.get("tools") else 0
+    )
+    result["tool_history_bytes"] = (
+        sum(len(json.dumps(m.get("tool_calls", [])).encode()) for m in messages)
+        if payload.get("tools")
+        else 0
+    )
+    result["message_envelope_reservation"] = 64 + 32 * len(messages)
+    return result

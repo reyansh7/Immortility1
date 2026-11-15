@@ -1,211 +1,462 @@
 {
   "checkpoint_date": "2026-11-15 Asia/Calcutta",
+  "implementation": {
+    "diagnostic_schema_version": "1.0",
+    "captured_at": "2026-11-15T16:43:14.971388+00:00",
+    "git_head": "a2fbdbe47e8664ecf87149470b60732999bf88f6",
+    "working_tree_dirty": true,
+    "source_sha256": {
+      "services/broker/src/immortility_broker/app.py": "d134375995cbacb3200149ded2bcd286135d933fb8d2eabf781e92c655333ef3",
+      "services/broker/src/immortility_broker/agent_bridge.py": "30aedbeb23682d3bc841f76a244fa7c4ee781838d0535192f0e2ac56d0d6526d",
+      "services/broker/src/immortility_broker/semantic_stream.py": "612e77042d43fbfc693c84a96d5be3a10e75516497206c6d042a3b8dc1754eb0",
+      "services/broker/src/immortility_broker/provider_stream.py": "7f5aa8168a29b6729e20cadf6d20da28fcbec8cda007c98ce630bdc266a7575d",
+      "services/broker/src/immortility_broker/policy.py": "80a855b429cacfcc8b322f93421d2f9ecab36d1010fae92847593ca8a3dbabdb",
+      "services/broker/src/immortility_broker/ledger.py": "82cce2d35ebced154e38b829dabedc3d961b023f24fd0974b76feeb331ad826d",
+      "services/broker/src/immortility_broker/providers.py": "3796f195d330729dcb46a0f013ab72882da0061b451316cd7656b07d60cca5fe",
+      "services/broker/src/immortility_broker/hermes.py": "66319e7e98970d2cfb182af193c4237d4ef1a1b8e726ea336bda5ec5c14f3c8f",
+      "services/broker/src/immortility_broker/artifacts.py": "71a8340ca1f9562cfcff5d29bd23c8bf7c9083067de8d579c3b0df7ae4134d74",
+      "services/broker/src/immortility_broker/evidence.py": "e42777a2dce97a6e4c66b1ed0bf2bbdc7082ec33b16c81bdda79c31fd1f2effb",
+      "scripts/smoke-research-report.py": "7ee6fa1fbeedaeacf784067990d3f5a9f8d02e50262a3fbbc6940713cefaff4f",
+      "integrations/artifacts/report_worker.py": "1e34bf7d0208ecedef9b876e087d813b356624b2f57ccb281c06b248f6a22165",
+      "integrations/mcp-standard/agent_bridge.py": "7ccd6da1beaadfb193b7896273ac99f6a5e4ae47cd59c3eafd2ce74ae7f90acd",
+      "packages/contracts/schemas/task-request.schema.json": "a1a5b4ed264c5cb9e6a8476011d86ddd7226e34ef53d3da63df1a7eb0769b2bf",
+      "packages/contracts/schemas/event.schema.json": "a9ac826d94fadc7b0a805e23a79a1eece2b8f7e42e4f7a602e68054b8dc9170c",
+      "config/agent-bridge-runtime.json": "812e1f304f8d5277107c80dc9a729ea3ca22f10d3d3af3f5b924425496a0cc1b"
+    },
+    "contract_version": "1.0",
+    "database_schema_version": 4,
+    "python": "3.13.11",
+    "platform": "Windows",
+    "packages": {
+      "httpx": "0.28.1",
+      "pydantic": "2.11.4",
+      "fastapi": "0.162.5"
+    }
+  },
   "milestone_status": {
-    "M2_compatibility": "IMPLEMENTED / OFFLINE VERIFIED; live acceptance BLOCKED",
-    "M3A_M3B": "IMPLEMENTED / OFFLINE VERIFIED foundation; not production multi-provider activation",
-    "overall_regression": "BLOCKED by four fixed SDK startup/arithmetic/workflow paths",
-    "native_interactive_model_hub": "PENDING",
-    "DOCX_publication": "DISABLED"
+    "offline_regression": "PASSED: 425 Python / 68 frontend / 12 Rust; builds/static/security passed",
+    "M3_release": "BLOCKED: direct concrete-model/account/stream qualification and separately authorized real-model tool execution",
+    "K32_F38": "IMPLEMENTED / OFFLINE VERIFIED with real pinned Hermes and synthetic 600-fragment turns",
+    "F04": "IMPLEMENTED / OFFLINE VERIFIED; per-read scopes, strict UTF-8 and finite transport limits",
+    "K24_F33_F39": "IMPLEMENTED / OFFLINE VERIFIED; safe termination statistics, all smoke failure categories, dirty-source hashes",
+    "K12_F14": "NATIVE VERIFIED with keyless 180-second completion/replay and 95-second silent-peer recovery/cancellation",
+    "K13_F15": "IMPLEMENTED / OFFLINE VERIFIED; both readiness orders, lazy notice, exact-once submit, unexpected-tool denial and timeout category",
+    "runtime_notifications": "IMPLEMENTED / OFFLINE VERIFIED / NATIVE VERIFIED in keyless fixture",
+    "Model_Hub_error_recovery": "NATIVE VERIFIED with injected failure and explicit retry; no inference",
+    "typed_capability_schemas": "IMPLEMENTED / OFFLINE VERIFIED, experimental default OFF",
+    "warm_Hermes": "OFFLINE feasibility only: two sequential scratch profiles; production reuse OFF"
   },
   "checks": {
     "scripts/check.ps1": {
-      "status": "failed",
-      "python_passed": 348,
-      "python_failed": 8,
-      "python_seconds": 411.71,
-      "note": "Four newly added health-visibility fixture failures omitted authentication; corrected and all four pass in the subsequent focused suite. Four SDK failures remain. Script stopped before its later checks. No full-suite pass claimed.",
-      "details": "M3_FULL_RUN_SLOW_FAILURE.json"
-    },
-    "focused_python": {
       "status": "passed",
-      "tests": 94,
-      "seconds": 94.66,
-      "command": ".venv/Scripts/python.exe -m pytest -q services/broker/tests/test_providers.py services/broker/tests/test_provider_stream.py services/broker/tests/test_tool_streams.py services/broker/tests/test_inference_grants.py services/broker/tests/test_reports.py services/broker/tests/test_usage_ledger.py",
-      "cloud_calls": 0
+      "exit_code": 0,
+      "python_tests": 425,
+      "python_seconds": 97.74,
+      "frontend_tests": 68,
+      "frontend_seconds": 2.3,
+      "mypy_sources": 49,
+      "python_format_files": 99,
+      "frontend_build_seconds": 3.02,
+      "contracts_lint_format_types": "passed",
+      "includes_original_four_SDK_failures": true,
+      "log": ".cache/verification/m3-optional-provider-check-20261115.log",
+      "log_sha256": "7e57337feeeb0822750484cf4b219fefd0f50e62e2efd38ecec7e6338d0df817",
+      "revision_note": "A type-narrowing assertion and provider-neutral status copy were completed during this gate; final source policy/rotation cases separately passed 22/22 afterwards. Engineering warm probe has separate executable evidence."
     },
-    "python_lint": "passed: .venv/Scripts/ruff.exe check services/broker services/tts",
-    "python_format": "passed: .venv/Scripts/ruff.exe format --check services/broker services/tts (84 files)",
-    "python_typing": {
+    "rust_tests": {
       "status": "passed",
-      "sources": 46,
-      "command": ".venv/Scripts/mypy.exe services/broker/src"
+      "tests": 12,
+      "seconds": 0.91,
+      "build_seconds": 1.58,
+      "build_timing": "warm offline build, not startup latency",
+      "command": ". ./scripts/dev-env.ps1; cargo test --offline --manifest-path apps/desktop/src-tauri/Cargo.toml; cargo build --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
     },
-    "contracts": "passed: scripts/validate-blueprint.py and scripts/generate-contracts.py --check",
-    "frontend_check": "passed: pnpm check (TypeScript, ESLint, Prettier)",
-    "frontend_tests": {
+    "stream_failure_and_evidence_tests": {
+      "passed": 10,
+      "seconds": 2.68
+    },
+    "minimum_report_headroom_and_stream_checks": {
+      "passed": 17,
+      "seconds": 2.04,
+      "minimum_output_reservation": 826,
+      "tokenizer_calibrated": false
+    },
+    "provider_stream_readiness_focused": {
+      "passed": 92,
+      "seconds": 7.52
+    },
+    "readiness_integrity_firewall": {
+      "passed": 13,
+      "seconds": 3.58,
+      "before_fix": "2 failed / 1 passed: readiness-first did not submit; raw TimeoutError escaped"
+    },
+    "security": {
       "status": "passed",
-      "tests": 62,
-      "files": 11,
-      "seconds": 9.21,
-      "command": "pnpm test"
+      "configured_key_isolation": true,
+      "git_diff_check": true,
+      "engineering_scripts_compile": true,
+      "warm_probe_lint": "passed with intentional sys.path/import E402 exception",
+      "protected_account_requests": 0,
+      "cloud_model_requests": 0
     },
-    "frontend_build": {
+    "source_and_history_integrity": "passed: recorded source hashes match; project HEAD unchanged; failed live and full-run evidence have no Git diff",
+    "final_policy_focus": {
       "status": "passed",
-      "seconds": 21.14,
-      "command": "pnpm build"
-    },
-    "rust_unit_tests": {
-      "status": "passed",
-      "tests": 9,
-      "scope": "Same native source revision in this slice; not interactive GUI acceptance",
-      "command": ". ./scripts/dev-env.ps1; cargo test --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
-    },
-    "configured_key_source_bundle_docs_config_scan": "passed",
-    "git_diff_check": "passed; existing LF/CRLF warnings only"
+      "tests": 22,
+      "seconds": 2.46,
+      "log": ".cache/verification/m3-final-policy-focus-20261115.log"
+    }
   },
   "acceptance": {
-    "real_native_hermes_report_synthetic_inference": {
-      "status": "passed",
-      "seconds": 62.776,
-      "cloud_calls": 0,
+    "native_model_hub": {
+      "status": "NATIVE VERIFIED in keyless scratch fixture",
+      "cases": [
+        "stored mode/pin/restart",
+        "task/voice notification locks",
+        "one delayed selection request",
+        "visible failure and explicit retry",
+        "disconnection locks and broker crash recovery",
+        "consent invalidation"
+      ],
+      "real_model_and_physical_voice": "not verified"
+    },
+    "native_events": {
+      "status": "NATIVE VERIFIED, synthetic events and real Store/native transport",
+      "completed_seconds": 180.009,
+      "unique_ticks": 36,
+      "completion_count": 1,
+      "idle_recovery_seconds": 90.286,
+      "silent_fixture_seconds": 95,
+      "explicit_cancellation": "one cancelled Store transition, no false completion, partial text preserved",
+      "early_interrupted_case": "preserved, not counted as timeout acceptance"
+    },
+    "typed_report": {
+      "status": "OFFLINE VERIFIED; experimental flag OFF; predates final provider exclusion",
+      "seconds": 15.763,
+      "actual_gateway_operations": 2,
       "synthetic_provider_turns": 2,
-      "real_gateway_operations": 2,
-      "editable_markdown": "reopened",
-      "PDF": "reopened-and-rendered",
-      "source_transport": "synthetic bytes",
-      "evidence": "M2_REPORT_OFFLINE_SMOKE.json"
+      "cloud_calls": 0,
+      "markdown": "reopened",
+      "pdf": "rendered/read back",
+      "draft_input_reservation": 5988,
+      "draft_output_reservation": 1262,
+      "experimental_floor": 1200,
+      "tokenizer_and_real_quality": "unverified",
+      "initial_budget_failures_preserved": true
     },
-    "authorized_live_report": {
-      "status": "failed / authorization consumed",
-      "provider_calls": 1,
-      "tool_dispatches": 0,
-      "artifacts": 0,
-      "reported_token_usage": null,
-      "conservative_unknown_token_charge": 6002,
-      "retry": false,
-      "paid_fallback": false,
-      "failure": "provider_stream_failed; exact cause not established",
-      "new_stream_categories_added_after_this_attempt": true,
-      "evidence": "M2_REPORT_LIVE_SMOKE.json"
+    "warm_Hermes": {
+      "status": "OFFLINE feasibility only; production OFF",
+      "positive_runs": 2,
+      "profiles_per_run": 2,
+      "current_source_phases": [
+        {
+          "profile": "first",
+          "ready_seconds": 6.7309,
+          "total_with_close_seconds": 8.6195
+        },
+        {
+          "profile": "second",
+          "ready_seconds": 1.2618,
+          "total_with_close_seconds": 1.498
+        }
+      ],
+      "credential_and_history_isolation": "passed for sequential text profiles",
+      "empty_tool_inventory": true,
+      "synthetic_fault_cleanup": "expected failure preserved; cleanup assertion passed",
+      "cloud_calls": 0,
+      "tool_calls": 0,
+      "limitations": [
+        "No MCP/tool profile isolation proof",
+        "No cancellation/crash/concurrent-session acceptance",
+        "No production credential or user context",
+        "No idle RAM or sustained throughput acceptance"
+      ],
+      "percentiles_or_production_speedup": "not established"
     },
-    "SDK_startup_diagnostic": {
-      "status": "measured local protocol success outside production deadline",
-      "seconds": 10.684,
-      "samples": 1,
-      "production_deadline_seconds": 10,
-      "production_timers_changed": false,
-      "evidence": "M3_MCP_STARTUP_DIAGNOSTIC.json"
+    "live": {
+      "status": "BLOCKED",
+      "new_provider_calls": 0,
+      "previous_authorization": "consumed",
+      "historical_unknown_charge": 6002,
+      "no_legacy_provider_acceptance_planned": true
+    }
+  },
+  "resources": {
+    "SDK_series": "M3_SDK_PHASE_BENCHMARK.json: 7/10 fresh pairs, 100/100 warm invocations; original 10 s limit retained",
+    "report_series": "M3_REPORT_PHASE_BENCHMARK.json: 5/5, p50 13112.829 ms, descriptive p95 15779.417 ms; zero cloud calls",
+    "auditor_scratch": "Reported 40/40 SDK and 363 tests with vault test deselected; external evidence, not our rerun",
+    "OneDrive_causality": "unproven",
+    "RAM_metric": "peak owned-job private committed bytes; not RSS/VRAM",
+    "final_router": {
+      "evidence": "M3_HARDENING_ROUTER_BENCHMARK_FINAL.json",
+      "warm_classification": {
+        "n": 1000,
+        "p50_ms": 0.052,
+        "p95_ms": 0.0604,
+        "max_ms": 0.2372
+      },
+      "warm_quality_ranking": {
+        "n": 1000,
+        "p50_ms": 0.0748,
+        "p95_ms": 0.0985,
+        "max_ms": 0.2705
+      },
+      "quality_or_cloud_latency": "not measured"
+    },
+    "final_fragmented_report": "14.394 s functional check, not a new controlled latency series or proven speedup",
+    "integration_idle_observation": {
+      "samples": 5,
+      "wall_seconds": 20.938719,
+      "processes": 11,
+      "cpu_percent_one_logical_core": 6.044,
+      "cpu_percent_machine_16_logical_cores_approx": 0.378,
+      "max_summed_working_set_bytes": 808640512,
+      "max_summed_private_bytes": 490008576,
+      "windows_owned_pid_gpu_dedicated_bytes": 23339008,
+      "limitations": "Historical compact-idle fixture before final notification bundle; shared RSS may be double-counted; not UI-only RAM, GPU utilization, NVIDIA-only VRAM, before/after proof or ten-minute soak"
     }
   },
   "providers": {
-    "openrouter": "Existing virtual free route only; fresh zero-price check before every dispatch; current report live acceptance failed. No paid fallback.",
-    "groq": "Fixed compatible transport OFFLINE VERIFIED; production BLOCKED pending account/model zero-cost verifier.",
-    "gemini": "Fixed compatible transport OFFLINE VERIFIED; production BLOCKED pending project/account zero-cost verifier.",
-    "nvidia": "Fixed compatible transport OFFLINE VERIFIED; production BLOCKED pending account/model zero-cost verifier."
+    "gemini": "Direct compatible adapter OFFLINE VERIFIED; production BLOCKED pending concrete-model/account/zero-cost/tool-stream qualification",
+    "groq": "Direct compatible adapter OFFLINE VERIFIED; production BLOCKED pending concrete-model/account/zero-cost/tool-stream qualification",
+    "nvidia": "Direct compatible adapter OFFLINE VERIFIED; production BLOCKED pending concrete-model/account/zero-cost/tool-stream qualification",
+    "openrouter": "EXCLUDED from forward architecture; historical compatibility code retained and default fallback OFF; no further qualification/benchmark/activation planned",
+    "omniroute": "EXCLUDED; not installed or benchmarked",
+    "local_qwen": "Optional on-demand policy; not installed or activated"
   },
-  "routing": {
-    "owner": "broker registry via keyless native Hermes-compatible proxy",
-    "classify": "deterministic local rules",
-    "rank": "verified task outcomes then p95 over latest 100 qualifying observations; at least three observations for measured branch",
-    "same_task_retry_or_provider_fallback": false,
-    "manual_free_alias": "Pins route, not underlying model",
-    "multimodal": "metadata/filter contract only; no vision inference enabled"
-  },
-  "budgets": {
-    "report_max_external_calls": 2,
-    "report_max_total_tokens": 8000,
-    "lower_user_caps_preserved": true,
-    "local_provider_daily_reservation_ceiling": 50,
-    "local_provider_daily_token_ceiling": 100000,
-    "provider_quota_claim": false,
-    "unknown_usage": "Conservatively charged; distinct from reported usage and proved-unsent reservations."
-  },
-  "benchmarks": {
-    "evidence": "M3_ROUTER_BENCHMARK.json",
-    "warm_routing_samples": 1000,
-    "warm_p95_ms": 0.081,
-    "quality_ranking_fixture_p95_ms": 0.1661,
-    "cold_store_registry_ms_n1": 26.278,
-    "model_quality_or_cloud_latency_measured": false,
-    "idle_CPU_RAM_VRAM_peaks": "unmeasured"
-  },
-  "security": {
-    "keys_sent_to_frontend": false,
-    "new_private_uploads": false,
-    "new_privileged_external_tools_enabled": false,
-    "new_dependencies_or_model_downloads": false,
-    "new_accounts_connected": false,
-    "system_settings_changed": false,
-    "unrelated_processes_terminated": false,
-    "hermes_primary": true,
-    "broker_boundary_preserved": true,
-    "single_store_owner": true,
+  "preserved_boundaries": {
+    "Hermes_primary": true,
+    "broker_sole_permission_boundary": true,
+    "Engine_Store_single_owner": true,
     "schema_version": 4,
-    "migration": "Consistent v3 backup; downgrade denial; tested on isolated databases only",
-    "new_license_dependency_inventory": "unchanged; no upstream code vendored",
-    "existing_hermes_advisories": "unresolved prior audit, not a new security scan"
+    "report_calls_max": 2,
+    "report_tokens_max": 8000,
+    "unknown_usage_charged": true,
+    "new_installs": false,
+    "new_models": false,
+    "system_settings_changes": false,
+    "Git_mutations": false,
+    "unrelated_avatar_voice_dashboard_edits": false,
+    "live_user_db_migration": false,
+    "Git_mutations_scope": "Project index/history; disposable integrity-test fixture repositories are separate",
+    "production_warm_reuse": false,
+    "fallback_default_enabled": false
   },
-  "preservation": {
-    "initial_m2_hashes_matched": 36,
-    "baseline": "M3_BASELINE.json",
-    "protected_m2_files_sha256_still_match": {
-      ".gitignore": true,
-      "services/broker/src/immortility_broker/artifacts.py": true,
-      "services/broker/src/immortility_broker/research.py": true,
-      "services/broker/src/immortility_broker/hermes.py": true,
-      "services/broker/src/immortility_broker/policy.py": true,
-      "services/broker/src/immortility_broker/contracts.py": true,
-      "services/broker/src/immortility_broker/config.py": true,
-      "services/broker/src/immortility_broker/capabilities.py": true,
-      "services/broker/src/immortility_broker/standard_mcp.py": true,
-      "services/broker/src/immortility_broker/public_fetch.py": true,
-      "integrations/artifacts/report_worker.py": true,
-      "integrations/mcp-standard/agent_bridge.py": true,
-      "packages/contracts/schemas/task-request.schema.json": true,
-      "apps/desktop/src/Conversation.tsx": true,
-      "apps/desktop/src/state.ts": true,
-      "apps/desktop/src/Conversation.test.tsx": true,
-      "apps/desktop/src-tauri/Cargo.toml": true,
-      "apps/desktop/src-tauri/Cargo.lock": true,
-      "services/broker/tests/test_agent_bridge.py": true,
-      "config/artifact-requirements.in": true,
-      "config/artifact-requirements.lock": true,
-      "config/artifact-runtime.json": true,
-      "scripts/prepare-artifact-runtime.py": true,
-      "scripts/smoke-artifacts.py": true,
-      "scripts/smoke-research-report.py": true,
-      "scripts/smoke-report-dashboard.py": true
-    },
-    "unrelated_avatar_GPU_voice_edits": "not edited by this slice; existing dirty work preserved",
-    "unexpected_untracked_SystemDrive_directory": "preserved",
-    "git_reset_commit_push": false
-  },
-  "next_steps": [
-    "Repair/rebenchmark SDK cold-start within the original deadline; pass the full regression gate.",
-    "Obtain a successful separately authorized real-model report acceptance with safe categorical diagnostics.",
-    "Implement account-specific reviewed zero-cost/model/quota verification before activating Groq/Gemini/NVIDIA.",
-    "Native interactive Model Hub acceptance and representative held-out live route corpus before claiming optimized provider ranking.",
-    "DOCX renderer/visual approval gate and later milestones remain separate; no installation or M4 runtime automatically enabled."
+  "evidence_outputs": "Engineering smoke and benchmark scripts now default to unique cache JSON; --output must be new, scoped JSON; history is never clobbered. Existing historical records retained.",
+  "remaining": [
+    "Qualify direct Gemini/Groq/NVIDIA concrete models and feasible account-specific zero-cost evidence; keep unproved routes blocked",
+    "Prove warm canonical Hermes MCP/tool/credential/context isolation, cancellation, crash recovery and idle memory before production reuse",
+    "Calibrate bounded report context/output with a qualified concrete model; no arbitrary token ratio or cap increase",
+    "Separately authorize and pass one public direct-provider model-selected tool task after prerequisites; no legacy-provider retry",
+    "Local on-demand Qwen installation/resource acceptance needs separate authorization; no download/start in this slice",
+    "Production database migration and broad memory/delegation/coding/desktop capability remain gated; preserve Store ownership"
   ],
-  "source_hashes": {
-    "services/broker/src/immortility_broker/providers.py": "4f05771fbe22c405ac543000f2ff9e864060515c235b4c9b37299a46ced2bc60",
-    "services/broker/src/immortility_broker/provider_stream.py": "6bfc0aa67539e68959f754c8c458f197a30a32c57f9b16938e9dc2c1d0bf9bb5",
-    "services/broker/src/immortility_broker/agent_bridge.py": "d71b731bc0a6b6194688bc82a1bb4bb02572a776af84eab1d86e89e031756cf5",
-    "services/broker/src/immortility_broker/app.py": "6633b8050b4b356caa7925261b545fc7a58ecd056542418e46136ef11f553f9f",
-    "services/broker/src/immortility_broker/store.py": "8ded43ee7e6e6ea01b5c2ac26fcd119887c7801f06be44983e75ca11f38a8493",
-    "services/broker/src/immortility_broker/ledger.py": "9143eafe876b2729b889aecdcd97dbda8f1fee9603c62eafef5e8a78a0d233d6",
-    "services/broker/src/immortility_broker/traces.py": "5190876ddac4e0488fcf6ae059a98c30d1cfce56ea7d145546650bdeac6db4dc",
-    "services/broker/tests/test_tool_streams.py": "4686355dab658a6000628b85495cf7ea4445190d0dbde8b16306af3124ae8966",
-    "services/broker/tests/test_provider_stream.py": "b2d346bb4ae46ed266fe1f209a68ff5c17d01868d983b390a7dbcb091ee34fc3",
-    "services/broker/tests/test_providers.py": "5a52fe5826246d4d4e4e705088f2ca1157e5516e572ce44dd7b807990e14c229",
-    "services/broker/tests/test_inference_grants.py": "5b829c35d5bffe260a34fad58147fd93ad80e57fff8167e22b8abfdea489be8d",
-    "services/broker/tests/test_reports.py": "49b61853fab07d400775419d81014cf777b3f5b720ffbb92572303aad887a81d",
-    "services/broker/tests/test_usage_ledger.py": "e92f96b9679663236665caf6d14c9747e0f4e59c32baa01b0cd46aebadeadf70",
-    "services/broker/tests/test_broker.py": "cdbddaac42ffb80f1379b8c1158df56be9781fbfdd0c12ce04db86125b0d11b9",
-    "services/broker/tests/test_m0_repairs.py": "c0925e104a26d7b2f845f7c8e2047297b97c264ccc95cb6e3d116ece108d8427",
-    "services/broker/tests/test_firewall.py": "4185de65198a0846ffc3c7be91ff92284b8439d1abacd4f370b45305738124d7",
-    "apps/desktop/src/ModelHub.tsx": "3f6407aae7078d173088a915b38bb3c8bee4ee23b2ec259b4b53ec6a7458b32b",
-    "apps/desktop/src/ModelHub.test.tsx": "bcd17558de5ed5e440f4efe0f0925baf2d5b654ca44ed11955a6500a3ac95c77",
-    "apps/desktop/src/SettingsPanel.tsx": "5273e79aebda87ad7acaced7ecf39a9b5d5ce95b8ad3068a48ecb5aad6d6f1d1",
-    "apps/desktop/src/main.tsx": "63256799e1bc5e588ec40310b5310417820367e223ee7d16a96410cc7788843a",
-    "apps/desktop/src/transport.ts": "51b799fa787247ca890001113cc1da971013cb07093af254f7dbac87eaadef95",
-    "apps/desktop/src/transport.test.ts": "6cc448e1dac11c52ae4cc8b149e9c4ad565c7e74086a783b8ece103d3d6c31f1",
-    "apps/desktop/src/contracts.generated.ts": "366619856001e19cb3fa0d86fb2fdb6e9f7e8bb0e42efc7fce8290039b165bb5",
-    "apps/desktop/src-tauri/src/main.rs": "d8c2dc6dc10f40179a2219d5af9daf8273727e03afe540e81dbe13d5ff41ae7c",
-    "packages/contracts/schemas/execution-trace.schema.json": "94446d3f847d571694f5bf2998ad3f15ddf626d95f41234c22a0411a1add7daf",
-    "packages/contracts/schemas/model-selection.schema.json": "0cae17faad989d00377355bfde52b386af466d27ffd405ff0ab41b21c80ec533",
-    "scripts/generate-contracts.py": "9cc241dbea1b970bc5b301e84201459ad0b42080d3a3f01886ce527613f8478c",
-    "scripts/benchmark-model-router.py": "1066310890c59578f234abf6393aa6b5d03a4adc714baf6c5e923372fdb0c2a7"
+  "prior_checkpoint": "M3_PRE_HARDENING_VERIFICATION.json",
+  "eligibility_review": "ARCHITECTURE_UPDATE_2026-11-15.md supersedes legacy-provider work; direct-provider proof limitations remain in M3_PROVIDER_READINESS_2026-11-15.md; no protected API queried",
+  "audit_reconciliation": "M3_GROKBOT_RECONCILIATION_2026-11-15.md",
+  "sqlite_v4": {
+    "isolated_migration_backup_owner_recovery_tests": "passed in full suite",
+    "production_user_database_migration_or_copy": "not performed; authorization/ownership/copy validation required before upgrade",
+    "database_owner": "Engine/Store unchanged"
   },
-  "note": "94 focused tests and all separately executed static/frontend/security checks pass. This does not convert the failed whole-suite run or failed live report into a pass."
+  "live_acceptance_preparation": {
+    "status": "BLOCKED: no qualified direct provider/model and no fresh authorization",
+    "provider_candidates": [
+      "gemini",
+      "groq",
+      "nvidia"
+    ],
+    "concrete_model": null,
+    "maximum_model_calls": 2,
+    "maximum_task_tokens": 8000,
+    "public_source_scope": "fixed reviewed MCP/OWASP excerpts only",
+    "publish_or_upload_files": false,
+    "private_history_files_screen_audio": false,
+    "paid_fallback": false,
+    "automatic_retry": false,
+    "excluded_providers": [
+      "openrouter",
+      "omniroute"
+    ]
+  },
+  "changed_source_sha256": {
+    "apps/desktop/src/runtimeStatus.test.ts": "35549939dab23e7025ea935a849312fcb3ba7509d6f32112899f5f76a1336af9",
+    "apps/desktop/src/runtimeStatus.ts": "5b2730fb6e7762f89618ff5cab50b0aef576dd61d39bc94457cb9c2b0903c650",
+    "scripts/native_event_fixture.py": "73aee93f0a15af7a7f7ae6289bfa67a9ff3a5e50e9f5f91ac3a399f80d83a321",
+    "scripts/probe-hermes-session-reuse.py": "e68f442214a5f353e62ac4eec1398a634a16137bae9d3200f71ae6c3494143b2",
+    "services/broker/src/immortility_broker/evidence.py": "e42777a2dce97a6e4c66b1ed0bf2bbdc7082ec33b16c81bdda79c31fd1f2effb",
+    "services/broker/src/immortility_broker/runtime_status.py": "fa310d307162f97a811859e5647531838f78b098ee1762f4e5774225e3cd3047",
+    "services/broker/src/immortility_broker/semantic_stream.py": "612e77042d43fbfc693c84a96d5be3a10e75516497206c6d042a3b8dc1754eb0",
+    "services/broker/tests/provider_fixtures.py": "338e6b068b675b8c33749a9343e7901c51fe59b9bc48ed27ae2d89374441b329",
+    "services/broker/tests/test_cancellation_diagnostics.py": "661cfc449ec06e637dc0f6fa11aee9d4c300e51c739a56617e4194dcc7332b0a",
+    "services/broker/tests/test_engineering_evidence.py": "89850d29c698c4706e6327d449c372c07dda3f6e7a4f7f2df7363a7c022f0cb0",
+    "services/broker/tests/test_hermes_readiness.py": "d4c2fe0a43f0332155249330f3326048590e156dfe4feff05de8b9dd979e9206",
+    "services/broker/tests/test_native_event_fixture.py": "cbe603bb3ffbe9fdc21d0aad6f9ec528b080fea7fada71c7defcc22875726ea4",
+    "services/broker/tests/test_provider_eligibility.py": "21b9488fb89f241029e70251ac148e7f6663c2c7db9b353a46efddb411139e72",
+    "services/broker/tests/test_report_context_budget.py": "e7667d63faf9981a08e4723ceefa05acaa5a00900d5dffc097440c2e697f080a",
+    "services/broker/tests/test_runtime_status.py": "202e26f47afe4c6f46e00c6862193db75b6bf130aabea77dd8e8619f8982a27a",
+    "services/broker/tests/test_semantic_stream.py": "f54815b839fa629a87785b15f41dd44f52470dcad83d3b0306312ac936eb6ecf",
+    "services/broker/tests/test_stream_termination.py": "5f67dcbac91fb05186410e349c23d2c77ae8f9e00005c5a8ccf9c26af95286e6",
+    "services/broker/tests/test_typed_tool_schemas.py": "343c1981c6b0fd6b0936a596296ee6cb75c2a5ffc6ec1a9125fc1514d8ac2745",
+    "apps/desktop/src-tauri/src/main.rs": "77350aa371a15d8f5e0e76ad5aafccfde4778856aa883fd96d285fac9300cd2a",
+    "apps/desktop/src/Conversation.tsx": "47e4094a7ce03495fc5431bb62c9aedf5644d02ce3e3eedf12a9a41bf6e0d21b",
+    "apps/desktop/src/ModelHub.test.tsx": "51538a88dce12a36d9dec743cdc3a4428bef6a9fa3ec7b75094c79b85454ba98",
+    "apps/desktop/src/ModelHub.tsx": "e64701e047bd1788759e8254b3e11395f19c08cf40db14f4be8c6733e5277e79",
+    "apps/desktop/src/SettingsPanel.tsx": "9564d192c7134655201d2c17750fd1e99b2e7a51ff82473fbdbca53805d6d266",
+    "apps/desktop/src/main.tsx": "4a289b19353cfcece957b1dcead82453126011331accb3c944f9779208a397a6",
+    "apps/desktop/src/transport.test.ts": "770ac42bce778ea70832c404bf748fcda029a1dc7a3d08e7094ebc1f1ef7a864",
+    "apps/desktop/src/transport.ts": "22546543f32caa11e921fcfde6d7fd056a0ddc6eb39feb671cfacb8c3231e1d8",
+    "scripts/benchmark-model-router.py": "279224dd0e3afe4b749217f90f5f71513d029bbcd477bfdc97143dcef0c7f65d",
+    "scripts/benchmark-report-workflow.py": "d266bb5105628e1fd9a9d69b9d25a09d7e6e02c05e2f6cbb62c5460ae00a6df1",
+    "scripts/benchmark-sdk-startup.py": "3c59ecf7cdec5544943867a359b8d33869c22d3585d867ffced7d1d5b6c41b8a",
+    "scripts/native-model-hub-broker.py": "2dcb38c27e00bb6bd82d0ac8f45b985e617d276fd638a5bc06452b702cac1426",
+    "scripts/smoke-agent-tools.py": "bea6bee9d240e2c09fc99450296acd6e9bf4fad2ccbba1ea8b9554b11f307432",
+    "scripts/smoke-hermes.py": "9f2f754525e6ea15c5f557585ef34bbebad664e06de853a0947e9ba4a8735253",
+    "scripts/smoke-model-hub-native.py": "0d0f2aa69ea29727b92af30e8ef39c327e9fbadf0e2649f729b78a677edf74db",
+    "scripts/smoke-research-report.py": "7ee6fa1fbeedaeacf784067990d3f5a9f8d02e50262a3fbbc6940713cefaff4f",
+    "services/broker/src/immortility_broker/agent_bridge.py": "30aedbeb23682d3bc841f76a244fa7c4ee781838d0535192f0e2ac56d0d6526d",
+    "services/broker/src/immortility_broker/app.py": "d134375995cbacb3200149ded2bcd286135d933fb8d2eabf781e92c655333ef3",
+    "services/broker/src/immortility_broker/artifacts.py": "71a8340ca1f9562cfcff5d29bd23c8bf7c9083067de8d579c3b0df7ae4134d74",
+    "services/broker/src/immortility_broker/config.py": "6ff667de24e198e0a2f69ea0a173d50de4917e60f4c1b529aaf90a06842c212c",
+    "services/broker/src/immortility_broker/hermes.py": "66319e7e98970d2cfb182af193c4237d4ef1a1b8e726ea336bda5ec5c14f3c8f",
+    "services/broker/src/immortility_broker/ledger.py": "82cce2d35ebced154e38b829dabedc3d961b023f24fd0974b76feeb331ad826d",
+    "services/broker/src/immortility_broker/policy.py": "80a855b429cacfcc8b322f93421d2f9ecab36d1010fae92847593ca8a3dbabdb",
+    "services/broker/src/immortility_broker/provider_stream.py": "7f5aa8168a29b6729e20cadf6d20da28fcbec8cda007c98ce630bdc266a7575d",
+    "services/broker/src/immortility_broker/providers.py": "3796f195d330729dcb46a0f013ab72882da0061b451316cd7656b07d60cca5fe",
+    "services/broker/src/immortility_broker/research.py": "b13ecbe47a492e126cecca5ec3e3b299b87ed60ca4ccf8ded1cf62a09669d6e2",
+    "services/broker/src/immortility_broker/voice.py": "9315cc387460ebe15ebb3fd0926fa855918a6b99feef9df0ac7aceaacb9b23ad",
+    "services/broker/tests/test_chat_regressions.py": "84fc5be448cde85cea8738699690b1ebf9b935f88117c20d0d663e43eb48d6aa",
+    "services/broker/tests/test_firewall.py": "1775af25ffd35241c2355887aad69d7b559639f8b75242093c51d89130099a3e",
+    "services/broker/tests/test_inference_grants.py": "6c2fa53045b84511fc8918838504b90f324d23e76a79a9f965f37b3b621eb26f",
+    "services/broker/tests/test_provider_stream.py": "fd3a864835e3deb634594433e2a57dbb6a450df1d9f2c9c90264437655859a6b",
+    "services/broker/tests/test_providers.py": "fcac21065f055686c94487c96d1bf4bf368431e2f856b6f2d0e50612d201fc38"
+  },
+  "historical_evidence": {
+    "previous_M3": "M3_PRE_HARDENING_VERIFICATION.json",
+    "failed_live": "M2_REPORT_LIVE_SMOKE.json unchanged in Git diff; previous authorization consumed",
+    "full_failed_runs": "M3_FULL_RUN_SLOW_FAILURE.json unchanged",
+    "previous_status": "CURRENT_STATUS_HISTORY_PRE_STREAM_GATE_2026-11-15.md",
+    "old_latest_offline_slot": "M2_REPORT_OFFLINE_SMOKE.json was updated by the first legacy smoke invocation; subsequent engineering runs now use exclusive new output files. Failure records were not overwritten.",
+    "pre_final_integration_snapshot": ".cache/m3-final-integration/eaf3e937-d860-4cae-ab35-d721a6fc29e7/M3_VERIFICATION.before-final-update.json"
+  },
+  "captured_at": "2026-11-15T16:43:15.078938+00:00",
+  "historical_checks_before_final_integration": {
+    "scripts/check.ps1": {
+      "status": "passed",
+      "python_tests": 393,
+      "python_seconds": 90.85,
+      "frontend_tests": 63,
+      "frontend_seconds": 2.14,
+      "mypy_sources": 48,
+      "python_format_files": 91,
+      "contracts_lint_format_types": "passed",
+      "frontend_build_seconds": 2.86,
+      "exit_code": 0,
+      "log": ".cache/verification/m3-final-check-20261115.log",
+      "log_sha256": "f360e175c13a7cc5763ea70b142c12ef1afc4e7ccaa2d4fad8ed1f62b4aa069a",
+      "includes_original_four_SDK_failures": true
+    },
+    "rust_tests": {
+      "status": "passed",
+      "tests": 11,
+      "seconds": 0.91,
+      "command": ". ./scripts/dev-env.ps1; cargo test --offline --manifest-path apps/desktop/src-tauri/Cargo.toml",
+      "build_seconds": 5.83,
+      "before_fix_event_tests": "1 passed / 1 failed; whole-request expiry truncated healthy body",
+      "native_dev_build": "passed in 10.76 s; offline; binary not interactively retested after idle-read repair",
+      "source_sha256": "b80a48c0ff5249b497c48888efa1f31a772d416112f0f4863cc0a10e9d05cc5e",
+      "built_binary_sha256": "314e4add36423ec82db226c905cedf97515860664cc29cd26c1f79a52b18650d"
+    },
+    "stream_failure_and_evidence_tests": {
+      "passed": 10,
+      "seconds": 2.68
+    },
+    "minimum_report_headroom_and_stream_checks": {
+      "passed": 17,
+      "seconds": 2.04,
+      "minimum_output_reservation": 826,
+      "tokenizer_calibrated": false
+    },
+    "provider_stream_readiness_focused": {
+      "passed": 92,
+      "seconds": 7.52
+    },
+    "readiness_integrity_firewall": {
+      "passed": 13,
+      "seconds": 3.58,
+      "before_fix": "2 failed / 1 passed: readiness-first did not submit; raw TimeoutError escaped"
+    },
+    "security": {
+      "configured_key_isolation": "passed; local comparison only; no key values printed",
+      "git_diff_check": "passed; LF/CRLF notices only",
+      "six_modified_engineering_scripts_py_compile": "passed",
+      "native_fixture_scope": "M3_NATIVE_FIXTURE_SCOPE_VERIFICATION.json; passed in 1.685 s; task POST denied before engine admission; owned processes reaped",
+      "dependency_installs_or_upgrades": 0,
+      "temporary_fixture_scope": "Existing runtime-integrity tests initialize and commit only synthetic temporary Git repositories; no project index/history changes. Existing vault test uses its own unique dummy entry."
+    },
+    "source_and_history_integrity": "passed: recorded source hashes match; project HEAD unchanged; failed live and full-run evidence have no Git diff"
+  },
+  "historical_acceptance_before_final_integration": {
+    "fragmented_native_report": {
+      "evidence": "M3_HARDENING_OFFLINE_REPORT_FINAL.json",
+      "seconds": 14.394,
+      "cloud_calls": 0,
+      "real_gateway_operations": 2,
+      "fragments_per_turn": 600,
+      "source_and_drafting": "synthetic",
+      "Markdown_and_PDF": "reopened; PDF rendered",
+      "private_reasoning": "discarded",
+      "synthetic_reported_tokens": 1500,
+      "second_call_max_tokens": 973,
+      "historical_pre_final_check": "M3_STREAM_REPAIR_VERIFICATION.json; 22.827 seconds; preserved"
+    },
+    "live_report": {
+      "status": "BLOCKED",
+      "authorization": "consumed",
+      "previous_result": "failed / 1 provider call / 6002 conservative unknown tokens / 0 tools or artifacts",
+      "historical_evidence_unchanged": "M2_REPORT_LIVE_SMOKE.json"
+    },
+    "native_Model_Hub": {
+      "status": "PARTIAL",
+      "evidence": "M3_NATIVE_MODEL_HUB_ACCEPTANCE.json",
+      "observed": [
+        "Auto Cloud Primary selected; four missing-credential/blocked provider labels; quotas unknown",
+        "Local Qwen selected and persisted; Local Heretic unavailable/cloud-blocked and restored across native restart",
+        "Manual Cloud showed free-alias variability warning; exact registered unavailable concrete fixture route selected and restored across restart",
+        "Three synthetic cloud/tool/artifact permission checkboxes were enabled in the network-disabled tester and all cleared after acknowledged switch to Auto; no task submitted",
+        "Injected stored running task disabled model controls; injected TRANSCRIBING voice state disabled controls with no active task; idle re-enabled controls",
+        "Reselecting the same Auto value did not add a mode request: scratch counter remained one",
+        "Initial local service failure visible; native reconnect recovered after scratch launcher path repair",
+        "Scratch harness confirmed owned native/broker/preview processes reaped; Computer Use final native window inventory empty"
+      ],
+      "pending": [
+        "Rapid overlapping distinct mode changes",
+        "Real model unavailable/failure presentation and no-fallback operation",
+        "Long-running 100-300 second native stream and reconnect after Rust idle-read repair",
+        "Physical active-voice interaction"
+      ],
+      "scope_limitations": [
+        "Health poll can delay frontend busy-state display by approximately its 15-second interval; broker guards remain immediate",
+        "Header Disconnected coexists with Setup required when Hermes missing; broker connection and runtime readiness presentation are not fully separated"
+      ],
+      "interaction_binary_sha256": "f30371399787265be2f41e4cbbad51fe2c845aa4c256e8741183b758ececb041",
+      "no_physical_voice_or_real_inference": true
+    }
+  },
+  "architecture_constraint": "ARCHITECTURE_UPDATE_2026-11-15.md; latest user excludes OpenRouter and OmniRoute; direct providers remain unqualified; no production warm reuse",
+  "integration_evidence_sha256": {
+    ".cache/verification/native-180s-f12fa971-3736-4877-9fb5-ed5fcf825f96.json": "6b6f03d32d70b29d02337e598caf0fe501716ea7405ad5235fb12e282304a7c4",
+    ".cache/verification/native-stall-interrupted-9326508f-effb-457f-bb8b-d58ced102767.json": "0844cc65bf259d4b0419268a49ff14168beba434d62085665483889da4ed557a",
+    ".cache/verification/native-model-race-f834b32e-d24e-46bd-9500-6aebecd0dfce.json": "b2b83186298f94b4e6dee9bb79c7fcbc6515d9a2d0f38ce52ff423762e920515",
+    ".cache/verification/native-model-error-recovery-ec906683-4be9-44cf-b25a-58e42edcab48.json": "b18fadebd543a2fa4086e38ce685d749f2738b0c6494f59e864b6c9a28080f39",
+    ".cache/verification/native-idle-timeout-cancel-263fc35f-4c20-4e04-8b3f-03754ebd1f73.json": "c38e2ade032c6d3e464fed4a8c5ebec3bdf859d8d0b1b46ffca2a463740a4a28",
+    ".cache/verification/native-broker-crash-recovery-fe62b900-d98a-4f26-96f2-e58c43361bef.json": "cc04b51d5401547efb86ead9a6465fb0f6f20ec4723e74a73753bf3489fb7609",
+    ".cache/verification/research-report-smoke-713e719a-83ce-480d-b2f5-00bc57178727.json": "de8825ccc53cbf96731f878af699f52ad131ba95132c472c98c0114fc0f1e027",
+    ".cache/verification/research-report-smoke-ee5e3d87-3787-4079-bca8-27f5e6b5dd6c.json": "93acea7ea566bd17ae2debf5fe31482441489b6747869155910ea6ae243b3e80",
+    ".cache/verification/research-report-smoke-d757b3dc-eafe-463e-856e-68127e57aa84.json": "1739744530dc8ebb43cce44ccfd32acf4611ae63bad5b609c2a81f4e2706a0f4",
+    ".cache/verification/hermes-session-reuse-probe-782cf259-d0ac-4255-a9e1-b3e303be4e91.json": "d1dc2141501a2a5ec3312095cb22a6b986ab092df216bb6bbba73b2587925e52",
+    ".cache/verification/hermes-session-reuse-probe-efcab0c5-8991-43e0-afe7-fea07bc35089.json": "7c93ad8a8007804c2249896df1747bff5b7a75fc1689be992540339c9bceb949",
+    ".cache/verification/hermes-session-reuse-probe-e45813c6-eca6-4428-b8d7-7a316d56241b.json": "aaaa5f9632f0ecd0df51eb10d0da86d2ed7b9a6787eaba0ffcad2c1596769f81"
+  },
+  "changed_source_scope": "All observed dirty/untracked source files, including preceding implementation; not an authorship claim for this final slice."
 }

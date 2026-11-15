@@ -34,6 +34,8 @@ async def main(offline: bool, use_hermes_key: bool, adversarial: bool, cancel: b
     calls = []
 
     def upstream(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/api/v1/key":
+            return httpx.Response(200,json={"data":{"free_model_daily_requests":{"limit":50,"used":0,"remaining":50}}})
         if request.url.path.endswith("/models"):
             return httpx.Response(200, json={"data": [{"id": MODEL, "pricing": {"prompt": "0", "completion": "0"}}]})
         body = json.loads(request.content)
@@ -56,6 +58,7 @@ async def main(offline: bool, use_hermes_key: bool, adversarial: bool, cancel: b
         settings.data_dir = Path(directory)
         if offline:
             settings.openrouter_api_key = SecretStr("offline-test-key")
+            settings.openrouter_fallback_enabled = True
         token = "smoke-only-" + "x" * 40
         listener = socket.socket()
         listener.bind(("127.0.0.1", 0))

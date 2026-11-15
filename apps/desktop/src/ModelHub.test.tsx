@@ -31,6 +31,34 @@ const catalog: ModelCatalog = {
 };
 
 describe("Model Hub policy presentation", () => {
+  it("renders failed mode changes inside Model Hub while Settings hides chat banners", () => {
+    const html = renderToStaticMarkup(
+      <ModelHubView
+        catalog={catalog}
+        busy={false}
+        active={false}
+        onSelect={() => {}}
+        issue="Synthetic model selection failure; no preference changed."
+      />,
+    );
+    expect(html).toContain('role="alert"');
+    expect(html).toContain("no preference changed");
+    expect(html).toContain('value="auto_cloud" selected=""');
+  });
+  it("blocks stale model controls while the broker is disconnected", () => {
+    const html = renderToStaticMarkup(
+      <ModelHubView
+        catalog={catalog}
+        busy={false}
+        active={false}
+        connected={false}
+        onSelect={() => {}}
+      />,
+    );
+    expect(html).toContain("Broker disconnected");
+    expect(html).toContain("last known");
+    expect(html).toContain('<fieldset disabled="">');
+  });
   it("shows Auto Cloud Primary and separates stored credentials from verified eligibility", () => {
     const html = renderToStaticMarkup(
       <ModelHubView

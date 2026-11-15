@@ -397,6 +397,7 @@ async fn connection(app: tauri::AppHandle) -> Result<(), String> {
 #[serde(rename_all = "snake_case")]
 enum Operation {
     Health,
+    RuntimeStatus,
     Sessions,
     CreateSession,
     SessionTasks,
@@ -428,6 +429,8 @@ enum Operation {
     ListTools,
     CallTool,
     SetWorkspace,
+    ProjectScope,
+    SetProject,
     ResolveApproval,
     SetWebResearch,
     SetMcp,
@@ -452,6 +455,17 @@ fn endpoint(operation: Operation, id: Option<String>) -> Result<(reqwest::Method
     use reqwest::Method;
     Ok(match operation {
         Operation::Health => (Method::GET, "/health/ready".into()),
+        Operation::RuntimeStatus => {
+            let path = match id {
+                None => "/v1/runtime/status".into(),
+                Some(value) => {
+                    let after = value.parse::<u64>().map_err(|_| "Invalid runtime revision.")?;
+                    if after > 9007199254740991 { return Err("Invalid runtime revision.".into()); }
+                    format!("/v1/runtime/status?after={after}")
+                }
+            };
+            (Method::GET, path)
+        },
         Operation::Sessions => (Method::GET, "/v1/sessions".into()),
         Operation::CreateSession => (Method::POST, "/v1/sessions".into()),
         Operation::CreateTask => (Method::POST, "/v1/tasks".into()),
@@ -485,6 +499,8 @@ fn endpoint(operation: Operation, id: Option<String>) -> Result<(reqwest::Method
         Operation::ListTools => (Method::GET, "/v1/tools".into()),
         Operation::CallTool => (Method::POST, "/v1/tools/call".into()),
         Operation::SetWorkspace => (Method::POST, "/v1/settings/workspace".into()),
+        Operation::ProjectScope => (Method::GET, "/v1/projects/scope".into()),
+        Operation::SetProject => (Method::POST, "/v1/settings/project".into()),
         Operation::ResolveApproval => (
             Method::POST,
             format!("/v1/tasks/{}/approval", valid_id(id)?),
@@ -512,6 +528,18 @@ fn local_client(seconds: u64) -> Result<reqwest::Client, String> {
         .timeout(std::time::Duration::from_secs(seconds))
         .build()
         .map_err(|_| "Local HTTP client unavailable.".into())
+}
+
+fn event_client(idle: std::time::Duration) -> Result<reqwest::Client, String> {
+    // The broker owns the task deadline (up to 300 seconds). Bound connection
+    // stalls here without cutting off a healthy task at a fixed HTTP lifetime.
+    reqwest::Client::builder()
+        .no_proxy()
+        .redirect(reqwest::redirect::Policy::none())
+        .connect_timeout(std::time::Duration::from_secs(5))
+        .read_timeout(idle)
+        .build()
+        .map_err(|_| "Local event client unavailable.".into())
 }
 
 #[tauri::command]
@@ -569,6 +597,7 @@ async fn broker_request(
     let (method, path) = endpoint(operation, id)?;
     let info = ensure_broker(&state)?;
     let seconds = match operation {
+        Operation::RuntimeStatus => 28,
         Operation::ObservationResult => 85,
         Operation::ResolveApproval | Operation::CallMcp => 30,
         _ => 8,
@@ -576,6 +605,9 @@ async fn broker_request(
     let mut request = local_client(seconds)?
         .request(method, format!("{}{}", info.url, path))
         .bearer_auth(info.token);
+    if matches!(operation, Operation::Stop | Operation::Cancel) {
+        request = request.header("X-Immortility-Action-Source", if matches!(operation, Operation::Stop) {"native-ipc-stop"} else {"native-ipc-cancel"});
+    }
     if let Some(body) = payload {
         request = request.json(&body);
     }
@@ -606,7 +638,7 @@ async fn stream_task(
 ) -> Result<(), String> {
     let id = valid_id(Some(task_id))?;
     let info = ensure_broker(&state)?;
-    let response = local_client(100)?
+    let response = event_client(std::time::Duration::from_secs(90))?
         .get(format!(
             "{}/v1/tasks/{}/events?after={}",
             info.url, id, after
@@ -642,7 +674,7 @@ async fn stream_task(
     Ok(())
 }
 
-fn stop_all(app: &tauri::AppHandle) {
+fn stop_all(app: &tauri::AppHandle, source: &'static str) {
     let state = app.state::<Supervisor>();
     if let Ok(guard) = state.broker.lock() {
         if let Some(broker) = guard.as_ref().and_then(|broker| broker.info().ok()) {
@@ -653,7 +685,7 @@ fn stop_all(app: &tauri::AppHandle) {
                     std::time::Duration::from_millis(200),
                 ) {
                     let _ = stream.set_write_timeout(Some(std::time::Duration::from_millis(200)));
-                    let _=write!(stream,"POST /v1/stop HTTP/1.1\r\nHost: 127.0.0.1\r\nAuthorization: Bearer {}\r\nContent-Length: 2\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n{{}}",broker.token);
+                    let _=write!(stream,"POST /v1/stop HTTP/1.1\r\nHost: 127.0.0.1\r\nAuthorization: Bearer {}\r\nX-Immortility-Action-Source: {}\r\nContent-Length: 2\r\nContent-Type: application/json\r\nConnection: close\r\n\r\n{{}}",broker.token,source);
                 }
             }
         }
@@ -1045,7 +1077,7 @@ fn main() {
                 }
                 let _ = app.emit("companion-mode", "command");
             }
-            "ctx-stop" => stop_all(app),
+            "ctx-stop" => stop_all(app,"native-context-stop"),
             "ctx-quit" => app.exit(0),
             _ => {}
         })
@@ -1056,7 +1088,7 @@ fn main() {
                         return;
                     }
                     if shortcut.to_string().to_lowercase().contains("escape") {
-                        stop_all(app);
+                        stop_all(app,"native-hotkey-stop");
                     } else {
                         if let Some(window) = app.get_webview_window("main") {
                             let _ = window.show();
@@ -1100,7 +1132,7 @@ fn main() {
                         }
                         let _ = app.emit("companion-mode", "command");
                     }
-                    "stop" => stop_all(app),
+                    "stop" => stop_all(app,"native-tray-stop"),
                     "quit" => app.exit(0),
                     _ => {}
                 })
@@ -1136,7 +1168,77 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    // Actual local HTTP bodies, with accelerated timings. A healthy stream can
+    // outlive its idle interval; a stalled connection must still time out.
+    fn event_fixture(stall: bool) -> (String, std::thread::JoinHandle<()>) {
+        use std::io::{Read, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let worker = std::thread::spawn(move || {
+            let (mut socket, _) = listener.accept().unwrap();
+            socket
+                .set_read_timeout(Some(std::time::Duration::from_secs(2)))
+                .unwrap();
+            let mut request = [0u8; 4096];
+            socket.read(&mut request).unwrap();
+            socket.write_all(b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n").unwrap();
+            if stall {
+                std::thread::sleep(std::time::Duration::from_millis(900));
+            } else {
+                for _ in 0..6 {
+                    std::thread::sleep(std::time::Duration::from_millis(150));
+                    if socket.write_all(b"1\r\nx\r\n").is_err() {
+                        return;
+                    }
+                }
+                let _ = socket.write_all(b"0\r\n\r\n");
+            }
+        });
+        (format!("http://{address}/events"), worker)
+    }
+
+    #[test]
+    fn event_stream_can_outlive_a_read_interval_when_data_keeps_arriving() {
+        let (url, worker) = event_fixture(false);
+        let result = tauri::async_runtime::block_on(async {
+            event_client(std::time::Duration::from_millis(400))
+                .unwrap()
+                .get(url)
+                .send()
+                .await
+                .unwrap()
+                .bytes()
+                .await
+        });
+        worker.join().unwrap();
+        assert_eq!(result.unwrap().as_ref(), b"xxxxxx");
+    }
+
+    #[test]
+    fn event_stream_still_rejects_a_stalled_connection() {
+        let (url, worker) = event_fixture(true);
+        let result = tauri::async_runtime::block_on(async {
+            event_client(std::time::Duration::from_millis(400))
+                .unwrap()
+                .get(url)
+                .send()
+                .await
+                .unwrap()
+                .bytes()
+                .await
+        });
+        worker.join().unwrap();
+        assert!(result.unwrap_err().is_timeout());
+    }
     use super::*;
+    #[test]
+    fn runtime_status_accepts_only_bounded_replay_revisions() {
+        assert_eq!(endpoint(Operation::RuntimeStatus,None).unwrap().1,"/v1/runtime/status");
+        assert_eq!(endpoint(Operation::RuntimeStatus,Some("12".into())).unwrap().1,"/v1/runtime/status?after=12");
+        for value in ["-1","9007199254740992","../../inference","https://evil.test"] {
+            assert!(endpoint(Operation::RuntimeStatus,Some(value.into())).is_err());
+        }
+    }
     #[test]
     fn model_modes_use_fixed_local_routes() {
         let catalog = endpoint(Operation::ModelCatalog, None).unwrap();

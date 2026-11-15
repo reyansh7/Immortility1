@@ -1,5 +1,7 @@
 """Content-free provider diagnostics and trusted identity configuration regressions."""
 
+from provider_fixtures import free_account_response
+
 import asyncio
 
 import httpx
@@ -55,6 +57,8 @@ def test_lower_call_ceiling_is_enforced_by_the_durable_ledger(tmp_path):
 )
 async def test_stream_error_is_classified_without_leaking_upstream_body(tmp_path, body):
     def provider(request):
+        if request.url.path == "/api/v1/key":
+            return free_account_response(request)
         if request.method == "GET":
             return httpx.Response(
                 200, json={"data": [{"id": MODEL, "pricing": {"prompt": "0", "completion": "0"}}]}
@@ -86,6 +90,8 @@ async def test_old_rejected_completion_cannot_poison_a_new_task(tmp_path):
     entered, release = asyncio.Event(), asyncio.Event()
 
     async def provider(request):
+        if request.url.path == "/api/v1/key":
+            return free_account_response(request)
         if request.method == "GET":
             return httpx.Response(
                 200, json={"data": [{"id": MODEL, "pricing": {"prompt": "0", "completion": "0"}}]}

@@ -26,6 +26,7 @@ from immortility_broker.config import Settings
 from immortility_broker.hermes import Hermes
 from immortility_broker.policy import MODEL
 from immortility_broker.research import PublicResearch
+from immortility_broker.evidence import implementation_provenance, write_engineering_evidence, engineering_output_path
 
 
 def result_envelope(text):
@@ -37,7 +38,11 @@ def result_envelope(text):
     return raw
 
 
-async def main(public_sources=False, live=False):
+async def main(public_sources=False, live=False, fragmented_fixture=False, output=None, typed_tools=False):
+    if live and fragmented_fixture:
+        raise SystemExit('Synthetic fragmentation is forbidden for live acceptance.')
+    output=engineering_output_path('research-report-smoke',output)
+    provenance = implementation_provenance()
     public_sources = public_sources or live
     calls, seen = [], []
     import immortility_broker.app as app_module
@@ -62,6 +67,8 @@ async def main(public_sources=False, live=False):
     app_module.inference_payload = inspected_payload
 
     def provider(request):
+        if request.url.path == "/api/v1/key":
+            return httpx.Response(200,json={"data":{"free_model_daily_requests":{"limit":50,"used":0,"remaining":50}}})
         if request.method == "GET":
             return httpx.Response(
                 200, json={"data": [{"id": MODEL, "pricing": {"prompt": "0", "completion": "0"}}]}
@@ -148,6 +155,16 @@ async def main(public_sources=False, live=False):
                 "usage": {"prompt_tokens": 500, "completion_tokens": 250},
             },
         ]
+        if fragmented_fixture:
+            arguments=delta['tool_calls'][0]['function']['arguments']
+            chunks=[{
+                'id':'fixture','object':'chat.completion.chunk','model':MODEL,
+                'system_fingerprint':'repeated-envelope-'*8,
+                'choices':[{'index':0,'delta':{'reasoning':'SYNTHETIC_REASONING_CANARY'*4,'tool_calls':[{
+                    'index':0,'id':delta['tool_calls'][0]['id'],'type':'function',
+                    'function':{'name':TOOL_NAME,'arguments':arguments[i*len(arguments)//600:(i+1)*len(arguments)//600]},
+                }]},'finish_reason':None}],
+            } for i in range(600)]+chunks[-1:]
         return httpx.Response(
             200,
             text="".join("data: " + json.dumps(c) + "\n\n" for c in chunks) + "data: [DONE]\n\n",
@@ -184,7 +201,7 @@ async def main(public_sources=False, live=False):
                     assert raw["capability"] == "public.research.v1"
                     seen.extend(raw["result"]["sources"])
             else:
-                assert request.method == "GET" and request.url.path == "/api/v1/models"
+                assert request.method == "GET" and request.url.path in {"/api/v1/models", "/api/v1/key"}
             return await self.transport.handle_async_request(request)
 
         async def aclose(self):
@@ -196,9 +213,11 @@ async def main(public_sources=False, live=False):
         _env_file=None,
         data_dir=root,
         openrouter_api_key=SecretStr("offline-fixture"),
+        openrouter_fallback_enabled=True,
         web_research_enabled=True,
         artifact_tools_enabled=True,
         model_call_cap=2,
+        typed_tool_schemas_enabled=typed_tools,
     )
     if live:
         from immortility_broker.secrets import CredentialManager
@@ -287,6 +306,7 @@ async def main(public_sources=False, live=False):
             )
             if task["status"] != "succeeded":
                 failure = {
+                    'implementation':provenance,
                     "status": task["status"],
                     "classification": "REAL PROVIDER CHECK FAILED ACCEPTANCE"
                     if live
@@ -296,10 +316,11 @@ async def main(public_sources=False, live=False):
                     "usage": app.state.store.ledger.summary(tid),
                     "error": task.get("error"),
                     "reason_categories": [
-                        event["data"]["reason"]
+                        event["data"].get("reason") or event["data"].get("termination")
                         for event in events
-                        if event["data"].get("name") == "provider_tool_contract"
+                        if event["data"].get("name") in {"provider_tool_contract","provider_stream_contract","provider_call_diagnostics"}
                     ],
+                    'provider_call_diagnostics':[e['data'] for e in events if e['data'].get('name')=='provider_call_diagnostics'],
                     "tool_dispatches": sum(event["type"] == "tool.started" for event in events),
                     "artifacts_published": bool(task.get("result", {}).get("artifacts")),
                     "retry_or_fallback": False,
@@ -311,9 +332,8 @@ async def main(public_sources=False, live=False):
                     if public_sources
                     else "M2_REPORT_OFFLINE_SMOKE.json"
                 )
-                (ROOT / "docs/implementation" / name).write_text(
-                    json.dumps(failure, indent=2) + "\n"
-                )
+                saved=write_engineering_evidence(failure,Path(name).stem,output)
+                print(json.dumps({'evidence_path':str(saved),'status':'failed'}),flush=True)
                 raise SystemExit("Report acceptance failed; evidence saved, no retry performed.")
             assert task["status"] == "succeeded" and len(calls) == 2 and len(seen) == 2
             assert task["result"]["finalization"] == "broker-verified-receipt"
@@ -325,6 +345,10 @@ async def main(public_sources=False, live=False):
                     await client.get(f"/v1/tasks/{tid}/artifacts/{ref['artifact_id']}")
                 ).status_code == 200
             evidence = {
+                'implementation':provenance,
+                'fragmented_fixture':fragmented_fixture,
+                'typed_tools':typed_tools,
+                'provider_call_diagnostics':[e['data'] for e in events if e['data'].get('name')=='provider_call_diagnostics'],
                 "status": "passed",
                 "classification": "VERIFIED REAL OPERATION"
                 if live
@@ -349,8 +373,10 @@ async def main(public_sources=False, live=False):
                 if public_sources
                 else "M2_REPORT_OFFLINE_SMOKE.json"
             )
-            (ROOT / "docs/implementation" / name).write_text(json.dumps(evidence, indent=2) + "\n")
+            saved=write_engineering_evidence(evidence,Path(name).stem,output)
+            evidence['evidence_path']=str(saved)
             print(json.dumps(evidence), flush=True)
+            return evidence
     finally:
         server.should_exit = True
         try:
@@ -365,10 +391,13 @@ async def main(public_sources=False, live=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--public-sources", action="store_true")
+    parser.add_argument('--output',type=Path,help='New evidence JSON path; default is unique project cache file; existing files are never replaced.')
+    parser.add_argument('--fragmented-fixture',action='store_true',help='Offline only: 600 transport fragments per synthetic tool call.')
+    parser.add_argument('--typed-tools',action='store_true',help='Experimental exact approved-capability schemas; does not authorize inference.')
     parser.add_argument(
         "--live-consent",
         action="store_true",
         help="Requires separate explicit approval: one public MCP report task, max 8000 tokens and 2 provider calls, no paid fallback or retry",
     )
     args = parser.parse_args()
-    asyncio.run(main(args.public_sources, args.live_consent))
+    asyncio.run(main(args.public_sources, args.live_consent, args.fragmented_fixture,args.output,args.typed_tools))

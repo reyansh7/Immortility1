@@ -363,6 +363,7 @@ def apply_workspace_file(settings: Any) -> None:
     if not isinstance(data, dict) or not isinstance(data.get("enabled"), bool):
         return
     settings.workspace_tools_enabled = data["enabled"]
+    settings.project_read_enabled = data.get("project_read_enabled") is True
     root = data.get("root")
     if isinstance(root, str) and root:
         settings.workspace_root = Path(root)
@@ -381,7 +382,15 @@ def save_workspace_file(settings: Any, enabled: bool, root: str | None) -> None:
     data_dir = Path(getattr(settings, "data_dir"))
     data_dir.mkdir(parents=True, exist_ok=True)
     (data_dir / "workspace.json").write_text(
-        json.dumps({"enabled": enabled, "root": stored}) + "\n", encoding="utf-8"
+        json.dumps(
+            {
+                "enabled": enabled,
+                "root": stored,
+                "project_read_enabled": settings.project_read_enabled,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
     )
 
 

@@ -5,6 +5,8 @@ endpoints, local-model startup and same-task inference replay are not exposed.
 """
 
 import hashlib
+import json
+import asyncio
 import math
 import re
 import sqlite3
@@ -215,6 +217,8 @@ class ModelRegistry:
         now = self.clock()
         if self.settings.local_only_mode:
             return "local_only"
+        if offer.provider == "openrouter" and not self.settings.openrouter_fallback_enabled:
+            return "optional_fallback_disabled"
         identity = credential_identity(self.settings, offer.provider)
         if not identity:
             return "missing_credential"
@@ -293,6 +297,7 @@ class ModelRegistry:
             count, success, latency = self.statistics(offer, need.task_class)
             measured = count >= 3
             return (
+                offer.provider == "openrouter",
                 not measured,
                 -success if measured else 0,
                 latency if measured else math.inf,
@@ -396,9 +401,17 @@ class ModelRegistry:
                     "id": provider.id,
                     "credential_present": bool(credential_identity(self.settings, provider.id)),
                     "transport": "Hermes OpenAI-compatible broker proxy",
-                    "status": "existing free route with fresh preflight"
+                    "status": (
+                        "optional fallback enabled; fresh preflight requires zero price and official account quota"
+                        if self.settings.openrouter_fallback_enabled
+                        else "optional fallback disabled; explicit broker configuration opt-in required"
+                    )
                     if provider.id == "openrouter"
-                    else "blocked pending verified model/account pricing",
+                    else {
+                        "groq": "blocked: concrete model qualification and account-plan zero-cost evidence missing; a model listing or rate-limit header does not prove free billing",
+                        "gemini": "blocked: concrete model qualification and project/model-specific free-tier billing evidence missing",
+                        "nvidia": "blocked: concrete model qualification and account/model-specific zero-cost production entitlement missing; trial credits alone do not qualify",
+                    }[provider.id],
                     "docs": provider.docs,
                 }
                 for provider in PROVIDERS.values()
@@ -441,7 +454,75 @@ def compatible_request(
     )
 
 
-async def verify_dispatch(client: httpx.AsyncClient, offer: ModelOffer) -> None:
+async def verify_free_quota(
+    client: httpx.AsyncClient, key: str, *, minimum_requests: int = 1
+) -> int:
+    """Fresh official account metadata, never a price/entitlement substitute.
+
+    No cache survives credential rotation or restart. Only an integer count
+    escapes this function; labels, account IDs, balances and response bodies do not.
+    A remote concurrent consumer can still exhaust quota after this observation;
+    the provider must reject that request and no fallback is authorized here.
+    """
+    if not key or type(minimum_requests) is not int or minimum_requests < 1:
+        raise BrokerError("quota_unverified", "Free-model account quota is unverified.", 403)
+
+    def unique(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for name, value in pairs:
+            if name in result:
+                raise ValueError("Ambiguous metadata")
+            result[name] = value
+        return result
+
+    try:
+        async with (
+            asyncio.timeout(10),
+            client.stream(
+                "GET",
+                "https://openrouter.ai/api/v1/key",
+                headers={"Authorization": "Bearer " + key, "Accept": "application/json"},
+                timeout=10,
+                follow_redirects=False,
+            ) as response,
+        ):
+            response.raise_for_status()
+            body = bytearray()
+            async for chunk in response.aiter_bytes():
+                if len(body) + len(chunk) > 32768:
+                    raise ValueError("Metadata exceeds bound")
+                body.extend(chunk)
+        quota = json.loads(body.decode("utf-8"), object_pairs_hook=unique)["data"][
+            "free_model_daily_requests"
+        ]
+        limit, used, remaining = (quota[name] for name in ("limit", "used", "remaining"))
+        if (
+            any(type(value) is not int or value < 0 for value in (limit, used, remaining))
+            or used + remaining != limit
+        ):
+            raise ValueError("Inconsistent quota")
+    except (httpx.HTTPError, TimeoutError, ValueError, KeyError, TypeError, RecursionError):
+        raise BrokerError(
+            "quota_unverified",
+            "Cannot verify current account free-model quota. No inference sent.",
+            403,
+        ) from None
+    if remaining < minimum_requests:
+        raise BrokerError(
+            "quota_exhausted", "Insufficient account free-model requests. No inference sent.", 403
+        )
+    assert isinstance(remaining, int)
+    return remaining
+
+
+async def verify_dispatch(
+    client: httpx.AsyncClient,
+    offer: ModelOffer,
+    *,
+    key: str = "",
+    minimum_requests: int = 1,
+    still_authorized: Callable[[], bool] | None = None,
+) -> int:
     # Groq/Gemini/NVIDIA account billing status cannot be proven by their model
     # advertisements. Keep their production dispatch closed pending that verifier.
     if offer.provider != "openrouter" or offer.model_id != MODEL:
@@ -453,3 +534,6 @@ async def verify_dispatch(client: httpx.AsyncClient, offer: ModelOffer) -> None:
     from .policy import verify_catalog
 
     await verify_catalog(client)
+    if still_authorized is not None and not still_authorized():
+        raise BrokerError("inference_closed", "Inference grant changed during preflight.", 403)
+    return await verify_free_quota(client, key, minimum_requests=minimum_requests)
