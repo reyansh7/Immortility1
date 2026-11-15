@@ -41,6 +41,12 @@ export function describe(entry: LogEntry): string {
       return "Approval requested";
     case "approval.resolved":
       return `Approval ${String(d.decision ?? "resolved")}`;
+    case "observation.authorized":
+      return "One local window read authorized";
+    case "observation.completed":
+      return `Local window inspected · ${String(d.nodes)} elements${d.truncated ? " · truncated" : ""}`;
+    case "observation.revoked":
+      return "Window access ended";
     case "audit.notice":
       if (typeof d.calls === "number")
         return `Route ${String(d.route_mode ?? "")} · ${d.calls} calls · ${String(d.latency_ms ?? "?")} ms`;
@@ -51,6 +57,56 @@ export function describe(entry: LogEntry): string {
       return "Artifact created";
     default:
       return entry.type;
+  }
+}
+
+const statePhase: Record<string, string> = {
+  created: "Request received",
+  queued: "Request queued",
+  running: "Request analyzed",
+  verifying: "Verifying",
+  awaiting_approval: "Approval required",
+  succeeded: "Result completed",
+  failed: "Failed",
+  blocked: "Blocked",
+  rate_limited: "Rate limited",
+  cancelled: "Stopped",
+};
+
+/**
+ * Stage label for the live-intelligence feed. Derived only from the event
+ * type and its structured fields: no model reasoning is ever shown.
+ */
+export function phase(entry: LogEntry): string {
+  const d = entry.data;
+  switch (entry.type) {
+    case "task.state":
+      return statePhase[String(d.status)] ?? "Task update";
+    case "audit.notice":
+      return typeof d.calls === "number" ? "Route finished" : "Route selected";
+    case "agent.started":
+      return "Specialist delegated";
+    case "agent.completed":
+      return d.status === "succeeded"
+        ? "Specialist returned"
+        : "Specialist failed";
+    case "tool.started":
+    case "tool.progress":
+      return "Tool in use";
+    case "tool.completed":
+      return d.path ? "File accessed" : "Tool used";
+    case "approval.requested":
+      return "Approval required";
+    case "approval.resolved":
+      return "Approval resolved";
+    case "task.error":
+      return typeof d.attempt === "number" || d.retrying === true
+        ? "Retry"
+        : "Error";
+    case "artifact.created":
+      return "Artifact";
+    default:
+      return "Event";
   }
 }
 
@@ -104,7 +160,7 @@ export function Timeline({
       aria-label="Live execution timeline"
     >
       <div className="timeline-head">
-        <h2>Live execution</h2>
+        <h2>{compact ? "Live intelligence" : "Live execution"}</h2>
         <div className="filters">
           <select
             aria-label="Filter by agent"
@@ -177,7 +233,8 @@ export function Timeline({
                     {new Date(entry.at).toLocaleTimeString()}
                   </time>
                   <span className="dot" aria-hidden="true" />
-                  {describe(entry)}
+                  <span className="phase">{phase(entry)}</span>
+                  <span className="what">{describe(entry)}</span>
                 </summary>
                 <dl>
                   <dt>event</dt>

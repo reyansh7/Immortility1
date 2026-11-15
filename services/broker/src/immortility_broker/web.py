@@ -12,9 +12,39 @@ from urllib.parse import quote, urlsplit
 import httpx
 
 from .contracts import BrokerError
+from .public_fetch import fetch_json, validate_url
 
 ALLOWED_HOSTS = frozenset({"en.wikipedia.org"})
 USER_AGENT = "Immortility/0.1 (local desktop research; research@localhost) python-httpx"
+
+
+async def research_page_async(question: str) -> dict[str, str]:
+    """Production path: bounded async I/O, pinned public connection, cancellable."""
+    query = " ".join(question.split())[:120]
+    if not query:
+        raise BrokerError("invalid_request", "Research needs a question.", 400)
+    rows = await fetch_json(
+        "https://en.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&search="
+        + quote(query)
+    )
+    if not isinstance(rows, list) or len(rows) < 4 or not rows[3]:
+        return {"title": "", "url": "", "extract": ""}
+    if any(
+        not isinstance(rows[index], list) or not rows[index] or not isinstance(rows[index][0], str)
+        for index in (1, 3)
+    ):
+        raise BrokerError("source_unavailable", "Malformed public search.", 503)
+    title, url = rows[1][0][:300], rows[3][0][:2000]
+    validate_url(url)
+    summary = await fetch_json(
+        "https://en.wikipedia.org/api/rest_v1/page/summary/" + quote(title, safe="")
+    )
+    if not isinstance(summary, dict):
+        raise BrokerError("source_unavailable", "Malformed public summary.", 503)
+    extract = summary.get("extract", "")
+    if not isinstance(extract, str):
+        raise BrokerError("source_unavailable", "Malformed public summary.", 503)
+    return {"title": title, "url": url, "extract": extract[:1500]}
 
 
 def guard_url(url: str) -> str:
@@ -27,7 +57,9 @@ def guard_url(url: str) -> str:
     try:
         infos = socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)
     except socket.gaierror as error:
-        raise BrokerError("catalog_unavailable", "The public source could not be resolved.") from error
+        raise BrokerError(
+            "catalog_unavailable", "The public source could not be resolved."
+        ) from error
     if not infos:
         raise BrokerError("catalog_unavailable", "The public source could not be resolved.")
     for info in infos:

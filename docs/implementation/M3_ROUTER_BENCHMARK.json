@@ -1,0 +1,28 @@
+{
+  "classification": "OFFLINE VERIFIED routing overhead only; synthetic model metadata/outcomes",
+  "cold_store_and_registry_ms": 26.278,
+  "warm_classification_and_selection": {
+    "n": 1000,
+    "p50_ms": 0.0578,
+    "p95_ms": 0.081,
+    "max_ms": 0.4892
+  },
+  "warm_quality_ranking_branch": {
+    "n": 1000,
+    "p50_ms": 0.089,
+    "p95_ms": 0.1661,
+    "max_ms": 1.2324
+  },
+  "task_classes_exercised": [
+    "CODING",
+    "DEEP_REASONING",
+    "DOCUMENT_WRITING",
+    "FAST_CHAT",
+    "RESEARCH",
+    "STRUCTURED_EXTRACTION",
+    "TOOL_EXECUTION"
+  ],
+  "model_quality_or_cloud_latency_measured": false,
+  "cloud_requests": 0,
+  "dependencies_added": 0
+}

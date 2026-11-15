@@ -1,0 +1,19 @@
+{
+  "mode": "real local SDK stdio, no model",
+  "sdk_version": "2.2.0",
+  "n": 100,
+  "success": 100,
+  "initialize_and_list_ms": 1021.56,
+  "warm_p50_ms": 0.86,
+  "warm_p95_ms": 1.26,
+  "model_calls": 0,
+  "cloud_tokens": 0,
+  "additional_ram_mib": null,
+  "additional_vram_mib": null,
+  "broker_cold_call_ms_n3": [
+    2769.34,
+    2290.98,
+    5032.03
+  ],
+  "scope": "Arithmetic only; not the full B1 task corpus or a quality comparison"
+}

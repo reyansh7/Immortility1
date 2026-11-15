@@ -226,7 +226,9 @@ def test_created_task_cannot_skip_to_succeeded(tmp_path):
     store = Store(tmp_path / "db")
     session = store.session()
     task, _ = store.create(
-        TaskRequest(session_id=session["id"], request_id="skip", content="hello", cloud_consent=True)
+        TaskRequest(
+            session_id=session["id"], request_id="skip", content="hello", cloud_consent=True
+        )
     )
     with pytest.raises(BrokerError) as raised:
         store.state(task["task_id"], "succeeded")
@@ -248,7 +250,7 @@ def test_restart_reconciles_without_reexecution(tmp_path):
     store = Store(tmp_path / "db")
     assert store.get(task["task_id"])["status"] == "disconnected"
     assert store.db.execute("PRAGMA journal_mode").fetchone()[0] == "wal"
-    assert store.db.execute("PRAGMA user_version").fetchone()[0] == 1
+    assert store.db.execute("PRAGMA user_version").fetchone()[0] == 4
     with pytest.raises(BrokerError):
         store.state(task["task_id"], "succeeded")
     store.db.close()

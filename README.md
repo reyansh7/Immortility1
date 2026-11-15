@@ -23,7 +23,23 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\bootstrap-dev.ps1
 # Edit .env locally if no key is configured. Never paste keys into chat or source files.
 notepad .env
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\dev.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-command.ps1
 ```
+
+After that install, open a new Command Prompt or PowerShell window:
+
+| Command | Behavior |
+|---|---|
+| `immortility` | On AC power, render on the high-performance GPU. On battery, use the power-saving GPU. |
+| `immortility -performance` | High-performance GPU and a 60 fps interaction cap. `-gpu` is the same choice. |
+| `immortility -balanced` | Power-saving GPU and a lower idle frame rate. |
+| `immortility -battery` | Power-saving GPU, lower resolution, and the lowest idle frame rate. |
+| `immortility -headless` | Local background runtime only. No 3D window and no cloud model calls. |
+
+The graphics choice is applied to Immortility's own executable and to the WebView2
+process it starts. It does not change the GPU preference of other applications.
+An adapter change applies at the next cold start; an already open window is only
+brought forward. Leave the desktop launch window open; closing it stops that app.
 
 `ExecutionPolicy Bypass` applies only to that PowerShell process; it does not change
 the machine execution policy. `bootstrap-dev.ps1` installs locked packages locally,
@@ -68,12 +84,26 @@ audition; defaults remain unchanged and `INFERNAL_VOICE_ENABLED=false`. See the
 for preserved A/B previews, real Windows playback/Stop results, licenses and
 remaining acceptance gates. Qwen remains disabled.
 
+The user-approved **Mechanical reference** voice now uses an isolated local XTTS
+runtime through the broker, with background prewarming, sentence prefetch and
+actual playback-energy face animation. On this PC the reference feature is
+enabled; choose **IMMORTILITY · Mechanical reference** in Settings and enable
+**Speak assistant replies** after restarting the updated app. It is English-only
+in this slice and its model/output license is non-commercial. See
+[reference voice evaluation and measured runtime](docs/research/REFERENCE_VOICE_EVALUATION.md).
+
 The current real route is **Hermes → local inference guard → OpenRouter
 `openrouter/free`**. Each outgoing request verifies the live catalog price and
 forces a zero-price route. Gemini and Groq are displayed but blocked because this
 implementation cannot establish account-level free eligibility. Paid inference,
 agent tools, model training, screen capture and OS automation remain blocked. Local
 Whisper/Piper inference requires no cloud speech subscription.
+
+## Face and dashboard
+
+The animated robotic face (`apps/desktop/public/models/immortility-face.glb`), its Blender
+pipeline, animation controls and the GSAP dashboard are documented in
+[`docs/visual/FACE_AND_DASHBOARD.md`](docs/visual/FACE_AND_DASHBOARD.md).
 
 ## Validate and build
 

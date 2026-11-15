@@ -1,0 +1,54 @@
+{
+  "status": "measured",
+  "exit_code": 0,
+  "valid_tools": true,
+  "phases_seconds": [
+    [
+      "manifest",
+      0.067
+    ],
+    [
+      "spawn",
+      0.247
+    ],
+    [
+      "import",
+      1.021
+    ],
+    [
+      "input",
+      5.144
+    ],
+    [
+      "initialize",
+      5.144
+    ],
+    [
+      "ready",
+      9.83
+    ],
+    [
+      "listed",
+      9.836
+    ],
+    [
+      "closing",
+      9.836
+    ],
+    [
+      "completed",
+      10.258
+    ],
+    [
+      "stdout",
+      10.258
+    ],
+    [
+      "exit",
+      10.684
+    ]
+  ],
+  "diagnostic_only_deadline_seconds": 25,
+  "production_deadline_seconds": 10,
+  "cloud_calls": 0
+}

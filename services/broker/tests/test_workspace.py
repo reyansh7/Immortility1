@@ -52,14 +52,7 @@ class CodingHermes:
             yield "The patch is present. Tests were not run.\nVERDICT: pass"
             return
         assert "return a - b" in content
-        yield (
-            "The function subtracts.\n"
-            "PATCH calc.py\n"
-            "<<<\n"
-            "def add(a, b):\n"
-            "    return a + b\n"
-            ">>>"
-        )
+        yield ("The function subtracts.\nPATCH calc.py\n<<<\ndef add(a, b):\n    return a + b\n>>>")
 
     async def stop(self):
         return None
@@ -77,7 +70,9 @@ def _wait(client, task_id, allowed):
 def test_approved_patch_is_applied_and_tested(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
-    (repo / "calc.py").write_text("def add(a, b):\n    return a - b\n", encoding="utf-8", newline="\n")
+    (repo / "calc.py").write_text(
+        "def add(a, b):\n    return a - b\n", encoding="utf-8", newline="\n"
+    )
     (repo / "test_calc.py").write_text(
         "import unittest\nfrom calc import add\n"
         "class T(unittest.TestCase):\n"
@@ -223,7 +218,9 @@ def test_changed_file_conflicts_instead_of_being_overwritten(tmp_path):
             },
         )
         waiting = _wait(client, created.json()["task_id"], {"awaiting_approval", "failed"})
-        (repo / "calc.py").write_text("def add(a, b):\n    return a\n", encoding="utf-8", newline="\n")
+        (repo / "calc.py").write_text(
+            "def add(a, b):\n    return a\n", encoding="utf-8", newline="\n"
+        )
         conflict = client.post(
             f"/v1/tasks/{waiting['task_id']}/approval",
             headers=AUTH,

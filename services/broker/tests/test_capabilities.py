@@ -19,6 +19,7 @@ def test_untrusted_code_execution_stays_disabled(tmp_path):
     assert raised.value.code == "tool_denied"
     settings = Settings(_env_file=None, data_dir=tmp_path, code_execution_enabled=True)
     assert settings.code_execution_enabled is False
+    assert Settings(_env_file=None, experimental_qwen_tts=True).experimental_qwen_tts is False
 
 
 def test_web_guard_rejects_private_and_off_allowlist_targets():
@@ -63,14 +64,22 @@ def test_memory_survives_restart_and_stays_in_its_session(tmp_path):
     store = Store(path)
     first = store.session()["id"]
     second = store.session()["id"]
-    store.remember(first, "task-1", "The broker stores python length notes")
+    from immortility_broker.contracts import TaskRequest
+
+    task, _ = store.create(
+        TaskRequest(
+            session_id=first, request_id="memory", content="python length", cloud_consent=True
+        )
+    )
+    task_id = task["task_id"]
+    store.remember(first, task_id, "The broker stores python length notes")
     store.db.close()
     reopened = Store(path)
     assert reopened.fts
     found = reopened.recall(first, "python length")
     assert any("python" in item["body"] for item in found)
     assert reopened.recall(second, "python length") == []
-    assert reopened.forget(first, "task-1") == 1
+    assert reopened.forget(first, task_id) == 1
     assert reopened.recall(first, "python length") == []
     reopened.db.close()
 

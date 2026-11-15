@@ -46,10 +46,11 @@ def play_wav(
     stop: threading.Event,
     on_level: Callable[[float], None],
     tempo: float = 1.0,
+    output_device: int | None = None,
 ) -> None:
     source = stretch_wav(path, tempo) if abs(tempo - 1.0) >= 0.01 else path
     try:
-        _play_pcm(source, volume, stop, on_level)
+        _play_pcm(source, volume, stop, on_level, output_device)
     finally:
         if source != path:
             source.unlink(missing_ok=True)
@@ -60,6 +61,7 @@ def _play_pcm(
     volume: float,
     stop: threading.Event,
     on_level: Callable[[float], None],
+    output_device: int | None = None,
 ) -> None:
     import numpy as np
     import sounddevice as sd
@@ -70,8 +72,10 @@ def _play_pcm(
         frames = audio.readframes(audio.getnframes())
     samples = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768
     samples *= max(0.0, min(1.0, volume))
-    block = max(1, int(rate * 0.05) * channels)
-    with sd.OutputStream(samplerate=rate, channels=channels, dtype="float32") as stream:
+    block = max(1, int(rate * 0.02) * channels)
+    with sd.OutputStream(
+        samplerate=rate, channels=channels, dtype="float32", device=output_device
+    ) as stream:
         for offset in range(0, len(samples), block):
             if stop.is_set():
                 break

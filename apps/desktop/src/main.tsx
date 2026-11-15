@@ -15,6 +15,9 @@ import { reduceEvent, terminal, type Task, type Transcript } from "./state";
 import "./style.css";
 import { useVoice } from "./useVoice";
 import { VoiceControls } from "./VoiceControls";
+import { ScreenInspection } from "./ScreenInspection";
+import { BackgroundConnection } from "./BackgroundConnection";
+import { followTask, reconcileTask, taskStatus } from "./chat";
 import { Composer, Messages } from "./Conversation";
 import {
   LocalTools,
@@ -28,7 +31,9 @@ import {
   faceLabel,
   wantsOverlay,
 } from "./face/faceState";
-import { FlatFace } from "./face/HeadScene";
+import { FlatFace } from "./face/FlatFace";
+import { MotionProvider } from "./ui/motion";
+import { Icon } from "./ui/Icon";
 import { Overlay } from "./companion/Overlay";
 import type { View } from "./command/CommandCenter";
 
@@ -83,12 +88,44 @@ const blank: Transcript = {
   events: [],
 };
 
+/**
+ * Development-only deep link (`?mode=command&view=chat`) so UI reviews and
+ * screenshot runs can open a surface directly. Production builds always start
+ * as the compact companion.
+ */
+function devStart(): { mode: Mode; view: View } {
+  const fallback = { mode: "compact" as Mode, view: "home" as View };
+  if (!import.meta.env.DEV) return fallback;
+  const query = new URLSearchParams(window.location.search);
+  const mode = query.get("mode");
+  const view = query.get("view");
+  return {
+    mode: ["compact", "chat", "command", "overlay"].includes(mode ?? "")
+      ? (mode as Mode)
+      : fallback.mode,
+    view: [
+      "home",
+      "chat",
+      "agents",
+      "tasks",
+      "timeline",
+      "memory",
+      "tools",
+      "settings",
+    ].includes(view ?? "")
+      ? (view as View)
+      : fallback.view,
+  };
+}
+const start = devStart();
+
 function App() {
-  const [mode, setMode] = useState<Mode>("compact"),
+  const [screenEpoch, setScreenEpoch] = useState(0);
+  const [mode, setMode] = useState<Mode>(start.mode),
     [settings, setSettings] = useState(false),
-    [view, setView] = useState<View>("home"),
+    [view, setView] = useState<View>(start.view),
     [prefs, setPrefsState] = useState(loadPrefs),
-    [preview, setPreview] = useState(false);
+    [preview, setPreview] = useState(start.mode === "overlay");
   const [health, setHealth] = useState<Health>(),
     [sessions, setSessions] = useState<Session[]>([]),
     [session, setSession] = useState("");
@@ -99,19 +136,24 @@ function App() {
     [connected, setConnected] = useState(false),
     [sending, setSending] = useState(false),
     [consent, setConsentState] = useState(false),
+    [toolConsent, setToolConsent] = useState(false),
+    [artifactConsent, setArtifactConsent] = useState(false),
     [errorSeen, setErrorSeen] = useState("");
   const streamAbort = useRef<AbortController | null>(null),
     historyAbort = useRef<AbortController | null>(null),
     sessionRef = useRef(""),
-    modeRef = useRef<Mode>("compact"),
+    submitting = useRef(false),
+    modeRef = useRef<Mode>(start.mode),
     beforeOverlay = useRef<Mode>("compact"),
     prefsRef = useRef(prefs),
-    level = useRef(0),
     lastRequest = useRef<{
       session_id: string;
       request_id: string;
       content: string;
       cloud_consent: true;
+      allowed_capabilities?: string[];
+      budget_mode?: "standard" | "auto";
+      requested_artifacts?: "none" | "markdown-and-pdf";
     } | null>(null),
     press = useRef<{ x: number; y: number } | null>(null),
     dragged = useRef(false),
@@ -143,11 +185,11 @@ function App() {
   }, []);
 
   const active = tasks.find(
-    (t) => !terminal.has(transcripts[t.task_id]?.status ?? t.status),
+    (t) => !terminal.has(taskStatus(t, transcripts[t.task_id])),
   );
   const focus = active ?? tasks.at(-1);
   const live = focus ? transcripts[focus.task_id] : undefined;
-  const status = live?.status ?? focus?.status;
+  const status = focus ? taskStatus(focus, live) : undefined;
 
   const watch = useCallback(async (task: Task) => {
     streamAbort.current?.abort();
@@ -155,20 +197,32 @@ function App() {
     streamAbort.current = controller;
     // Replay from the beginning and deduplicate sequence numbers after reconnect.
     try {
-      await stream(
-        task.task_id,
-        0,
+      await followTask(
+        task,
+        {
+          stream: (after, onEvent, signal) =>
+            stream(task.task_id, after, onEvent, signal),
+          task: () => api<Task>(`/v1/tasks/${task.task_id}`),
+        },
         (event) => {
           setTranscripts((previous) => ({
             ...previous,
             [task.task_id]: reduceEvent(previous[task.task_id] ?? blank, event),
           }));
         },
+        (fresh) => {
+          setTasks((previous) =>
+            previous.map((t) => (t.task_id === fresh.task_id ? fresh : t)),
+          );
+          setTranscripts((previous) => ({
+            ...previous,
+            [task.task_id]: reconcileTask(
+              previous[task.task_id] ?? blank,
+              fresh,
+            ),
+          }));
+        },
         controller.signal,
-      );
-      const fresh = await api<Task>(`/v1/tasks/${task.task_id}`);
-      setTasks((previous) =>
-        previous.map((t) => (t.task_id === fresh.task_id ? fresh : t)),
       );
     } catch (issue) {
       if (!controller.signal.aborted)
@@ -181,7 +235,7 @@ function App() {
     (task: Task) => {
       setTasks((previous) =>
         previous.some((t) => t.task_id === task.task_id)
-          ? previous
+          ? previous.map((t) => (t.task_id === task.task_id ? task : t))
           : [...previous, task],
       );
       if (!terminal.has(task.status)) void watch(task);
@@ -189,10 +243,10 @@ function App() {
     [watch],
   );
   const voice = useVoice(session, consent, onVoiceTask, setInput);
-  level.current = voice.status.level;
+  const level = voice.level;
 
   const derived = deriveFace({
-    connected: connected && !!health?.ready,
+    connected: connected && (!!health?.ready || focus?.input.no_cloud === true),
     status,
     log: live?.log ?? [],
     text: live?.text ?? "",
@@ -232,6 +286,8 @@ function App() {
       setSession(id);
       setError("");
       setConsentState(false);
+      setToolConsent(false);
+      setArtifactConsent(false);
       try {
         const rows = await api<Task[]>(`/v1/sessions/${id}/tasks`);
         if (sessionRef.current !== id) return;
@@ -297,7 +353,25 @@ function App() {
       );
     }
   }, [selectSession, watch]);
+  const backgroundChanged = useCallback(
+    async (attached: boolean) => {
+      streamAbort.current?.abort();
+      historyAbort.current?.abort();
+      sessionRef.current = "";
+      setSession("");
+      setTasks([]);
+      setTranscripts({});
+      setSessions([]);
+      setHealth(undefined);
+      setConnected(false);
+      setError("");
+      setScreenEpoch((value) => value + 1);
+      if (attached) await refresh();
+    },
+    [refresh],
+  );
   const stop = useCallback(() => {
+    setScreenEpoch((value) => value + 1);
     void api("/v1/stop", {})
       .then(() => {
         const running = tasksRef.current.find((t) => !terminal.has(t.status));
@@ -315,9 +389,10 @@ function App() {
   useEffect(() => {
     void refresh();
     // The UI always starts compact, so a reload must not leave a large window behind.
-    void windowAction("collapse")
-      .then(() => windowAction(prefsRef.current.pin ? "pin" : "unpin"))
-      .catch(() => {});
+    if (start.mode === "compact")
+      void windowAction("collapse")
+        .then(() => windowAction(prefsRef.current.pin ? "pin" : "unpin"))
+        .catch(() => {});
     const timer = setInterval(() => {
       void api<Health>("/health/ready")
         .then((h) => {
@@ -335,6 +410,7 @@ function App() {
           void changeMode(event.payload);
       }),
       listen("global-stop", () => {
+        setScreenEpoch((value) => value + 1);
         void api("/v1/stop", {}).catch(() =>
           setError("Stop could not reach the broker."),
         );
@@ -361,36 +437,68 @@ function App() {
     consent &&
     !sending &&
     ["IDLE", "ERROR", "CANCELLED"].includes(voice.status.state);
+  const localOnly = health?.runtime_mode === "local-background";
   async function send() {
-    if (!input.trim() || active || !canSend) return;
+    if (!input.trim() || active || !canSend || submitting.current) return;
+    submitting.current = true;
     setSending(true);
     setError("");
+    const report =
+      artifactConsent &&
+      toolConsent &&
+      health?.artifact_tools_enabled === true &&
+      health?.web_research_enabled === true;
+    const allowedCapabilities = report
+      ? ["public.research.v1", "report.create.v1"]
+      : toolConsent
+        ? [
+            ...(health?.local_tools_enabled ? ["clock.now.v1"] : []),
+            ...(health?.standard_mcp_enabled ? ["arithmetic.add.v1"] : []),
+            ...(health?.web_research_enabled ? ["public.research.v1"] : []),
+          ]
+        : [];
     const request =
       lastRequest.current?.content === input &&
-      lastRequest.current.session_id === session
+      lastRequest.current.session_id === session &&
+      JSON.stringify(lastRequest.current.allowed_capabilities ?? []) ===
+        JSON.stringify(allowedCapabilities) &&
+      (lastRequest.current.requested_artifacts ?? "none") ===
+        (report ? "markdown-and-pdf" : "none")
         ? lastRequest.current
         : {
             session_id: session,
             request_id: crypto.randomUUID(),
             content: input,
             cloud_consent: true as const,
+            allowed_capabilities: allowedCapabilities,
+            requested_artifacts: report
+              ? ("markdown-and-pdf" as const)
+              : ("none" as const),
+            budget_mode: allowedCapabilities.length
+              ? ("standard" as const)
+              : ("auto" as const),
           };
     lastRequest.current = request;
     try {
       const task = await api<Task>("/v1/tasks", request);
+      if (lastRequest.current === request) lastRequest.current = null;
+      if (sessionRef.current !== request.session_id) return;
       setTasks((previous) =>
         previous.some((t) => t.task_id === task.task_id)
           ? previous
           : [...previous, task],
       );
-      setInput("");
-      lastRequest.current = null;
+      setInput((current) => (current === request.content ? "" : current));
+      setToolConsent(false);
+      setArtifactConsent(false);
       if (!terminal.has(task.status)) void watch(task);
     } catch (issue) {
-      setError(
-        issue instanceof Error ? issue.message : "Message could not be sent.",
-      );
+      if (sessionRef.current === request.session_id)
+        setError(
+          issue instanceof Error ? issue.message : "Message could not be sent.",
+        );
     } finally {
+      submitting.current = false;
       setSending(false);
     }
   }
@@ -436,6 +544,27 @@ function App() {
     }
   }
 
+  const localCapabilities = (
+    <>
+      <BackgroundConnection
+        attached={health?.runtime_mode === "local-background"}
+        session={session}
+        sdk={health?.standard_mcp_enabled === true}
+        onChanged={backgroundChanged}
+        onTask={onVoiceTask}
+        onError={setError}
+      />
+      <ScreenInspection
+        key={`${session}:${screenEpoch}`}
+        session={session}
+        available={connected && health?.observation_available === true}
+        busy={!!active}
+        onTask={onVoiceTask}
+        onStop={stop}
+        onError={setError}
+      />
+    </>
+  );
   const messages = (
     <Messages
       tasks={tasks}
@@ -444,6 +573,7 @@ function App() {
       reduced={prefs.reduced}
       onError={setError}
       onSpeak={(id) => void voice.speak(id)}
+      localOnly={localOnly}
     />
   );
   const composer = (quick: boolean) => (
@@ -457,6 +587,23 @@ function App() {
       onSend={() => void send()}
       onStop={stop}
       quickActions={quick}
+      localOnly={localOnly}
+      toolConsent={toolConsent}
+      setToolConsent={(value) => {
+        setToolConsent(value);
+        if (!value) setArtifactConsent(false);
+      }}
+      artifactConsent={artifactConsent}
+      setArtifactConsent={setArtifactConsent}
+      artifactsAvailable={
+        health?.artifact_tools_enabled === true &&
+        health?.web_research_enabled === true
+      }
+      toolsAvailable={
+        health?.local_tools_enabled === true ||
+        health?.standard_mcp_enabled === true ||
+        health?.web_research_enabled === true
+      }
     />
   );
   const settingsPanel = (
@@ -468,6 +615,12 @@ function App() {
       setPrefs={setPrefs}
       onRefresh={() => void refresh()}
       onError={setError}
+      localCapabilities={localCapabilities}
+      onModelChange={() => {
+        setConsentState(false);
+        setToolConsent(false);
+        setArtifactConsent(false);
+      }}
       onPreviewOverlay={() => {
         beforeOverlay.current = modeRef.current;
         setPreview(true);
@@ -489,267 +642,297 @@ function App() {
   const tip = `Immortility · ${faceLabel[face]}. Click for chat, double-click for the command center, right-click for more.`;
 
   return (
-    <main
-      className={`mode-${mode} ${prefs.reduced ? "reduced" : ""}`}
-      onKeyDown={(event) => {
-        if (event.key === "Escape" && mode === "chat")
-          void changeMode("compact");
-      }}
-    >
-      {mode === "compact" && (
-        <div className={`companion ${face}`}>
-          <div
-            className="face-hit"
-            role="button"
-            tabIndex={0}
-            aria-label={tip}
-            title={tip}
-            onKeyDown={faceKeys}
-            onPointerDown={facePointerDown}
-            onPointerMove={facePointerMove}
-            onPointerUp={() => (press.current = null)}
-            onClick={(event) => {
-              if (dragged.current) {
-                dragged.current = false;
-                return;
-              }
-              if (event.detail > 1) return;
-              window.clearTimeout(clickTimer.current);
-              clickTimer.current = window.setTimeout(
-                () => void changeMode("chat"),
-                240,
-              );
-            }}
-            onDoubleClick={() => {
-              window.clearTimeout(clickTimer.current);
-              void changeMode("command");
-            }}
-            onContextMenu={(event) => {
-              event.preventDefault();
-              void windowAction("context_menu");
-            }}
-          >
-            <Suspense fallback={<FlatFace face={face} compact />}>
-              <HeadCanvas
-                face={face}
-                level={level}
-                quality={prefs.quality}
-                reduced={prefs.reduced}
-                compact
-              />
-            </Suspense>
-          </div>
-          <div className="companion-bar">
-            <button
-              type="button"
-              className="grip"
-              aria-label="Drag companion"
-              title="Drag to move, or focus and use Up/Down arrows"
+    <MotionProvider reduced={prefs.reduced}>
+      <main
+        className={`mode-${mode} ${prefs.reduced ? "reduced" : ""}`}
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && mode === "chat")
+            void changeMode("compact");
+        }}
+      >
+        {mode === "compact" && (
+          <div className={`companion ${face} ${active ? "busy" : ""}`}>
+            <span className="relic-shell" aria-hidden="true" />
+            <span className="relic-pedestal" aria-hidden="true" />
+            <div
+              className="face-hit"
+              role="button"
+              tabIndex={0}
+              aria-label={tip}
+              title={tip}
               onKeyDown={faceKeys}
-              onPointerDown={(e) => {
-                if (e.button === 0) void windowAction("drag");
+              onPointerDown={facePointerDown}
+              onPointerMove={facePointerMove}
+              onPointerUp={() => (press.current = null)}
+              onClick={(event) => {
+                if (dragged.current) {
+                  dragged.current = false;
+                  return;
+                }
+                if (event.detail > 1) return;
+                window.clearTimeout(clickTimer.current);
+                clickTimer.current = window.setTimeout(
+                  () => void changeMode("chat"),
+                  240,
+                );
+              }}
+              onDoubleClick={() => {
+                window.clearTimeout(clickTimer.current);
+                void changeMode("command");
+              }}
+              onContextMenu={(event) => {
+                event.preventDefault();
+                void windowAction("context_menu");
               }}
             >
-              ⠿
-            </button>
-            <span className={`state-dot ${face}`} title={faceLabel[face]} />
-            {active && (
+              <Suspense fallback={<FlatFace face={face} compact />}>
+                <HeadCanvas
+                  face={face}
+                  level={level}
+                  quality={prefs.quality}
+                  reduced={prefs.reduced}
+                  compact
+                />
+              </Suspense>
+            </div>
+            <div className="companion-bar">
               <button
                 type="button"
-                className="danger"
-                aria-label="Stop the active task"
-                title="Stop"
-                onClick={stop}
+                className="grip"
+                aria-label="Drag companion"
+                title="Drag to move, or focus and use Up/Down arrows"
+                onKeyDown={faceKeys}
+                onPointerDown={(e) => {
+                  if (e.button === 0) void windowAction("drag");
+                }}
               >
-                ■
+                <Icon name="grip" />
               </button>
-            )}
-            <button
-              type="button"
-              aria-label="Open command center"
-              title="Open command center"
-              onClick={() => void changeMode("command")}
-            >
-              ⛶
-            </button>
-          </div>
-        </div>
-      )}
-      {mode === "chat" && (
-        <section className="panel" aria-label="Immortility quick chat">
-          <header>
-            <div className="identity">
-              <div className="mini-face" aria-hidden="true">
-                <Suspense fallback={<FlatFace face={face} compact />}>
-                  <HeadCanvas
-                    face={face}
-                    level={level}
-                    quality={prefs.quality}
-                    reduced={prefs.reduced}
-                    compact
-                  />
-                </Suspense>
-              </div>
-              <div>
-                <strong>IMMORTILITY</strong>
-                <small className={`state-text ${face}`}>
-                  {faceLabel[face]}
-                </small>
-              </div>
-            </div>
-            <div className="header-actions">
+              <span
+                className={`state-dot ${face}`}
+                role="status"
+                aria-label={faceLabel[face]}
+                title={faceLabel[face]}
+              />
+              <button
+                type="button"
+                aria-label="Open quick chat"
+                title="Quick chat"
+                onClick={() => void changeMode("chat")}
+              >
+                <Icon name="chat" />
+              </button>
+              {active && (
+                <button
+                  type="button"
+                  className="danger"
+                  aria-label="Stop the active task"
+                  title="Stop"
+                  onClick={stop}
+                >
+                  <Icon name="stop" />
+                </button>
+              )}
               <button
                 type="button"
                 aria-label="Open command center"
-                title="Command center"
+                title="Open command center"
                 onClick={() => void changeMode("command")}
               >
-                ⛶
-              </button>
-              <button
-                type="button"
-                aria-label="Settings"
-                aria-pressed={settings}
-                onClick={() => setSettings(!settings)}
-              >
-                ⚙
-              </button>
-              <button
-                type="button"
-                aria-label="Collapse to the floating face"
-                onClick={() => void changeMode("compact")}
-              >
-                −
+                <Icon name="expand" />
               </button>
             </div>
-          </header>
-          <div className="connection">
-            <span
-              className={`dot ${connected && health?.ready ? "online" : ""}`}
-            />
-            <span>
-              {connected
-                ? health?.ready
-                  ? "Hermes connected · openrouter/free"
-                  : "Setup required"
-                : "Broker disconnected"}
-            </span>
-            <span className="badge">$0 LOCKED</span>
           </div>
-          {settings ? (
-            settingsPanel
-          ) : (
-            <>
-              <nav aria-label="Conversations">
-                <select
-                  aria-label="Conversation"
-                  value={session}
-                  onChange={(e) => void selectSession(e.target.value)}
-                >
-                  {sessions.map((s, index) => (
-                    <option key={s.id} value={s.id}>
-                      {index === 0
-                        ? "Latest"
-                        : new Date(s.created).toLocaleString()}{" "}
-                      · {s.id.slice(0, 6)}
-                    </option>
-                  ))}
-                </select>
+        )}
+        {mode === "chat" && (
+          <section className="panel" aria-label="Immortility quick chat">
+            <header>
+              <div className="identity">
+                <div className="mini-face" aria-hidden="true">
+                  <Suspense fallback={<FlatFace face={face} compact />}>
+                    <HeadCanvas
+                      face={face}
+                      level={level}
+                      quality={prefs.quality}
+                      reduced={prefs.reduced}
+                      compact
+                    />
+                  </Suspense>
+                </div>
+                <div>
+                  <strong>IMMORTILITY</strong>
+                  <small className={`state-text ${face}`}>
+                    {faceLabel[face]}
+                  </small>
+                </div>
+              </div>
+              <div className="header-actions">
                 <button
                   type="button"
-                  onClick={() => void newSession()}
-                  disabled={!connected}
-                  aria-label="New conversation"
+                  aria-label="Open command center"
+                  title="Command center"
+                  onClick={() => void changeMode("command")}
                 >
-                  ＋
+                  ⛶
                 </button>
-              </nav>
-              {messages}
-              {errorBanner}
-              {composer(false)}
-              <VoiceControls voice={voice} />
-            </>
-          )}
-          <footer>
-            <button
-              type="button"
-              onPointerDown={(e) => {
-                if (e.button === 0) void windowAction("drag");
-              }}
-              aria-label="Drag companion"
-              title="Drag to move, or focus and use Up/Down arrows"
-              onKeyDown={faceKeys}
-            >
-              ⠿ Move
-            </button>
-            <span>Esc collapses</span>
-          </footer>
-        </section>
-      )}
-      {mode === "command" && (
-        <Suspense
-          fallback={<div className="loading">Loading command center…</div>}
-        >
-          <CommandCenter
-            face={face}
-            agent={derived.agent}
-            level={level}
-            prefs={prefs}
-            health={health}
-            connected={connected}
-            consent={consent}
-            micLive={micLive}
-            tasks={tasks}
-            transcripts={transcripts}
-            focus={focus}
-            agents={agents}
-            sessions={sessions}
-            session={session}
-            view={view}
-            setView={setView}
-            onSelectSession={(id) => void selectSession(id)}
-            onNewSession={() => void newSession()}
-            onStop={stop}
-            onError={setError}
-            onCompanion={() => void changeMode("compact")}
-            onQuickChat={() => void changeMode("chat")}
-            chat={messages}
-            composer={composer(true)}
-            voice={<VoiceControls voice={voice} />}
-            settings={settingsPanel}
-            memory={
-              <LocalTools
-                session={session}
-                mcp={false}
-                clock={false}
-                onError={setError}
+                <button
+                  type="button"
+                  aria-label="Settings"
+                  aria-pressed={settings}
+                  onClick={() => setSettings(!settings)}
+                >
+                  ⚙
+                </button>
+                <button
+                  type="button"
+                  aria-label="Collapse to the floating face"
+                  onClick={() => void changeMode("compact")}
+                >
+                  −
+                </button>
+              </div>
+            </header>
+            <div className="connection">
+              <span
+                className={`dot ${connected && (health?.ready || localOnly) ? "online" : ""}`}
               />
+              <span>
+                {connected
+                  ? localOnly
+                    ? "Attached · local tasks only"
+                    : health?.ready
+                      ? "Hermes connected · openrouter/free"
+                      : "Setup required"
+                  : "Broker disconnected"}
+              </span>
+              <span className="badge">$0 LOCKED</span>
+            </div>
+            {settings ? (
+              settingsPanel
+            ) : (
+              <>
+                <nav aria-label="Conversations">
+                  <select
+                    aria-label="Conversation"
+                    value={session}
+                    onChange={(e) => void selectSession(e.target.value)}
+                  >
+                    {sessions.map((s, index) => (
+                      <option key={s.id} value={s.id}>
+                        {index === 0
+                          ? "Latest"
+                          : new Date(s.created).toLocaleString()}{" "}
+                        · {s.id.slice(0, 6)}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => void newSession()}
+                    disabled={!connected}
+                    aria-label="New conversation"
+                  >
+                    ＋
+                  </button>
+                </nav>
+                {messages}
+                {errorBanner}
+                {composer(false)}
+                {!localOnly && <VoiceControls voice={voice} />}
+              </>
+            )}
+            <footer>
+              <button
+                type="button"
+                onPointerDown={(e) => {
+                  if (e.button === 0) void windowAction("drag");
+                }}
+                aria-label="Drag companion"
+                title="Drag to move, or focus and use Up/Down arrows"
+                onKeyDown={faceKeys}
+              >
+                ⠿ Move
+              </button>
+              <span>Esc collapses</span>
+            </footer>
+          </section>
+        )}
+        {mode === "command" && (
+          <Suspense
+            fallback={<div className="loading">Loading command center…</div>}
+          >
+            <CommandCenter
+              face={face}
+              agent={derived.agent}
+              level={level}
+              prefs={prefs}
+              health={health}
+              connected={connected}
+              consent={consent}
+              micLive={micLive}
+              tasks={tasks}
+              transcripts={transcripts}
+              focus={focus}
+              agents={agents}
+              sessions={sessions}
+              session={session}
+              view={view}
+              setView={setView}
+              onSelectSession={(id) => void selectSession(id)}
+              onNewSession={() => void newSession()}
+              onStop={stop}
+              onError={setError}
+              onCompanion={() => void changeMode("compact")}
+              onQuickChat={() => void changeMode("chat")}
+              chat={messages}
+              composer={composer(true)}
+              voice={
+                localOnly ? (
+                  <p className="hint">
+                    Voice is unavailable in local background mode.
+                  </p>
+                ) : (
+                  <VoiceControls voice={voice} />
+                )
+              }
+              settings={settingsPanel}
+              memory={
+                <LocalTools
+                  session={session}
+                  mcp={false}
+                  clock={false}
+                  onError={setError}
+                />
+              }
+              error={errorBanner}
+            />
+          </Suspense>
+        )}
+        {mode === "overlay" && (
+          <Overlay
+            face={face}
+            level={level}
+            quality={prefs.quality}
+            reduced={prefs.reduced}
+            title={focus?.input.content.slice(0, 80) ?? "No active task"}
+            startedAt={
+              status && !terminal.has(status) ? live?.log?.[0]?.at : undefined
             }
-            error={errorBanner}
+            screenAccess={screenControl}
+            preview={preview}
+            onStop={stop}
+            onRestore={() => {
+              setPreview(false);
+              void changeMode(
+                beforeOverlay.current === "overlay"
+                  ? "compact"
+                  : beforeOverlay.current,
+              );
+            }}
           />
-        </Suspense>
-      )}
-      {mode === "overlay" && (
-        <Overlay
-          face={face}
-          title={focus?.input.content.slice(0, 80) ?? "No active task"}
-          startedAt={
-            status && !terminal.has(status) ? live?.log?.[0]?.at : undefined
-          }
-          screenAccess={screenControl}
-          preview={preview}
-          onStop={stop}
-          onRestore={() => {
-            setPreview(false);
-            void changeMode(
-              beforeOverlay.current === "overlay"
-                ? "compact"
-                : beforeOverlay.current,
-            );
-          }}
-        />
-      )}
-    </main>
+        )}
+      </main>
+    </MotionProvider>
   );
 }
 createRoot(document.getElementById("root")!).render(<App />);

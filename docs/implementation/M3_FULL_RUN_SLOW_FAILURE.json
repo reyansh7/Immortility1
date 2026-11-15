@@ -1,0 +1,71 @@
+{
+  "classification": "Full regression with overlapping checks; failure evidence retained",
+  "python_passed": 351,
+  "python_failed": 5,
+  "seconds": 540.18,
+  "failures": [
+    {
+      "test": "test_real_official_sdk_stdio_discovery_and_call",
+      "category": "existing SDK deadline/operation failure"
+    },
+    {
+      "test": "test_real_broker_local_arithmetic_uses_no_hermes_or_cloud",
+      "category": "capability grant deadline"
+    },
+    {
+      "test": "test_production_admission_allows_local_work_without_provider_or_hermes",
+      "category": "capability grant deadline"
+    },
+    {
+      "test": "test_unknown_usage_survives_restart_and_cannot_be_refunded_twice",
+      "category": "expected summary omitted three newly added dispatch accounting fields; assertion corrected"
+    },
+    {
+      "test": "test_real_broker_dag_uses_registered_sdk_clock_and_zero_model_calls",
+      "category": "capability grant deadline"
+    }
+  ],
+  "sdk_timeouts_increased": false,
+  "unrelated_processes_changed": false,
+  "cause": "Serial recheck still fails. A separate fixed-worker timing probe succeeded in 10.684 s, beyond the unchanged 10 s production deadline; import/initialization dominates that sample. This does not identify a particular host process as the cause.",
+  "serial_recheck": {
+    "command": ".venv/Scripts/python.exe -m pytest -q services/broker/tests/test_standard_mcp.py services/broker/tests/test_usage_ledger.py services/broker/tests/test_workflows.py",
+    "passed": 19,
+    "failed": 4,
+    "seconds": 98.69,
+    "accounting_assertion_passed": true,
+    "failures": [
+      "SDK discovery operation",
+      "local arithmetic grant deadline",
+      "production local arithmetic grant deadline",
+      "workflow first-attempt expectation after bounded retry"
+    ]
+  },
+  "last_serial_full_run": {
+    "command": "./scripts/check.ps1",
+    "passed": 348,
+    "failed": 8,
+    "python_seconds": 411.71,
+    "script_exit": 1,
+    "remaining_checks_skipped_by_script": true,
+    "fixture_failures": {
+      "count": 4,
+      "reason": "New active health assertion omitted the normal broker authorization header; authentication correctly rejected the request. Fixture corrected; focused recheck pending.",
+      "recheck": {
+        "status": "passed",
+        "scope": "all four provider fixtures included in 94 focused checks",
+        "seconds_for_focused_suite": 94.66
+      }
+    },
+    "sdk_failures": {
+      "count": 4,
+      "tests": [
+        "test_real_official_sdk_stdio_discovery_and_call",
+        "test_real_broker_local_arithmetic_uses_no_hermes_or_cloud",
+        "test_production_admission_allows_local_work_without_provider_or_hermes",
+        "test_real_broker_dag_uses_registered_sdk_clock_and_zero_model_calls"
+      ]
+    },
+    "production_sdk_timers_changed": false
+  }
+}

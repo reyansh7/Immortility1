@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "classification": "REAL PROVIDER CHECK FAILED ACCEPTANCE",
+  "provider_calls": 1,
+  "synthetic_provider_calls": 0,
+  "usage": {
+    "calls": 1,
+    "charged_tokens": 6002,
+    "unknown_calls": 1,
+    "prompt_tokens": null,
+    "completion_tokens": null
+  },
+  "error": {
+    "code": "provider_stream_failed",
+    "message": "Provider response was interrupted or malformed. No fallback attempted."
+  },
+  "reason_categories": [],
+  "tool_dispatches": 0,
+  "artifacts_published": false,
+  "retry_or_fallback": false
+}

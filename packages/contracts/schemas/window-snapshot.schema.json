@@ -1,0 +1,181 @@
+{
+  "$defs": {
+    "WindowNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "exclusiveMaximum": 64,
+          "minimum": 0,
+          "title": "Id",
+          "type": "integer"
+        },
+        "depth": {
+          "maximum": 4,
+          "minimum": 0,
+          "title": "Depth",
+          "type": "integer"
+        },
+        "protected": {
+          "title": "Protected",
+          "type": "boolean"
+        },
+        "text": {
+          "maxLength": 2000,
+          "title": "Text",
+          "type": "string"
+        },
+        "control_type": {
+          "anyOf": [
+            {
+              "maxLength": 40,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Control Type"
+        },
+        "rect": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "integer"
+              },
+              "maxItems": 4,
+              "minItems": 4,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rect"
+        }
+      },
+      "required": [
+        "id",
+        "depth",
+        "protected",
+        "text"
+      ],
+      "title": "WindowNode",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "kind": {
+      "const": "untrusted_ui_data",
+      "title": "Kind",
+      "type": "string"
+    },
+    "task_id": {
+      "title": "Task Id",
+      "type": "string"
+    },
+    "lease_id": {
+      "title": "Lease Id",
+      "type": "string"
+    },
+    "hwnd": {
+      "exclusiveMinimum": 0,
+      "title": "Hwnd",
+      "type": "integer"
+    },
+    "pid": {
+      "exclusiveMinimum": 0,
+      "title": "Pid",
+      "type": "integer"
+    },
+    "created": {
+      "exclusiveMinimum": 0,
+      "title": "Created",
+      "type": "integer"
+    },
+    "observed_at": {
+      "exclusiveMinimum": 0,
+      "title": "Observed At",
+      "type": "number"
+    },
+    "valid_until": {
+      "exclusiveMinimum": 0,
+      "title": "Valid Until",
+      "type": "number"
+    },
+    "window_rect": {
+      "items": {
+        "type": "integer"
+      },
+      "maxItems": 4,
+      "minItems": 4,
+      "title": "Window Rect",
+      "type": "array"
+    },
+    "dpi": {
+      "maximum": 960,
+      "minimum": 48,
+      "title": "Dpi",
+      "type": "integer"
+    },
+    "foreground": {
+      "title": "Foreground",
+      "type": "boolean"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/WindowNode"
+      },
+      "maxItems": 64,
+      "title": "Nodes",
+      "type": "array"
+    },
+    "truncated": {
+      "title": "Truncated",
+      "type": "boolean"
+    },
+    "cloud_allowed": {
+      "const": false,
+      "title": "Cloud Allowed",
+      "type": "boolean"
+    },
+    "screenshots": {
+      "const": 0,
+      "title": "Screenshots",
+      "type": "integer"
+    },
+    "input_actions": {
+      "const": 0,
+      "title": "Input Actions",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "kind",
+    "task_id",
+    "lease_id",
+    "hwnd",
+    "pid",
+    "created",
+    "observed_at",
+    "valid_until",
+    "window_rect",
+    "dpi",
+    "foreground",
+    "nodes",
+    "truncated",
+    "cloud_allowed",
+    "screenshots",
+    "input_actions"
+  ],
+  "title": "WindowSnapshot",
+  "type": "object"
+}

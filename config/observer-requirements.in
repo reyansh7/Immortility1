@@ -1,0 +1,3 @@
+# Read-only Windows UIA evaluation. No input controller or screenshot daemon.
+# pywinauto 0.6.9: BSD-3-Clause, official wheel SHA verified against PyPI.
+pywinauto==0.6.9

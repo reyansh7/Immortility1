@@ -1,0 +1,148 @@
+{
+  "$defs": {
+    "JsonValue": {},
+    "OutputReference": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,31}$",
+          "title": "Step Id",
+          "type": "string"
+        },
+        "field": {
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_]{0,63}$",
+          "title": "Field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step_id",
+        "field"
+      ],
+      "title": "OutputReference",
+      "type": "object"
+    },
+    "WorkflowStep": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,31}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "capability": {
+          "maxLength": 64,
+          "minLength": 3,
+          "title": "Capability",
+          "type": "string"
+        },
+        "arguments": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "maxProperties": 16,
+          "title": "Arguments",
+          "type": "object"
+        },
+        "depends_on": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Depends On",
+          "type": "array"
+        },
+        "bindings": {
+          "additionalProperties": {
+            "$ref": "#/$defs/OutputReference"
+          },
+          "maxProperties": 16,
+          "title": "Bindings",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "capability"
+      ],
+      "title": "WorkflowStep",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "session_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Session Id",
+      "type": "string"
+    },
+    "request_id": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Request Id",
+      "type": "string"
+    },
+    "label": {
+      "maxLength": 160,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/WorkflowStep"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Steps",
+      "type": "array"
+    },
+    "deadline_seconds": {
+      "default": 60,
+      "maximum": 3600,
+      "minimum": 1,
+      "title": "Deadline Seconds",
+      "type": "integer"
+    },
+    "max_retries": {
+      "default": 0,
+      "maximum": 2,
+      "minimum": 0,
+      "title": "Max Retries",
+      "type": "integer"
+    },
+    "resume_on_restart": {
+      "default": false,
+      "title": "Resume On Restart",
+      "type": "boolean"
+    },
+    "local_read_consent": {
+      "const": true,
+      "title": "Local Read Consent",
+      "type": "boolean"
+    },
+    "no_cloud": {
+      "const": true,
+      "default": true,
+      "title": "No Cloud",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "session_id",
+    "request_id",
+    "label",
+    "steps",
+    "local_read_consent"
+  ],
+  "title": "WorkflowRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

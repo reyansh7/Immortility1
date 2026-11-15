@@ -49,7 +49,10 @@
         "audit.notice",
         "task.error",
         "agent.started",
-        "agent.completed"
+        "agent.completed",
+        "observation.authorized",
+        "observation.completed",
+        "observation.revoked"
       ]
     },
     "actor": {

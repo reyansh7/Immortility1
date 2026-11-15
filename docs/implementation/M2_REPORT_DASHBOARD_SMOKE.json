@@ -1,0 +1,28 @@
+{
+  "status": "partial native acceptance",
+  "classification": "real native Tauri dashboard, restarted local-only broker, stored synthetic-draft public-source report",
+  "stored_report_visible": true,
+  "completion_state_and_metrics_visible": true,
+  "both_deliverable_buttons_visible": true,
+  "native_export_copies_reopened_and_matched": [
+    {
+      "format": ".md",
+      "size": 2393,
+      "sha256": "6223e2da9cf262d4398496208f24188be0914941c888aabb622714b189dacb67"
+    },
+    {
+      "format": ".pdf",
+      "size": 3296,
+      "sha256": "daa79c831c54c3ee20b17d5d231e8b3653f5918f800eac38969800cd3ae06600"
+    }
+  ],
+  "private_task_data_or_provider_key_sent": false,
+  "new_model_calls": 0,
+  "viewer_launch": "new Edge window observed; viewer binding failed with foreground window did not report a process id",
+  "external_viewer_render_acceptance": "pending",
+  "owned_native_broker_frontend_processes_stopped": true,
+  "limitations": [
+    "Header still said Disconnected despite Attached local tasks only; pre-existing face readiness presentation needs a separate fix.",
+    "Historical fixture metric said deep despite actual standard cap; metric reporting has now been corrected and is under test."
+  ]
+}

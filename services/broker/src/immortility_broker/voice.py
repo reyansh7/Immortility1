@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import textwrap
 import time
 from collections.abc import Awaitable, Callable
 from pathlib import Path
@@ -16,9 +17,11 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from .process_owner import ProcessOwner, reap, spawn_owned
 from .config import ROOT, Settings
 from .contracts import BrokerError, TaskRequest, TERMINAL, uid
 from .infernal import PRESETS
+from .reference_client import ReferenceVoice
 from .playback import CLONE_PLAYBACK_TEMPO, play_wav
 from .speech_text import for_speech, ready_sentences
 from .store import Store
@@ -58,7 +61,7 @@ class VoiceOptions(BaseModel):
     output_device: int | None = Field(default=None, ge=0, le=1000)
     language: Literal["en", "hi", "es", "fr", "de", "ja", "auto"] = "en"
     stt_device: Literal["cpu", "auto"] = "cpu"
-    voice: Literal["ljspeech", "joe", "friend", "infernal"] = "ljspeech"
+    voice: Literal["ljspeech", "joe", "friend", "infernal", "reference"] = "ljspeech"
     infernal_base: Literal[
         "piper_northern", "kokoro_george", "kokoro_fable", "kokoro_onyx", "kokoro_fenrir"
     ] = "kokoro_george"
@@ -97,6 +100,10 @@ class RecordRequest(VoiceOptions):
 
 
 ERRORS = {
+    "speech_recognition_unavailable": "Local speech recognition failed. CPU mode needs no CUDA; check the installed Whisper model. Audio was not uploaded.",
+    "audio_capture_unavailable": "Microphone capture failed. Check the selected input device and Windows microphone permission. Capture does not use CUDA.",
+    "speech_synthesis_unavailable": "Local speech synthesis failed. Check the selected voice and installed model.",
+    "audio_playback_unavailable": "Local voice playback failed. Check the voice model and selected output device.",
     "audio_device_or_engine_unavailable": "Audio device or local engine unavailable. Check device selection, Windows microphone permission and installed models.",
     "recording_too_short": "Hold push-to-talk a little longer before releasing.",
     "microphone_consent_required": "Enable microphone consent before recording.",
@@ -126,6 +133,8 @@ class VoiceService:
         self.transcript = ""
         self.task_id: str | None = None
         self.process: asyncio.subprocess.Process | None = None
+        self.owner: ProcessOwner | None = None
+        self.infernal_owner: ProcessOwner | None = None
         self.infernal_process: asyncio.subprocess.Process | None = None
         self.infernal_used_at = 0.0
         self.worker_lock = asyncio.Lock()
@@ -133,15 +142,21 @@ class VoiceService:
         self.stop_requested = False
         self.options = VoiceOptions()
         self.latency: dict[str, float] = {}
+        self.diagnostic: dict[str, str | int | float] = {}
         self.preparing = False
         self.utterance_id: str | None = None
         self.qwen = QwenWorker(enabled=settings.experimental_qwen_tts)
+        self.reference = ReferenceVoice(enabled=settings.reference_voice_enabled)
+        self.reference_warm: asyncio.Task[None] | None = None
+        self.reference_paused = False
+        self.reference_warm_failed = False
         self.playback_stop = threading.Event()
         self.speech_generation = 0
         self.speech_buffer = ""
         self.speech_spoken = 0
         self.speech_final = False
         self.speech_task: str | None = None
+        self.completed_speech_task: str | None = None
         self.tts_state = "cold"
         self.tts_error: str | None = None
         self.idle_at: float | None = None
@@ -179,6 +194,7 @@ class VoiceService:
             "models_ready": ready(self.models),
             "preparing": self.preparing,
             "latency_ms": self.latency,
+            "diagnostic": dict(self.diagnostic),
             "microphone_active": self.state == "LISTENING",
             "cloud_audio": False,
             "wake_word": False,
@@ -189,20 +205,31 @@ class VoiceService:
             "metrics": self.qwen.metrics,
             "options": self.options.model_dump(),
             "experimental_qwen_enabled": self.settings.experimental_qwen_tts,
+            "reference_enabled": self.settings.reference_voice_enabled,
+            "reference_ready": self.reference.ready,
+            "reference_metrics": self.reference.metrics,
             "infernal_enabled": self.settings.infernal_voice_enabled,
             "infernal_presets": PRESETS,
         }
 
     def _maybe_unload(self) -> None:
         if (
+            self.options.voice == "reference"
+            and self.options.voice_output
+            and self.reference.enabled
+            and not self.reference_paused
+            and not self.reference_warm_failed
+            and not self.reference.ready
+        ):
+            self._prewarm_reference()
+        if (
             self.infernal_process
             and self.state == "IDLE"
             and time.monotonic() - self.infernal_used_at > 60
         ):
             idle_process, self.infernal_process = self.infernal_process, None
-            if idle_process.returncode is None:
-                idle_process.kill()
-                asyncio.get_running_loop().create_task(idle_process.wait())
+            idle_owner, self.infernal_owner = self.infernal_owner, None
+            asyncio.get_running_loop().create_task(reap(idle_process, idle_owner))
         process = self.qwen.process
         if (
             self.idle_at is None
@@ -222,6 +249,11 @@ class VoiceService:
             return await self._worker(operation, **options)
 
     async def _worker(self, operation: str, **options: Any) -> dict[str, Any]:
+        if options.get("voice") == "reference":
+            if operation != "speak":
+                raise BrokerError("reference_operation", "Unsupported reference voice operation.")
+            await self._reference_speech(str(options.get("text", "")))
+            return {"kind": "done"}
         if options.get("voice") == "infernal":
             return await self._infernal_worker(operation, options)
         if operation == "speak" and options.get("voice") == "friend":
@@ -251,8 +283,10 @@ class VoiceService:
             HF_HUB_DISABLE_TELEMETRY="1",
             HF_HUB_DISABLE_IMPLICIT_TOKEN="1",
             OMP_NUM_THREADS="2",
+            HF_HUB_OFFLINE="1" if operation != "prepare" else "0",
         )
-        self.process = await asyncio.create_subprocess_exec(
+        self.diagnostic = {"operation": operation, "stage": "worker_start"}
+        self.process, self.owner = await spawn_owned(
             sys.executable,
             "-m",
             "immortility_broker.voice_worker",
@@ -263,23 +297,45 @@ class VoiceService:
             stderr=asyncio.subprocess.DEVNULL,
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         )
-        assert self.process.stdin and self.process.stdout
-        self.process.stdin.write(
-            (
-                json.dumps({"operation": operation, "models": str(self.models), **options}) + "\n"
-            ).encode()
-        )
-        if operation == "record" and self.stop_requested:
-            self.process.stdin.write(b"stop\n")
-        await self.process.stdin.drain()
+        started = time.monotonic()
         try:
             timeout = 600 if operation == "prepare" else 40 if operation == "record" else 120
-            started = time.monotonic()
             async with asyncio.timeout(timeout):
+                assert self.process.stdin and self.process.stdout
+                self.process.stdin.write(
+                    (
+                        json.dumps({"operation": operation, "models": str(self.models), **options})
+                        + "\n"
+                    ).encode()
+                )
+                if operation == "record" and self.stop_requested:
+                    self.process.stdin.write(b"stop\n")
+                await self.process.stdin.drain()
                 while line := await self.process.stdout.readline():
                     frame = json.loads(line)
+                    if frame["kind"] == "stage":
+                        stage = frame.get("stage")
+                        if stage in {
+                            "device_enumeration",
+                            "model_prepare",
+                            "audio_capture",
+                            "speech_recognition",
+                            "speech_playback",
+                            "speech_synthesis",
+                            "stt_load",
+                            "stt_cpu_fallback",
+                            "stt_recognize",
+                        }:
+                            self.diagnostic["stage"] = stage
+                        if frame.get("device") in {"cpu", "cuda"}:
+                            self.diagnostic["device"] = frame["device"]
                     if frame["kind"] == "error":
                         code = str(frame.get("code", "audio_device_or_engine_unavailable"))
+                        self.diagnostic["code"] = (
+                            code if code in ERRORS else "audio_device_or_engine_unavailable"
+                        )
+                        if frame.get("error_type") in {"os_error", "runtime_error"}:
+                            self.diagnostic["error_type"] = frame["error_type"]
                         raise BrokerError(code, ERRORS.get(code, "Local voice operation failed."))
                     if frame["kind"] == "meter":
                         self.level = float(frame["level"])
@@ -295,7 +351,13 @@ class VoiceService:
         except TimeoutError:
             raise BrokerError("voice_timeout", ERRORS["voice_timeout"]) from None
         finally:
+            self.diagnostic["elapsed_ms"] = round(1000 * (time.monotonic() - started), 1)
+            finished_process = self.process
+            cleanup_started = time.monotonic()
             await self.stop_worker()
+            self.diagnostic["cleanup_ms"] = round(1000 * (time.monotonic() - cleanup_started), 1)
+            if finished_process is not None and finished_process.returncode is not None:
+                self.diagnostic["exit_code"] = finished_process.returncode
 
     async def _infernal_worker(self, operation: str, options: dict[str, Any]) -> dict[str, Any]:
         if not self.settings.infernal_voice_enabled:
@@ -334,7 +396,7 @@ class VoiceService:
                 HF_HUB_DISABLE_TELEMETRY="1",
                 OMP_NUM_THREADS="2",
             )
-            process = await asyncio.create_subprocess_exec(
+            process, self.infernal_owner = await spawn_owned(
                 str(python),
                 "-m",
                 "immortility_broker.voice_worker",
@@ -394,31 +456,22 @@ class VoiceService:
 
     async def _stop_infernal(self) -> None:
         process, self.infernal_process = self.infernal_process, None
-        if process and process.returncode is None:
-            # This audited worker has no child-process tools or package/model installers.
-            process.kill()
-            await asyncio.wait_for(process.wait(), 3)
+        owner, self.infernal_owner = self.infernal_owner, None
+        if process is not None:
+            await reap(process, owner)
         self.level = 0.0
 
     async def stop_worker(self) -> None:
+        if self.reference_warm and not self.reference_warm.done():
+            self.reference_warm.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await self.reference_warm
+        await self.reference.close()
         await self._stop_infernal()
-        if self.process and self.process.returncode is None:
-            if os.name == "nt":
-                killer = await asyncio.create_subprocess_exec(
-                    "taskkill.exe",
-                    "/PID",
-                    str(self.process.pid),
-                    "/T",
-                    "/F",
-                    stdout=asyncio.subprocess.DEVNULL,
-                    stderr=asyncio.subprocess.DEVNULL,
-                    creationflags=subprocess.CREATE_NO_WINDOW,
-                )
-                await asyncio.wait_for(killer.wait(), 3)
-            else:
-                self.process.kill()
-            await asyncio.wait_for(self.process.wait(), 3)
-        self.process = None
+        process, self.process = self.process, None
+        owner, self.owner = self.owner, None
+        if process is not None:
+            await reap(process, owner)
 
     def ensure_idle(self) -> None:
         if (self.job and not self.job.done()) or self.preparing or self.worker_lock.locked():
@@ -562,6 +615,14 @@ class VoiceService:
             )
 
     def apply_options(self, options: VoiceOptions) -> dict[str, Any]:
+        if options.voice == "reference" and not self.settings.reference_voice_enabled:
+            raise BrokerError("reference_disabled", "The reference voice feature is disabled.")
+        if options.voice == "reference" and options.language != "en":
+            raise BrokerError(
+                "reference_language", "The approved reference voice currently supports English."
+            )
+        previous_voice = self.options.voice
+        previous_output = self.options.voice_output
         if options.voice == "infernal" and not self.settings.infernal_voice_enabled:
             raise BrokerError("infernal_disabled", "INFERNAL is optional and currently disabled.")
         if options.voice == "friend" and not options.clone_consent:
@@ -572,6 +633,14 @@ class VoiceService:
         if options.clone_consent != self.options.clone_consent:
             write_consent(options.clone_consent)
         self.options = options
+        if options.voice == "reference":
+            self.reference_paused = False
+            self.reference_warm_failed = False
+        if previous_voice == "reference" and (
+            options.voice != "reference" or (previous_output and not options.voice_output)
+        ):
+            with contextlib.suppress(RuntimeError):
+                asyncio.get_running_loop().create_task(self.cancel())
         save_voice_settings(self.settings.data_dir, options.model_dump())
         self.tts_error = None
         return self.snapshot()
@@ -579,9 +648,12 @@ class VoiceService:
     def note_assistant_text(self, task_id: str, text: str, final: bool) -> None:
         if not self.options.voice_output:
             return
+        if task_id == self.completed_speech_task:
+            return
         if self.speech_task not in {None, task_id}:
             return
         if self.speech_task != task_id:
+            self.reference_paused = False
             self.speech_generation += 1
             self.speech_spoken = 0
             self.speech_task = task_id
@@ -599,6 +671,8 @@ class VoiceService:
             if self.options.voice == "friend":
                 self._require_clone_consent(self.options)
                 await self._stream_clone(generation)
+            elif self.options.voice == "reference":
+                await self._reference_speech(None, generation)
             elif self.speech_final and generation == self.speech_generation:
                 if not ready(self.models):
                     raise BrokerError("voice_setup", "Download local speech models first.")
@@ -609,7 +683,9 @@ class VoiceService:
                 )
             if generation == self.speech_generation and self.state == "SPEAKING":
                 self.transition("IDLE")
-                self.tts_state = "ready" if self.options.voice == "friend" else self.tts_state
+                self.tts_state = (
+                    "ready" if self.options.voice in {"friend", "reference"} else self.tts_state
+                )
         except asyncio.CancelledError:
             if self.state == "SPEAKING":
                 self.transition("CANCELLED")
@@ -626,6 +702,113 @@ class VoiceService:
         finally:
             self.level = 0.0
             self.idle_at = time.monotonic()
+            if generation == self.speech_generation and self.speech_final:
+                self.completed_speech_task = self.speech_task
+                self.speech_task = None
+
+    def _prewarm_reference(self) -> None:
+        if self.reference_warm and not self.reference_warm.done():
+            return
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+
+        async def warm() -> None:
+            self.tts_state = "loading"
+            try:
+                await self.reference.prepare()
+                if self.tts_state == "loading":
+                    self.tts_state = "ready"
+            except asyncio.CancelledError:
+                raise
+            except Exception as error:
+                self.reference_warm_failed = True
+                self.tts_error = (
+                    error.message
+                    if isinstance(error, BrokerError)
+                    else "Reference voice warm-up failed. Check available RAM and local model setup."
+                )
+                self.tts_state = "error"
+
+        self.tts_state = "loading"
+        self.reference_warm = loop.create_task(warm())
+
+    async def _reference_speech(self, text: str | None, generation: int | None = None) -> None:
+        if not self.reference.enabled:
+            raise BrokerError("reference_disabled", "The reference voice is disabled.")
+        if self.options.language != "en":
+            raise BrokerError(
+                "reference_language", "The approved reference voice currently supports English."
+            )
+        self.reference_paused = False
+        self.tts_state = "loading"
+        self.tts_error = None
+        queue: asyncio.Queue[Path | Exception | None] = asyncio.Queue(maxsize=2)
+
+        async def produce() -> None:
+            cursor = 0
+            pending: Path | None = None
+            try:
+                while not self.playback_stop.is_set() and (
+                    generation is None or generation == self.speech_generation
+                ):
+                    buffer = text if text is not None else self.speech_buffer
+                    final = text is not None or self.speech_final
+                    fresh, cursor = ready_sentences(buffer, cursor, final)
+                    for sentence in fresh:
+                        for phrase in textwrap.wrap(sentence, width=400, break_long_words=True):
+                            pending = await self.reference.render(phrase, self.options.speed)
+                            await queue.put(pending)
+                            pending = None
+                    if final:
+                        break
+                    await asyncio.sleep(0.04)
+                await queue.put(None)
+            except asyncio.CancelledError:
+                raise
+            except Exception as error:
+                await queue.put(error)
+            finally:
+                if pending is not None:
+                    pending.unlink(missing_ok=True)
+
+        producer = asyncio.create_task(produce())
+        try:
+            while not self.playback_stop.is_set():
+                item = await queue.get()
+                if item is None:
+                    break
+                if isinstance(item, Exception):
+                    raise item
+                try:
+                    if self.state != "SPEAKING":
+                        self.transition("SPEAKING")
+                    self.tts_state = "speaking"
+                    self.latency["reference_render"] = self.reference.metrics.get(
+                        "last_render_ms", 0
+                    )
+                    await asyncio.to_thread(
+                        play_wav,
+                        item,
+                        self.options.volume,
+                        self.playback_stop,
+                        self._set_level,
+                        1.0,
+                        self.options.output_device,
+                    )
+                finally:
+                    item.unlink(missing_ok=True)
+            self.tts_state = "ready"
+        finally:
+            producer.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await producer
+            while not queue.empty():
+                item = queue.get_nowait()
+                if isinstance(item, Path):
+                    item.unlink(missing_ok=True)
+            self.level = 0.0
 
     async def _stream_clone(self, generation: int) -> None:
         self.tts_state = "loading"
@@ -707,7 +890,7 @@ class VoiceService:
             raise BrokerError(
                 "tts_no_response", "Only completed assistant responses can be spoken."
             )
-        if options.voice != "friend" and not ready(self.models):
+        if options.voice not in {"friend", "reference"} and not ready(self.models):
             raise BrokerError("voice_setup", "Download local speech models first.")
         if options.voice == "friend" and options.clone_consent:
             write_consent(True)
@@ -748,7 +931,7 @@ class VoiceService:
         self.ensure_idle()
         self.apply_options(options)
         self._require_clone_consent(options)
-        if options.voice != "friend" and not ready(self.models):
+        if options.voice not in {"friend", "reference"} and not ready(self.models):
             raise BrokerError("voice_setup", "Download local speech models first.")
         self.playback_stop.clear()
         self.error = None
@@ -800,6 +983,9 @@ class VoiceService:
             await self.cancel()
 
     async def cancel(self) -> dict[str, Any]:
+        self.reference_paused = True
+        self.completed_speech_task = self.speech_task
+        self.speech_task = None
         self.speech_generation += 1
         self.playback_stop.set()
         self.qwen.stop.set()

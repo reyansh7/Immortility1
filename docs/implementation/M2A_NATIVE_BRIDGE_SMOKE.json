@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "classification": "VERIFIED LOCAL INTEGRATION; provider tool selection MOCK-TESTED ONLY",
+  "runtime": "real pinned Hermes native loop + SDK MCP bridge + authoritative broker gateway",
+  "provider_requests": 2,
+  "real_tool_dispatches": 1,
+  "actual_result_reached_provider": true,
+  "cloud_calls": 0,
+  "seconds": 8.015,
+  "usage": {
+    "calls": 2,
+    "charged_tokens": 700,
+    "unknown_calls": 0,
+    "prompt_tokens": 600,
+    "completion_tokens": 100
+  }
+}

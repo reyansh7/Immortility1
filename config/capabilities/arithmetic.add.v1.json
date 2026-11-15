@@ -1,0 +1,63 @@
+{
+  "manifest": {
+    "schema_version": "1.0",
+    "name": "arithmetic.add.v1",
+    "provider": "reviewed-local-mcp",
+    "classification": "deterministic-read",
+    "network": false,
+    "irreversible": false,
+    "max_payload_bytes": 1024,
+    "max_output_bytes": 1024,
+    "deadline_ms": 10000,
+    "concurrency": 1,
+    "approval": "task-scoped-local-opt-in"
+  },
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "a": {
+        "maximum": 1000000000,
+        "minimum": -1000000000,
+        "title": "A",
+        "type": "integer"
+      },
+      "b": {
+        "maximum": 1000000000,
+        "minimum": -1000000000,
+        "title": "B",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "a",
+      "b"
+    ],
+    "title": "AddInput",
+    "type": "object"
+  },
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "result": {
+        "maximum": 2000000000,
+        "minimum": -2000000000,
+        "title": "Result",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "result"
+    ],
+    "title": "AddOutput",
+    "type": "object"
+  },
+  "status": "experimental-default-off",
+  "execution": "fixed reviewed isolated SDK stdio",
+  "permissions": [
+    "current running task",
+    "matching session and ledger attempt",
+    "exact typed argument digest",
+    "bounded expiring grant consumed before dispatch"
+  ],
+  "grants_no_external_tools": true
+}

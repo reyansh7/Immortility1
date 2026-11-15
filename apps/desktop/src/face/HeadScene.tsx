@@ -1,6 +1,7 @@
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import {
   Component,
+  memo,
   Suspense,
   useEffect,
   useMemo,
@@ -10,30 +11,43 @@ import {
   type RefObject,
 } from "react";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { clone as cloneSkinned } from "three/examples/jsm/utils/SkeletonUtils.js";
+import { playbackEnergy, type FaceState, type Role } from "./faceState";
+import { FACE_URL, FlatFace, type Quality, type SceneStats } from "./FlatFace";
 import {
-  ROLES,
-  playbackEnergy,
-  type AgentStatus,
-  type FaceState,
-  type Role,
-} from "./faceState";
+  BUSY_STATES,
+  EXPRESSIONS,
+  blinkAmount,
+  envelope,
+  effectivePower,
+  frameBudget,
+  graphicsHint,
+  jawOpen,
+  nextBlink,
+  pixelRatioCap,
+  speechEnergy,
+  syllable,
+  type PowerProfile,
+} from "./rig";
+import { BoneDriver } from "./boneDriver";
 
-export const HEAD_URL = "/models/immortility-head.glb";
-export const HEAD_IMAGE = "/models/immortility-head-2d.png";
-export type Quality = "high" | "balanced" | "performance" | "2d";
+export type { Quality, SceneStats } from "./FlatFace";
 
-export interface SceneStats {
-  fps: number;
-  frameMs: number;
-  maxFrameMs: number;
-  loadMs: number;
-  calls: number;
-  triangles: number;
-  renderer: string;
-}
+/*
+ * Lighting language shared with the CSS theme: obsidian surroundings, a dim
+ * neutral key from above, crimson rim light and controlled emissive seams.
+ * Everything renders on demand (frameloop="demand") through the Pacer below.
+ */
+const ENERGY = new THREE.Color("#ff2b47");
+const TITANIUM = "#2a2d34";
+const GUNMETAL = "#1b1d22";
 
 function rendererName(gl: THREE.WebGLRenderer): string {
   const context = gl.getContext();
@@ -47,644 +61,864 @@ function rendererName(gl: THREE.WebGLRenderer): string {
     .slice(0, 90);
 }
 
-interface Pose {
-  pitch: number;
+/** Live values the face writes each frame and the chamber/lights read. */
+interface Signal {
+  hue: THREE.Color;
+  spin: number;
+  energy: number;
+  busy: number;
   eye: number;
-  core: number;
-  crest: number;
-  mouth: number;
-  squint: number;
 }
-const poses: Record<FaceState, Pose> = {
-  idle: { pitch: 0, eye: 2.2, core: 0.35, crest: 1.1, mouth: 0.12, squint: 1 },
-  listening: {
-    pitch: -0.05,
-    eye: 3.2,
-    core: 0.5,
-    crest: 1.6,
-    mouth: 0.2,
-    squint: 1,
-  },
-  thinking: {
-    pitch: 0.13,
-    eye: 1.6,
-    core: 0.7,
-    crest: 2.2,
-    mouth: 0.12,
-    squint: 0.82,
-  },
-  planning: {
-    pitch: 0.06,
-    eye: 2.4,
-    core: 0.8,
-    crest: 2.4,
-    mouth: 0.12,
-    squint: 0.9,
-  },
-  delegating: {
-    pitch: 0.03,
-    eye: 2.8,
-    core: 0.7,
-    crest: 2,
-    mouth: 0.12,
-    squint: 0.9,
-  },
-  executing: {
-    pitch: 0.06,
-    eye: 3,
-    core: 0.6,
-    crest: 1.8,
-    mouth: 0.12,
-    squint: 0.6,
-  },
-  awaiting: {
-    pitch: 0,
-    eye: 2.6,
-    core: 0.4,
-    crest: 1.4,
-    mouth: 0.12,
-    squint: 1,
-  },
-  responding: {
-    pitch: -0.02,
-    eye: 2.6,
-    core: 0.5,
-    crest: 1.6,
-    mouth: 0.4,
-    squint: 1,
-  },
-  speaking: {
-    pitch: -0.02,
-    eye: 2.8,
-    core: 0.5,
-    crest: 1.6,
-    mouth: 0.4,
-    squint: 1,
-  },
-  error: {
-    pitch: 0.1,
-    eye: 0.9,
-    core: 0.2,
-    crest: 0.5,
-    mouth: 0.08,
-    squint: 0.8,
-  },
-  disconnected: {
-    pitch: 0.15,
-    eye: 0.15,
-    core: 0.04,
-    crest: 0.08,
-    mouth: 0,
-    squint: 0.7,
-  },
-};
-const busy = new Set<FaceState>([
-  "listening",
-  "thinking",
-  "planning",
-  "delegating",
-  "executing",
-  "responding",
-  "speaking",
-]);
 
-export const NODE_POSITIONS: Record<Role, [number, number, number]> = {
-  research: [-2.9, 0.35, -0.4],
-  coding: [2.9, 0.35, -0.4],
-  review: [0, -1.5, 0.7],
-};
-const yawToward: Record<Role, [number, number]> = {
-  research: [-0.32, 0.02],
-  coding: [0.32, 0.02],
-  review: [0, 0.2],
-};
+interface Pointer {
+  x: number;
+  y: number;
+  seen: boolean;
+  moved: number;
+}
 
-let brushed: THREE.DataTexture | null = null;
-function brushedTexture(): THREE.DataTexture {
-  if (brushed) return brushed;
-  const size = 256;
-  const data = new Uint8Array(size * size * 4);
-  let seed = 7;
-  const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  for (let y = 0; y < size; y += 1) {
-    const row = 205 + random() * 40;
-    for (let x = 0; x < size; x += 1) {
-      const value = Math.min(255, row + (random() - 0.5) * 18);
-      const i = (y * size + x) * 4;
-      data[i] = data[i + 1] = data[i + 2] = value;
-      data[i + 3] = 255;
-    }
-  }
-  brushed = new THREE.DataTexture(data, size, size);
-  brushed.wrapS = brushed.wrapT = THREE.RepeatWrapping;
-  brushed.repeat.set(5, 5);
-  brushed.needsUpdate = true;
-  return brushed;
+/** Cursor position relative to the canvas centre, tracked across the whole window. */
+function usePointer(host: RefObject<HTMLDivElement | null>) {
+  const pointer = useRef<Pointer>({ x: 0, y: 0, seen: false, moved: 0 });
+  useEffect(() => {
+    let box: DOMRect | null = null;
+    const measure = () => (box = host.current?.getBoundingClientRect() ?? null);
+    const move = (event: PointerEvent) => {
+      if (!box) measure();
+      if (!box) return;
+      const x = (event.clientX - (box.left + box.width / 2)) / (box.width / 2);
+      const y =
+        -(event.clientY - (box.top + box.height / 2)) / (box.height / 2);
+      const p = pointer.current;
+      p.x = Math.max(-1.6, Math.min(1.6, x));
+      p.y = Math.max(-1.6, Math.min(1.6, y));
+      p.seen = true;
+      p.moved = performance.now();
+    };
+    const reset = () => (box = null);
+    window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("resize", reset);
+    window.addEventListener("scroll", reset, true);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("resize", reset);
+      window.removeEventListener("scroll", reset, true);
+    };
+  }, [host]);
+  return pointer;
+}
+
+/** False while the window is hidden/minimized or the canvas is scrolled away. */
+function useVisible(host: RefObject<HTMLDivElement | null>): boolean {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const node = host.current;
+    let inView = true;
+    const update = () =>
+      setVisible(inView && document.visibilityState === "visible");
+    const observer =
+      node && typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(([entry]) => {
+            inView = entry.isIntersecting;
+            update();
+          })
+        : null;
+    if (node) observer?.observe(node);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      observer?.disconnect();
+      document.removeEventListener("visibilitychange", update);
+    };
+  }, [host]);
+  return visible;
 }
 
 let glow: THREE.CanvasTexture | null = null;
 function glowTexture(): THREE.CanvasTexture {
   if (glow) return glow;
   const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 128;
+  canvas.width = canvas.height = 64;
   const context = canvas.getContext("2d")!;
-  const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
+  const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
   gradient.addColorStop(0, "rgba(255,255,255,1)");
   gradient.addColorStop(0.25, "rgba(255,255,255,0.45)");
   gradient.addColorStop(1, "rgba(255,255,255,0)");
   context.fillStyle = gradient;
-  context.fillRect(0, 0, 128, 128);
+  context.fillRect(0, 0, 64, 64);
   glow = new THREE.CanvasTexture(canvas);
   return glow;
 }
 
+const BONES = [
+  "Head",
+  "Jaw",
+  "LipLowerL",
+  "LipLowerR",
+  "LipUpperL",
+  "LipUpperR",
+  "MouthCornerL",
+  "MouthCornerR",
+  "EyeL",
+  "EyeR",
+  "LidUpperL",
+  "LidUpperR",
+  "LidLowerL",
+  "LidLowerR",
+  "BrowInnerL",
+  "BrowInnerR",
+  "BrowOuterL",
+  "BrowOuterR",
+] as const;
+type BoneName = (typeof BONES)[number];
+
 interface Rig {
   root: THREE.Object3D;
-  head: THREE.Object3D;
-  jaw: THREE.Object3D;
-  eyes: THREE.Mesh[];
-  eyeMaterial: THREE.MeshStandardMaterial;
-  coreMaterial: THREE.MeshStandardMaterial;
-  crestMaterial: THREE.MeshStandardMaterial;
-  mouthMaterial: THREE.MeshStandardMaterial;
+  bones: Partial<Record<BoneName, BoneDriver>>;
+  armor: THREE.MeshStandardMaterial;
+  glow: THREE.MeshBasicMaterial;
   halos: THREE.Sprite[];
   dispose: () => void;
 }
 
-function prepare(source: THREE.Object3D): Rig {
-  const root = source.clone(true);
-  const texture = brushedTexture();
-  const armor = new THREE.MeshPhysicalMaterial({
-    color: "#262a32",
-    metalness: 1,
-    roughness: 0.34,
-    roughnessMap: texture,
-    clearcoat: 0.4,
-    clearcoatRoughness: 0.28,
-  });
-  const titanium = new THREE.MeshPhysicalMaterial({
-    color: "#8d939e",
-    metalness: 1,
-    roughness: 0.24,
-    roughnessMap: texture,
-    clearcoat: 0.2,
-  });
-  const inner = new THREE.MeshStandardMaterial({
-    color: "#0b0c0f",
-    metalness: 0.6,
-    roughness: 0.55,
-  });
-  const glowMaterial = (intensity: number) =>
-    new THREE.MeshStandardMaterial({
-      color: "#2a0308",
-      emissive: "#ff304a",
-      emissiveIntensity: intensity,
-      toneMapped: false,
-    });
-  const coreMaterial = new THREE.MeshStandardMaterial({
-    color: "#0c0103",
-    emissive: "#d21f35",
-    emissiveIntensity: 0.35,
-    roughness: 0.6,
-  });
-  const eyeMaterial = glowMaterial(2.2);
-  const crestMaterial = glowMaterial(1.1);
-  const mouthMaterial = glowMaterial(0.12);
-  const created: THREE.Material[] = [
-    armor,
-    titanium,
-    inner,
-    coreMaterial,
-    eyeMaterial,
-    crestMaterial,
-    mouthMaterial,
-  ];
-  const eyes: THREE.Mesh[] = [];
+/**
+ * One standard PBR material for the armour (albedo, ORM, normal, seam
+ * emission from the GLB) and one unlit material for eyes and mouth: two
+ * programs, two draw calls for the whole face.
+ */
+function prepare(source: THREE.Object3D, compact: boolean): Rig {
+  const root = cloneSkinned(source);
+  const created: THREE.Material[] = [];
+  let armor: THREE.MeshStandardMaterial | null = null;
+  const glowMaterial = new THREE.MeshBasicMaterial({ color: ENERGY });
+  created.push(glowMaterial);
   root.traverse((object) => {
     if (!(object instanceof THREE.Mesh)) return;
-    const named = (object.material as THREE.Material).name;
-    const owner = object.name.startsWith("Eye")
-      ? "Eye"
-      : object.parent?.name.startsWith("Eye")
-        ? "Eye"
-        : object.name;
-    if (owner === "Eye" || named === "Eye") {
-      object.material = eyeMaterial;
-      eyes.push(object);
-    } else if (object.name.startsWith("CrestGlow"))
-      object.material = crestMaterial;
-    else if (object.name.startsWith("MouthGlow"))
-      object.material = mouthMaterial;
-    else if (named === "Armor") object.material = armor;
-    else if (named === "Titanium") object.material = titanium;
-    else if (named === "Inner") object.material = inner;
-    else if (named === "Core") object.material = coreMaterial;
+    object.frustumCulled = false;
+    const original = object.material as THREE.MeshStandardMaterial;
+    if (object.name.startsWith("FaceGlow")) {
+      object.material = glowMaterial;
+      return;
+    }
+    armor = new THREE.MeshStandardMaterial({
+      map: original.map,
+      normalMap: original.normalMap,
+      normalScale: new THREE.Vector2(1.15, 1.15),
+      roughnessMap: original.roughnessMap,
+      metalnessMap: original.metalnessMap,
+      emissiveMap: original.emissiveMap,
+      emissive: "#ffffff",
+      emissiveIntensity: 0.9,
+      metalness: 1,
+      roughness: 1,
+      envMapIntensity: compact ? 1.5 : 1.6,
+      side: THREE.DoubleSide,
+    });
+    created.push(armor);
+    object.material = armor;
   });
-  const head = root.getObjectByName("Head") ?? root;
-  const jaw = root.getObjectByName("JawPivot") ?? new THREE.Object3D();
-  const halos = eyes.map((eye) => {
-    eye.geometry.computeBoundingBox();
-    const center = new THREE.Vector3();
-    eye.geometry.boundingBox!.getCenter(center);
-    const halo = new THREE.Sprite(
-      new THREE.SpriteMaterial({
-        map: glowTexture(),
-        color: "#ff304a",
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        transparent: true,
-        opacity: 0.5,
-      }),
-    );
-    created.push(halo.material);
-    halo.position.copy(center).add(new THREE.Vector3(0, 0, 0.08));
-    halo.scale.set(0.62, 0.3, 1);
-    eye.add(halo);
-    return halo;
-  });
+  if (!armor) throw new Error("Face shell missing from the model.");
+  const bones: Rig["bones"] = {};
+  for (const name of BONES) {
+    const bone = root.getObjectByName(name);
+    if (bone) bones[name] = new BoneDriver(bone, root);
+  }
+  // Two small additive sprites stand in for bloom around the eyes on tiers
+  // without post-processing (and add a tight core on High).
+  const halos: THREE.Sprite[] = [];
+  const head = bones.Head?.bone;
+  if (head) {
+    root.updateMatrixWorld(true);
+    for (const side of ["EyeL", "EyeR"] as const) {
+      const eye = bones[side]?.bone;
+      if (!eye) continue;
+      const at = eye.getWorldPosition(new THREE.Vector3());
+      at.z += 0.2;
+      const halo = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: glowTexture(),
+          color: ENERGY,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          transparent: true,
+          opacity: 0.3,
+        }),
+      );
+      created.push(halo.material);
+      head.worldToLocal(at);
+      halo.position.copy(at);
+      const s = 1 / (head.getWorldScale(new THREE.Vector3()).x || 1);
+      halo.scale.set(0.5 * s, 0.17 * s, 1);
+      head.add(halo);
+      halos.push(halo);
+    }
+  }
   return {
     root,
-    head,
-    jaw,
-    eyes,
-    eyeMaterial,
-    coreMaterial,
-    crestMaterial,
-    mouthMaterial,
+    bones,
+    armor,
+    glow: glowMaterial,
     halos,
     dispose: () => created.forEach((material) => material.dispose()),
   };
 }
 
-function Head({
+/** Where the face looks (yaw, pitch) when it hands work to a specialist node. */
+const AGENT_LOOK: Record<Role, [number, number]> = {
+  research: [-0.48, 0.08],
+  review: [-0.42, -0.14],
+  coding: [0.48, 0.08],
+};
+
+function Face({
   face,
   agent,
   level,
   reduced,
   hovered,
   follow,
+  signal,
+  compact,
 }: {
   face: FaceState;
   agent?: Role;
   level: RefObject<number>;
   reduced: boolean;
   hovered: boolean;
-  follow: boolean;
+  follow: RefObject<Pointer>;
+  signal: RefObject<Signal>;
+  compact: boolean;
 }) {
-  const gltf = useLoader(GLTFLoader, HEAD_URL);
-  const rig = useMemo(() => prepare(gltf.scene), [gltf]);
+  const gltf = useLoader(GLTFLoader, FACE_URL);
+  const rig = useMemo(() => prepare(gltf.scene, compact), [gltf, compact]);
   useEffect(() => () => rig.dispose(), [rig]);
-  const changed = useRef({ state: face, at: 0 });
-  const motion = useRef({ yaw: 0, pitch: 0, jaw: 0, bob: 0 });
+  const timeline = useRef({
+    state: face,
+    since: 0,
+    blinkAt: 1.5,
+    blinkStart: -10,
+    poke: -10,
+    energy: 0,
+    pokeRequested: false,
+  });
+  const cur = useRef({
+    ...EXPRESSIONS.idle,
+    hue: new THREE.Color(EXPRESSIONS.idle.hue),
+    px: 0,
+    py: 0,
+  });
+  const target = useMemo(() => new THREE.Color(), []);
+  const scratch = useMemo(() => new THREE.Vector3(), []);
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     const dt = Math.min(delta, 0.1);
-    if (changed.current.state !== face)
-      changed.current = { state: face, at: t };
-    const since = t - changed.current.at;
-    const pose = poses[face];
+    const tl = timeline.current;
+    if (tl.state !== face) {
+      tl.state = face;
+      tl.since = t;
+    }
+    const since = t - tl.since;
+    if (tl.pokeRequested) {
+      tl.pokeRequested = false;
+      tl.poke = t;
+      tl.blinkStart = t;
+    }
+    const e = EXPRESSIONS[face];
+    const c = cur.current;
     const live = !reduced;
-    let yaw = 0;
-    let pitch = pose.pitch;
-    let eyeL = pose.eye;
-    let eyeR = pose.eye;
-    let crest = pose.crest;
-    let core = pose.core;
-    let mouth = pose.mouth;
+    const k = (rate: number) => 1 - Math.exp(-rate * dt);
+    const ease = k(4);
+    for (const key of [
+      "pitch",
+      "yaw",
+      "roll",
+      "brow",
+      "furrow",
+      "lid",
+      "eye",
+      "lines",
+      "mouth",
+      "scan",
+      "spin",
+      "follow",
+    ] as const)
+      c[key] += (e[key] - c[key]) * ease;
+    target.set(e.hue);
+    c.hue.lerp(target, k(3));
+
+    // Speech energy comes only from the broker's reported playback level
+    // (playbackEnergy: 0 on silence, stop or an invalid meter). When speech
+    // stops or is cancelled the jaw closes quickly instead of easing out.
+    const raw = level.current ?? 0;
+    const speaking = face === "speaking";
+    tl.energy = speaking
+      ? envelope(tl.energy, playbackEnergy(raw, true), dt)
+      : Math.max(0, tl.energy - dt * 6);
+    const energy = tl.energy;
+    const mic = face === "listening" ? speechEnergy(raw) : 0;
+
+    const pointer = follow.current;
+    const px = pointer.seen && live ? pointer.x : 0;
+    const py = pointer.seen && live ? pointer.y : 0;
+    c.px += (px - c.px) * k(5);
+    c.py += (py - c.py) * k(5);
+
+    if (live && t > tl.blinkAt) {
+      tl.blinkStart = t;
+      tl.blinkAt = t + nextBlink();
+    }
+    const blink = face === "disconnected" ? 0 : blinkAmount(t - tl.blinkStart);
+    const closure = Math.min(1, Math.max(c.lid, blink));
+    const poke = Math.exp(-(t - tl.poke) * 4);
+
+    let yaw = c.yaw + c.px * 0.36 * c.follow;
+    let pitch = c.pitch - c.py * 0.18 * c.follow;
+    let roll = c.roll;
+    let bob = 0;
     if (live) {
-      if (face === "idle")
-        yaw = 0.06 * Math.sin(t * 0.23) + 0.03 * Math.sin(t * 0.61);
-      if (face === "thinking") crest *= 1 + 0.35 * Math.sin(t * 2.2);
-      if (face === "planning") {
-        eyeL *= 1 + 0.3 * Math.sin(t * 5);
-        eyeR *= 1 + 0.3 * Math.sin(t * 5 + Math.PI);
-        yaw = 0.08 * Math.sin(t * 1.3) * Math.exp(-since * 0.4);
-      }
-      if (face === "executing") core *= 1 + 0.12 * Math.sin(t * 13);
-      if (face === "responding") mouth *= 0.7 + 0.3 * Math.sin(t * 6);
-      if (face === "error")
-        eyeL = eyeR = pose.eye + 1.2 * Math.exp(-since * 1.5);
-      const tracked = new Set<FaceState>([
-        "idle",
-        "listening",
-        "responding",
-        "speaking",
-      ]);
-      if (follow && tracked.has(face)) {
-        yaw += state.pointer.x * 0.22;
-        pitch -= state.pointer.y * 0.1;
-      }
+      // Slow hover plus tiny servo-like corrections.
+      yaw += 0.035 * Math.sin(t * 0.21) + 0.012 * Math.sin(t * 0.83 + 1);
+      pitch += 0.014 * Math.sin(t * 0.29) + 0.006 * Math.sin(t * 1.7);
+      roll += 0.01 * Math.sin(t * 0.37 + 2);
+      bob = 0.03 * Math.sin(t * 0.9);
+      pitch += energy * 0.02 * Math.sin(t * 5.1);
+      // Error: one controlled recoil, no shaking or flashing.
+      if (face === "error") pitch += 0.06 * Math.exp(-since * 2.2);
+      if (face === "thinking") roll += 0.025 * Math.sin(t * 0.6);
+      pitch -= poke * 0.08;
     }
     if (face === "delegating" && agent) {
-      yaw = yawToward[agent][0];
-      pitch = yawToward[agent][1];
+      const [lookYaw, lookPitch] = AGENT_LOOK[agent];
+      yaw = lookYaw * Math.min(1, since * 1.5);
+      pitch = lookPitch * Math.min(1, since * 1.5);
     }
-    const hover = hovered ? 1.15 : 1;
-    // Playback RMS for speech sits around 0.05-0.25; scale it into the jaw's range.
-    const speech = playbackEnergy(level.current ?? 0, face === "speaking");
-    if (face === "speaking") mouth = 0.3 + speech * 2.6;
-    const m = motion.current;
-    m.yaw = THREE.MathUtils.damp(m.yaw, yaw, 4, dt);
-    m.pitch = THREE.MathUtils.damp(m.pitch, pitch, 4, dt);
-    m.jaw = THREE.MathUtils.damp(m.jaw, speech * 0.3, 18, dt);
-    m.bob = live ? 0.035 * Math.sin(t * 0.9) : 0;
-    rig.head.rotation.y = m.yaw;
-    rig.head.rotation.x = m.pitch;
-    rig.jaw.rotation.x = m.jaw;
-    rig.root.position.y = 0.25 + m.bob;
-    const damp = (from: number, to: number) =>
-      THREE.MathUtils.damp(from, to, 6, dt);
-    rig.eyeMaterial.emissiveIntensity = damp(
-      rig.eyeMaterial.emissiveIntensity,
-      ((eyeL + eyeR) / 2) * hover,
+    const b = rig.bones;
+    b.Head?.set(pitch, yaw, roll);
+    rig.root.position.y = bob + (hovered ? 0.03 : 0);
+
+    // Jaw moves only with reported voice level; restrained amplitude.
+    const open = c.mouth + (live ? jawOpen(energy, syllable(t)) : energy * 0.4);
+    const wide = energy * (0.4 + 0.3 * Math.sin(t * 4.1));
+    b.Jaw?.set(open * 0.21, 0, 0);
+    b.LipLowerL?.set(open * 0.07, 0, 0, scratch.set(0, -open * 0.008, 0));
+    b.LipLowerR?.set(open * 0.07, 0, 0, scratch.set(0, -open * 0.008, 0));
+    b.LipUpperL?.set(0, 0, 0, scratch.set(0, open * 0.01, 0));
+    b.LipUpperR?.set(0, 0, 0, scratch.set(0, open * 0.01, 0));
+    b.MouthCornerL?.set(0, 0, 0, scratch.set(wide * 0.016, -open * 0.02, 0));
+    b.MouthCornerR?.set(0, 0, 0, scratch.set(-wide * 0.016, -open * 0.02, 0));
+
+    const scan = live ? c.scan * Math.sin(t * 1.9) * 0.3 : 0;
+    const eyeYaw = c.px * 0.14 * c.follow + scan;
+    const eyePitch = -c.py * 0.07 * c.follow;
+    const squash = Math.max(0.06, 1 - closure * 0.94);
+    b.EyeL?.set(eyePitch, eyeYaw, 0, undefined, squash);
+    b.EyeR?.set(eyePitch, eyeYaw, 0, undefined, squash);
+    b.LidUpperL?.set(closure * 0.45, 0, 0);
+    b.LidUpperR?.set(closure * 0.45, 0, 0);
+    b.LidLowerL?.set(-closure * 0.2, 0, 0);
+    b.LidLowerR?.set(-closure * 0.2, 0, 0);
+
+    const lift = c.brow * 0.028 + energy * 0.005;
+    const furrow = c.furrow;
+    b.BrowInnerL?.set(
+      0,
+      0,
+      furrow * 0.12,
+      scratch.set(-furrow * 0.012, lift - furrow * 0.014, 0),
     );
-    rig.halos.forEach((halo, index) => {
-      const value = (index === 0 ? eyeL : eyeR) * hover;
-      halo.material.opacity = damp(
-        halo.material.opacity,
-        Math.min(0.85, value / 4),
-      );
-    });
-    rig.eyes.forEach((eye) => {
-      eye.scale.y = damp(eye.scale.y, pose.squint);
-    });
-    rig.crestMaterial.emissiveIntensity = damp(
-      rig.crestMaterial.emissiveIntensity,
-      crest,
+    b.BrowInnerR?.set(
+      0,
+      0,
+      -furrow * 0.12,
+      scratch.set(furrow * 0.012, lift - furrow * 0.014, 0),
     );
-    rig.coreMaterial.emissiveIntensity = damp(
-      rig.coreMaterial.emissiveIntensity,
-      core,
-    );
-    rig.mouthMaterial.emissiveIntensity = THREE.MathUtils.damp(
-      rig.mouthMaterial.emissiveIntensity,
-      mouth,
-      14,
-      dt,
-    );
+    b.BrowOuterL?.set(0, 0, 0, scratch.set(0, lift * 0.7, 0));
+    b.BrowOuterR?.set(0, 0, 0, scratch.set(0, lift * 0.7, 0));
+
+    // Glow: purposeful modulation per state, never strobing.
+    let pulse = 0;
+    if (live) {
+      if (face === "listening") pulse = 0.1 * Math.sin(t * 2.2);
+      else if (face === "thinking")
+        pulse = 0.14 * Math.sin(t * 1.3) * Math.sin(t * 0.41 + 1);
+      else if (BUSY_STATES.has(face)) pulse = 0.05 * Math.sin(t * 1.6);
+    }
+    // Kept near 1.0–1.6 in linear light: brighter values tone-map toward
+    // pink/white, which is exactly the washed-out look to avoid.
+    const eye =
+      1.35 *
+      c.eye *
+      (1 +
+        pulse +
+        energy * 0.3 +
+        mic * 0.35 +
+        (hovered ? 0.12 : 0) +
+        poke * 0.35) *
+      (1 - closure * 0.45);
+    rig.glow.color.copy(ENERGY).lerp(c.hue, 0.3).multiplyScalar(eye);
+    rig.armor.emissiveIntensity =
+      // Seams only: kept low so emission never floods the metal.
+      0.22 *
+      c.lines *
+      (1 + energy * 0.5 + (live ? 0.08 * Math.sin(t * 1.1) : 0));
+    for (const halo of rig.halos) {
+      halo.material.opacity = Math.min(0.4, eye / 4.2);
+      halo.material.color.copy(ENERGY).lerp(c.hue, 0.3);
+    }
+
+    const s = signal.current;
+    s.hue.copy(c.hue);
+    s.spin = c.spin;
+    s.energy = Math.max(energy, mic);
+    s.busy += ((BUSY_STATES.has(face) ? 1 : 0) - s.busy) * k(3);
+    s.eye = eye;
   });
-  return <primitive object={rig.root} />;
+  return (
+    <primitive
+      object={rig.root}
+      onClick={(event: { stopPropagation: () => void }) => {
+        event.stopPropagation();
+        timeline.current.pokeRequested = true;
+      }}
+    />
+  );
 }
 
-function label(text: string): THREE.CanvasTexture {
-  const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 96;
-  const context = canvas.getContext("2d")!;
-  context.font = "600 34px 'Segoe UI', Inter, sans-serif";
-  context.textAlign = "center";
-  context.fillStyle = "#e8e9ed";
-  context.fillText(text.toUpperCase(), 256, 44);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
+function arcs(
+  radius: number,
+  tube: number,
+  segments: [number, number][],
+  radial = 6,
+): THREE.BufferGeometry {
+  const parts = segments.map(([start, length]) => {
+    const g = new THREE.TorusGeometry(
+      radius,
+      tube,
+      radial,
+      Math.max(8, Math.round(length * 24)),
+      length,
+    );
+    g.rotateZ(start);
+    return g;
+  });
+  const merged = mergeGeometries(parts, false)!;
+  parts.forEach((part) => part.dispose());
+  return merged;
 }
 
-function AgentNode({
-  agent,
-  selected,
-  onSelect,
+/** Static chamber geometry, built once and shared by every dashboard canvas. */
+function buildChamber() {
+  // Halo: three black-chrome arc segments with machined ticks, merged.
+  const gap = 0.32;
+  const third = (Math.PI * 2) / 3;
+  const halo = arcs(1.56, 0.032, [
+    [Math.PI / 2 + gap / 2, third - gap],
+    [Math.PI / 2 + third + gap / 2, third - gap],
+    [Math.PI / 2 + 2 * third + gap / 2, third - gap],
+  ]);
+  const ticks: THREE.BufferGeometry[] = [];
+  for (let i = 0; i < 36; i += 1) {
+    const a = (i / 36) * Math.PI * 2;
+    const tick = new THREE.BoxGeometry(0.018, i % 3 === 0 ? 0.11 : 0.05, 0.02);
+    tick.translate(0, 1.66, 0);
+    tick.rotateZ(a);
+    ticks.push(tick);
+  }
+  const chrome = mergeGeometries([halo, ...ticks], false)!;
+  halo.dispose();
+  ticks.forEach((tick) => tick.dispose());
+  // Energy channel inside the arcs (emissive, thin).
+  const channel = arcs(
+    1.5,
+    0.006,
+    [0, 1, 2].map((i) => [Math.PI / 2 + i * third + 0.5, third - 1.0]),
+    4,
+  );
+  const outer = new THREE.TorusGeometry(1.82, 0.0035, 3, 160);
+  // Emitter pedestal: machined lathe profile under the chin.
+  const profile = [
+    [0, -0.5],
+    [1.05, -0.5],
+    [1.12, -0.44],
+    [1.1, -0.38],
+    [0.86, -0.32],
+    [0.74, -0.16],
+    [0.78, -0.1],
+    [0.6, -0.04],
+    [0.42, 0],
+    [0, 0],
+  ].map(([x, y]) => new THREE.Vector2(x, y));
+  const pedestal = new THREE.LatheGeometry(profile, 72);
+  const emitter = new THREE.TorusGeometry(0.66, 0.012, 6, 96);
+  emitter.rotateX(Math.PI / 2);
+  emitter.translate(0, -0.06, 0);
+  const lip = new THREE.TorusGeometry(1.08, 0.008, 4, 120);
+  lip.rotateX(Math.PI / 2);
+  lip.translate(0, -0.42, 0);
+  const emitters = mergeGeometries([emitter, lip], false)!;
+  emitter.dispose();
+  lip.dispose();
+  return { chrome, channel, outer, pedestal, emitters };
+}
+
+/**
+ * The chamber the face lives in: a slowly turning halo of machined arcs
+ * behind the head and an emitter pedestal below it. Six draw calls, no
+ * transparency except the emissive lines.
+ */
+const Chamber = memo(function Chamber({
+  signal,
+  reduced,
 }: {
-  agent: AgentStatus;
-  selected: boolean;
-  onSelect: (role: Role) => void;
+  signal: RefObject<Signal>;
+  reduced: boolean;
 }) {
-  const ring = useRef<THREE.Mesh>(null);
-  const pulse = useRef<THREE.Mesh>(null);
-  const position = NODE_POSITIONS[agent.role];
-  const curve = useMemo(() => {
-    const end = new THREE.Vector3(...position);
-    const start = new THREE.Vector3(0, 0.25, 0.25);
-    const middle = start
-      .clone()
-      .lerp(end, 0.5)
-      .add(new THREE.Vector3(0, 0.45, 0.4));
-    return new THREE.QuadraticBezierCurve3(start, middle, end);
-  }, [position]);
-  const tube = useMemo(
-    () => new THREE.TubeGeometry(curve, 48, 0.009, 6),
-    [curve],
+  const geometry = useMemo(buildChamber, []);
+  const materials = useMemo(
+    () => ({
+      chrome: new THREE.MeshStandardMaterial({
+        color: GUNMETAL,
+        metalness: 1,
+        roughness: 0.24,
+      }),
+      titanium: new THREE.MeshStandardMaterial({
+        color: TITANIUM,
+        metalness: 1,
+        roughness: 0.42,
+      }),
+      channel: new THREE.MeshBasicMaterial({ color: ENERGY }),
+      outer: new THREE.MeshBasicMaterial({
+        color: ENERGY,
+        transparent: true,
+        opacity: 0.35,
+        depthWrite: false,
+      }),
+      emitter: new THREE.MeshBasicMaterial({ color: ENERGY }),
+    }),
+    [],
   );
-  useEffect(() => () => tube.dispose(), [tube]);
-  const text = useMemo(
-    () =>
-      label(
-        `${agent.role} · ${agent.status === "started" ? "running" : agent.status}`,
-      ),
-    [agent.role, agent.status],
+  useEffect(
+    () => () => {
+      Object.values(geometry).forEach((g) => g.dispose());
+      Object.values(materials).forEach((m) => m.dispose());
+    },
+    [geometry, materials],
   );
-  useEffect(() => () => text.dispose(), [text]);
-  const running = agent.status === "started";
-  const emissive = {
-    off: 0,
-    available: 0.25,
-    started: 2.4,
-    succeeded: 0.8,
-    failed: 0.4,
-  }[agent.status];
-  const opacity = {
-    off: 0.06,
-    available: 0.18,
-    started: 0.75,
-    succeeded: 0.35,
-    failed: 0.25,
-  }[agent.status];
-  useFrame((state, delta) => {
-    if (ring.current && running) ring.current.rotation.z += delta * 1.4;
-    if (pulse.current) {
-      pulse.current.visible = running;
-      if (running)
-        pulse.current.position.copy(
-          curve.getPoint((state.clock.elapsedTime * 0.55) % 1),
-        );
-    }
+  const halo = useRef<THREE.Group>(null);
+  const outer = useRef<THREE.Mesh>(null);
+  const spin = useRef(0);
+  useFrame((_, delta) => {
+    const s = signal.current;
+    const dt = Math.min(delta, 0.1);
+    if (!reduced) spin.current += dt * s.spin * 0.22;
+    if (halo.current) halo.current.rotation.z = spin.current;
+    if (outer.current) outer.current.rotation.z = -spin.current * 0.6;
+    const level = 0.55 + s.busy * 0.35 + s.energy * 0.8;
+    materials.channel.color.copy(ENERGY).lerp(s.hue, 0.5).multiplyScalar(level);
+    materials.emitter.color
+      .copy(ENERGY)
+      .lerp(s.hue, 0.4)
+      .multiplyScalar(0.8 + s.busy * 0.5 + s.energy * 1.2);
+    materials.outer.color.copy(s.hue);
+    materials.outer.opacity = 0.18 + s.busy * 0.14;
   });
   return (
     <group>
-      <mesh geometry={tube}>
-        <meshBasicMaterial
-          color="#d21f35"
-          transparent
-          opacity={opacity}
-          depthWrite={false}
-          toneMapped={false}
+      <group position={[0, 0.06, -0.62]}>
+        <group ref={halo}>
+          <mesh geometry={geometry.chrome} material={materials.chrome} />
+          <mesh geometry={geometry.channel} material={materials.channel} />
+        </group>
+        <mesh
+          ref={outer}
+          geometry={geometry.outer}
+          material={materials.outer}
         />
-      </mesh>
-      <mesh ref={pulse} visible={false}>
-        <sphereGeometry args={[0.045, 12, 8]} />
-        <meshBasicMaterial color="#ff304a" toneMapped={false} />
-      </mesh>
-      <group
-        position={position}
-        scale={selected ? 1.18 : 1}
-        onClick={(event) => {
-          event.stopPropagation();
-          onSelect(agent.role);
-        }}
-        onPointerOver={() => (document.body.style.cursor = "pointer")}
-        onPointerOut={() => (document.body.style.cursor = "")}
-      >
-        <mesh>
-          <icosahedronGeometry args={[0.22, 1]} />
-          <meshPhysicalMaterial
-            color={agent.status === "off" ? "#30343c" : "#8d939e"}
-            metalness={1}
-            roughness={0.3}
-            clearcoat={0.3}
-            flatShading
-          />
-        </mesh>
-        <mesh>
-          <sphereGeometry args={[0.1, 16, 12]} />
-          <meshStandardMaterial
-            color="#1a0205"
-            emissive={agent.status === "failed" ? "#7a2a2a" : "#ff304a"}
-            emissiveIntensity={emissive}
-            toneMapped={false}
-          />
-        </mesh>
-        <mesh ref={ring} rotation={[Math.PI / 2.4, 0, 0]}>
-          <torusGeometry args={[0.36, 0.016, 8, 48]} />
-          <meshStandardMaterial
-            color="#252931"
-            metalness={1}
-            roughness={0.3}
-            emissive="#d21f35"
-            emissiveIntensity={selected ? 1.2 : emissive * 0.4}
-          />
-        </mesh>
-        <sprite
-          position={agent.role === "review" ? [1.15, 0, 0] : [0, -0.55, 0]}
-          scale={[1.5, 0.28, 1]}
-        >
-          <spriteMaterial
-            map={text}
-            transparent
-            depthWrite={false}
-            opacity={agent.status === "off" ? 0.45 : 0.95}
-          />
-        </sprite>
+      </group>
+      <group position={[0, -1.12, -0.1]}>
+        <mesh geometry={geometry.pedestal} material={materials.titanium} />
+        <mesh geometry={geometry.emitters} material={materials.emitter} />
       </group>
     </group>
   );
-}
+});
 
-function Environment() {
+/**
+ * Dark studio for reflections: obsidian room, a dim neutral softbox above
+ * and in front, crimson strips behind left and right. Baked once to PMREM.
+ */
+function Environment({ intensity }: { intensity: number }) {
   const { gl, scene } = useThree();
   useEffect(() => {
+    const room = new THREE.Scene();
+    const created: { dispose: () => void }[] = [];
+    const panel = (
+      w: number,
+      h: number,
+      color: THREE.Color,
+      position: [number, number, number],
+    ) => {
+      const geometry = new THREE.PlaneGeometry(w, h);
+      const material = new THREE.MeshBasicMaterial({
+        color,
+        side: THREE.DoubleSide,
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(...position);
+      mesh.lookAt(0, 0, 0);
+      room.add(mesh);
+      created.push(geometry, material);
+    };
+    const box = new THREE.BoxGeometry(20, 20, 20);
+    const walls = new THREE.MeshBasicMaterial({
+      // Faint neutral walls give the metal a body instead of pure black.
+      color: new THREE.Color(0.03, 0.03, 0.034),
+      side: THREE.BackSide,
+    });
+    room.add(new THREE.Mesh(box, walls));
+    created.push(box, walls);
+    const white = new THREE.Color(0.9, 0.92, 0.97);
+    panel(7, 3, white.clone().multiplyScalar(5), [0, 6, 1.5]);
+    panel(4, 3.5, white.clone().multiplyScalar(2.6), [3, 2, 6]);
+    panel(12, 3, white.clone().multiplyScalar(0.55), [0, 4.5, 6]);
+    panel(3, 3, white.clone().multiplyScalar(0.6), [-4, 1, 5]);
+    panel(1.4, 8, ENERGY.clone().multiplyScalar(2.3), [-6, 0.5, -3]);
+    panel(1.4, 8, ENERGY.clone().multiplyScalar(1.5), [6, 0, -2.5]);
+    panel(8, 3, ENERGY.clone().multiplyScalar(0.18), [0, -6, 0]);
     const generator = new THREE.PMREMGenerator(gl);
-    const room = new RoomEnvironment();
     const map = generator.fromScene(room, 0.04).texture;
     scene.environment = map;
-    scene.environmentIntensity = 0.55;
+    scene.environmentIntensity = intensity;
+    generator.dispose();
+    created.forEach((item) => item.dispose());
     return () => {
       scene.environment = null;
       map.dispose();
-      generator.dispose();
-      room.traverse((object) => {
-        if (object instanceof THREE.Mesh) {
-          object.geometry.dispose();
-          (object.material as THREE.Material).dispose();
-        }
-      });
     };
-  }, [gl, scene]);
+  }, [gl, scene, intensity]);
   return null;
 }
 
-function Pacer({ fps }: { fps: number }) {
+/** Crimson rim lights and an emitter fill that follow the state hue. */
+function StateLights({
+  signal,
+  chamber,
+}: {
+  signal: RefObject<Signal>;
+  chamber: boolean;
+}) {
+  const a = useRef<THREE.PointLight>(null);
+  const b = useRef<THREE.PointLight>(null);
+  const under = useRef<THREE.PointLight>(null);
+  useFrame(() => {
+    const s = signal.current;
+    if (a.current) {
+      a.current.color.copy(ENERGY).lerp(s.hue, 0.5);
+      a.current.intensity = 4 + s.energy * 2.5 + s.busy * 2;
+    }
+    if (b.current) b.current.color.copy(ENERGY).lerp(s.hue, 0.5);
+    if (under.current) {
+      under.current.color.copy(ENERGY).lerp(s.hue, 0.4);
+      under.current.intensity = 0.9 + s.busy * 0.8 + s.energy * 1.5;
+    }
+  });
+  return (
+    <>
+      <pointLight ref={a} position={[-2.8, 1.2, -1.6]} intensity={4} />
+      <pointLight ref={b} position={[2.8, 0.5, -1.4]} intensity={3} />
+      {chamber && (
+        <pointLight ref={under} position={[0, -1.15, 0.9]} intensity={1.6} />
+      )}
+    </>
+  );
+}
+
+/**
+ * Guards the bloom chain: a single NaN/Inf texel from specular aliasing on
+ * the skinned metal would otherwise be blurred across the whole head.
+ */
+const SanitizeShader = {
+  name: "SanitizeShader",
+  uniforms: { tDiffuse: { value: null } },
+  vertexShader: `varying vec2 vUv;
+void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `uniform sampler2D tDiffuse;
+varying vec2 vUv;
+void main() {
+  vec4 c = texture2D(tDiffuse, vUv);
+  bvec4 bad = bvec4(isnan(c.r) || isinf(c.r), isnan(c.g) || isinf(c.g), isnan(c.b) || isinf(c.b), isnan(c.a) || isinf(c.a));
+  if (any(bad)) c = vec4(0.0);
+  gl_FragColor = vec4(min(c.rgb, vec3(16.0)), clamp(c.a, 0.0, 1.0));
+}`,
+};
+
+/** High tier only: emissive-only bloom (threshold above lit-metal luminance). */
+function Bloom() {
+  const { gl, scene, camera, size } = useThree();
+  const composer = useMemo(() => {
+    const target = new THREE.WebGLRenderTarget(1, 1, {
+      type: THREE.HalfFloatType,
+      format: THREE.RGBAFormat,
+      samples: 4,
+    });
+    const effect = new EffectComposer(gl, target);
+    const render = new RenderPass(scene, camera);
+    render.clearAlpha = 0;
+    effect.addPass(render);
+    effect.addPass(new ShaderPass(SanitizeShader));
+    effect.addPass(
+      new UnrealBloomPass(new THREE.Vector2(256, 256), 0.5, 0.35, 1.05),
+    );
+    effect.addPass(new OutputPass());
+    return effect;
+  }, [gl, scene, camera]);
+  useEffect(() => {
+    composer.setPixelRatio(Math.min(gl.getPixelRatio(), 1.25));
+    composer.setSize(size.width, size.height);
+  }, [composer, gl, size]);
+  useEffect(() => () => composer.dispose(), [composer]);
+  useFrame(() => composer.render(), 1);
+  return null;
+}
+
+/**
+ * Invalidation pacer for frameloop="demand": renders at the active rate while
+ * something is happening (busy state, hover, recent cursor motion) and drops
+ * to the idle rate otherwise. Stops entirely while hidden.
+ */
+function Pacer({
+  active,
+  idle,
+  pointer,
+  wake,
+}: {
+  active: number;
+  idle: number;
+  pointer: RefObject<Pointer>;
+  wake: unknown;
+}) {
   const invalidate = useThree((state) => state.invalidate);
   useEffect(() => {
     invalidate();
-    if (fps <= 0) return;
-    let frame = 0;
-    let last = 0;
-    const interval = 1000 / fps;
-    const loop = (time: number) => {
-      frame = requestAnimationFrame(loop);
-      if (document.hidden) return;
-      // At a 60 fps cap every display frame renders; gating it only adds jitter-driven drops.
-      if (fps >= 58 || time - last >= interval - 4) {
-        last = time;
-        invalidate();
+  }, [invalidate, wake]);
+  useEffect(() => {
+    if (active <= 0 && idle <= 0) return;
+    let raf = 0;
+    let timer = 0;
+    let stopped = false;
+    const tick = () => {
+      if (stopped) return;
+      const moving = performance.now() - pointer.current.moved < 1200;
+      const fps = moving ? Math.max(active, idle) : idle;
+      if (fps <= 0) return;
+      invalidate();
+      if (fps >= 58) {
+        raf = requestAnimationFrame(tick);
+        return;
       }
+      timer = window.setTimeout(
+        () => {
+          raf = requestAnimationFrame(tick);
+        },
+        Math.max(0, 1000 / fps - 4),
+      );
     };
-    frame = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(frame);
-  }, [fps, invalidate]);
+    raf = requestAnimationFrame(tick);
+    return () => {
+      stopped = true;
+      cancelAnimationFrame(raf);
+      window.clearTimeout(timer);
+    };
+  }, [active, idle, invalidate, pointer]);
   return null;
 }
 
+/** Whole-frame renderer statistics (post-processing included). */
 function Meter({
   onStats,
   started,
+  passes,
+  budget,
 }: {
   onStats?: (stats: SceneStats) => void;
   started: number;
+  passes: number;
+  budget: number;
 }) {
+  const gl = useThree((state) => state.gl);
+  useEffect(() => {
+    gl.info.autoReset = false;
+    return () => {
+      gl.info.autoReset = true;
+    };
+  }, [gl]);
   const sample = useRef({
     frames: 0,
     time: 0,
     worst: 0,
+    gaps: [] as number[],
     from: performance.now(),
+    calls: 0,
+    triangles: 0,
   });
   const loaded = useRef(0);
   const renderer = useRef("");
   useFrame((state, delta) => {
+    const info = state.gl.info;
+    const s = sample.current;
+    // Totals of the previous frame, then start counting this one.
+    s.calls = info.render.calls;
+    s.triangles = info.render.triangles;
+    info.reset();
     if (!loaded.current) loaded.current = performance.now() - started;
     if (!renderer.current) renderer.current = rendererName(state.gl);
-    const s = sample.current;
     s.frames += 1;
     s.time += delta;
     s.worst = Math.max(s.worst, delta);
+    s.gaps.push(delta * 1000);
+    if (s.gaps.length > 180) s.gaps.shift();
     const now = performance.now();
-    if (now - s.from >= 1000 && onStats) {
-      onStats({
+    if (now - s.from >= 1000) {
+      const ordered = [...s.gaps].sort((a, b) => a - b);
+      const index = Math.min(
+        ordered.length - 1,
+        Math.max(0, Math.ceil(ordered.length * 0.95) - 1),
+      );
+      const p95 = ordered[index] ?? 0;
+      const stats: SceneStats = {
         fps: Math.round((s.frames * 1000) / (now - s.from)),
         frameMs: Math.round((s.time / s.frames) * 10000) / 10,
         maxFrameMs: Math.round(s.worst * 10000) / 10,
+        p95FrameMs: Math.round(p95 * 10) / 10,
         loadMs: Math.round(loaded.current),
-        calls: state.gl.info.render.calls,
-        triangles: state.gl.info.render.triangles,
+        calls: s.calls,
+        triangles: s.triangles,
+        textures: info.memory.textures,
+        geometries: info.memory.geometries,
+        programs: info.programs?.length ?? 0,
+        passes,
+        budget,
         renderer: renderer.current,
-      });
-      sample.current = { frames: 0, time: 0, worst: 0, from: now };
+      };
+      onStats?.(stats);
+      if (import.meta.env.DEV) {
+        const w = window as unknown as {
+          __immortilityScene?: Record<string, SceneStats>;
+        };
+        w.__immortilityScene = {
+          ...w.__immortilityScene,
+          [state.size.width < 300 ? "compact" : "stage"]: stats,
+        };
+      }
+      sample.current = {
+        ...s,
+        frames: 0,
+        time: 0,
+        worst: 0,
+        gaps: [],
+        from: now,
+      };
     }
   });
-  return null;
-}
-
-function Controls({ reset }: { reset?: RefObject<(() => void) | null> }) {
-  const { camera, gl, invalidate } = useThree();
-  const controls = useMemo(
-    () => new OrbitControls(camera, gl.domElement),
-    [camera, gl],
-  );
-  useEffect(() => {
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.minDistance = 4.5;
-    controls.maxDistance = 10;
-    controls.minAzimuthAngle = -0.7;
-    controls.maxAzimuthAngle = 0.7;
-    controls.minPolarAngle = Math.PI / 2 - 0.45;
-    controls.maxPolarAngle = Math.PI / 2 + 0.3;
-    controls.panSpeed = 0.5;
-    controls.saveState();
-    const low = new THREE.Vector3(-2, -1.5, -1);
-    const high = new THREE.Vector3(2, 1.5, 1);
-    const change = () => {
-      controls.target.clamp(low, high);
-      invalidate();
-    };
-    controls.addEventListener("change", change);
-    if (reset) reset.current = () => controls.reset();
-    return () => {
-      controls.removeEventListener("change", change);
-      controls.dispose();
-    };
-  }, [controls, invalidate, reset]);
-  useFrame(() => controls.update());
   return null;
 }
 
@@ -701,21 +935,19 @@ class Boundary extends Component<
   }
 }
 
-export function FlatFace({
-  face,
-  compact,
-}: {
-  face: FaceState;
-  compact?: boolean;
-}) {
-  return (
-    <div
-      className={`flat-face ${face} ${compact ? "small" : ""}`}
-      aria-hidden="true"
-    >
-      <img src={HEAD_IMAGE} alt="" draggable={false} />
-    </div>
-  );
+function launchPower(): { profile: PowerProfile; onBattery: boolean } {
+  const raw = import.meta.env.VITE_IMMORTILITY_PROFILE;
+  const profile: PowerProfile =
+    raw === "auto" ||
+    raw === "performance" ||
+    raw === "balanced" ||
+    raw === "battery"
+      ? raw
+      : "balanced";
+  return {
+    profile,
+    onBattery: import.meta.env.VITE_IMMORTILITY_ON_BATTERY === "1",
+  };
 }
 
 export interface HeadCanvasProps {
@@ -724,97 +956,132 @@ export interface HeadCanvasProps {
   level: RefObject<number>;
   quality: Quality;
   reduced: boolean;
+  /** Companion / quick-chat face: no chamber, no post-processing, low idle rate. */
   compact?: boolean;
-  agents?: Record<Role, AgentStatus>;
-  selected?: Role | null;
-  onSelect?: (role: Role) => void;
   onStats?: (stats: SceneStats) => void;
-  reset?: RefObject<(() => void) | null>;
 }
 
 export default function HeadCanvas(props: HeadCanvasProps) {
-  const { face, quality, reduced, compact } = props;
+  const { face, quality, reduced, compact = false } = props;
   const [hovered, setHovered] = useState(false);
   const [lost, setLost] = useState(false);
+  const launch = useMemo(launchPower, []);
+  const [dprCap, setDprCap] = useState(() =>
+    pixelRatioCap({
+      quality,
+      compact,
+      power: launch.profile,
+      onBattery: launch.onBattery,
+    }),
+  );
   const started = useMemo(() => performance.now(), []);
+  const host = useRef<HTMLDivElement>(null);
+  const pointer = usePointer(host);
+  const visible = useVisible(host);
+  const signal = useRef<Signal>({
+    hue: new THREE.Color(EXPRESSIONS.idle.hue),
+    spin: 0.35,
+    energy: 0,
+    busy: 0,
+    eye: 1,
+  });
   const fallback = <FlatFace face={face} compact={compact} />;
   if (quality === "2d" || lost) return fallback;
-  const active = busy.has(face) || hovered;
-  const fps = reduced
-    ? 0
-    : compact
-      ? active
-        ? 30
-        : 12
-      : {
-          high: active ? 60 : 30,
-          balanced: active ? 45 : 20,
-          performance: active ? 30 : 10,
-        }[quality];
-  const dpr: [number, number] =
-    quality === "high" ? [1, 2] : quality === "balanced" ? [1, 1.5] : [1, 1];
+  const busy = BUSY_STATES.has(face) || hovered;
+  const budget = {
+    quality,
+    compact,
+    reduced,
+    visible,
+    power: launch.profile,
+    onBattery: launch.onBattery,
+  };
+  const activeFps = frameBudget({ ...budget, active: true });
+  const idleFps = frameBudget({ ...budget, active: busy });
+  const rendering = effectivePower(launch.profile, launch.onBattery);
+  const bloom = !compact && quality === "high" && rendering !== "battery";
+  const dprCeiling = Math.min(
+    dprCap,
+    pixelRatioCap({
+      quality,
+      compact,
+      power: launch.profile,
+      onBattery: launch.onBattery,
+    }),
+  );
+  const dpr: [number, number] = [Math.min(1, dprCeiling), dprCeiling];
+  const noteStats = (stats: SceneStats) => {
+    props.onStats?.(stats);
+    if (stats.budget < 45 || stats.fps < 1 || dprCeiling <= 1) return;
+    if (stats.fps >= stats.budget * 0.75) return;
+    setDprCap((current) =>
+      Math.max(1, Math.round((current - 0.25) * 100) / 100),
+    );
+  };
   return (
     <Boundary fallback={fallback}>
-      <Canvas
-        className="head-canvas"
-        frameloop="demand"
-        dpr={compact ? [1, 1.5] : dpr}
-        camera={
-          compact
-            ? { position: [0, 0.1, 5.4], fov: 30 }
-            : { position: [0, 0.1, 6.9], fov: 35 }
-        }
-        gl={{
-          antialias: quality !== "performance",
-          alpha: true,
-          powerPreference: compact ? "low-power" : "high-performance",
-        }}
-        onCreated={({ gl }) => {
-          gl.domElement.addEventListener("webglcontextlost", () =>
-            setLost(true),
-          );
-        }}
-        onPointerEnter={() => setHovered(true)}
-        onPointerLeave={() => setHovered(false)}
-      >
-        <Pacer fps={fps} />
-        <Meter onStats={props.onStats} started={started} />
-        <ambientLight intensity={0.12} />
-        <directionalLight
-          position={[3, 4, 5]}
-          intensity={2.3}
-          color="#dfe6f0"
-        />
-        <directionalLight
-          position={[-4, 2, 3]}
-          intensity={0.35}
-          color="#9ca3af"
-        />
-        <pointLight position={[-3, 1.4, -2.4]} intensity={22} color="#d21f35" />
-        <pointLight position={[3.2, -1, -2]} intensity={8} color="#ff304a" />
-        {quality !== "performance" && <Environment />}
-        <Suspense fallback={null}>
-          <Head
-            face={face}
-            agent={props.agent}
-            level={props.level}
-            reduced={reduced}
-            hovered={hovered}
-            follow={!compact || hovered}
+      <div ref={host} className="head-host">
+        <Canvas
+          className="head-canvas"
+          frameloop="demand"
+          dpr={dpr}
+          camera={
+            compact
+              ? { position: [0, 0.02, 5.1], fov: 30 }
+              : { position: [0, -0.18, 5.7], fov: 30 }
+          }
+          gl={{
+            antialias: !bloom && quality !== "performance",
+            alpha: true,
+            premultipliedAlpha: true,
+            powerPreference: graphicsHint(launch.profile, launch.onBattery),
+            toneMapping: THREE.NeutralToneMapping,
+            toneMappingExposure: 0.92,
+          }}
+          onCreated={({ gl }) => {
+            gl.setClearColor(0x000000, 0);
+            gl.domElement.addEventListener("webglcontextlost", () =>
+              setLost(true),
+            );
+          }}
+          onPointerEnter={() => setHovered(true)}
+          onPointerLeave={() => setHovered(false)}
+        >
+          <Pacer
+            active={activeFps}
+            idle={idleFps}
+            pointer={pointer}
+            wake={`${face}${props.agent ?? ""}${visible}`}
           />
-        </Suspense>
-        {!compact &&
-          props.agents &&
-          ROLES.map((role) => (
-            <AgentNode
-              key={role}
-              agent={props.agents![role]}
-              selected={props.selected === role}
-              onSelect={props.onSelect ?? (() => {})}
+          <Meter
+            onStats={noteStats}
+            started={started}
+            passes={bloom ? 4 : 0}
+            budget={idleFps}
+          />
+          <directionalLight
+            position={[2.4, 4.2, 5]}
+            intensity={2.6}
+            color="#e9ebf2"
+          />
+          <StateLights signal={signal} chamber={!compact} />
+          <Environment intensity={compact ? 0.9 : 1} />
+          <Suspense fallback={null}>
+            <Face
+              face={face}
+              agent={props.agent}
+              level={props.level}
+              reduced={reduced}
+              hovered={hovered}
+              follow={pointer}
+              signal={signal}
+              compact={compact}
             />
-          ))}
-        {!compact && <Controls reset={props.reset} />}
-      </Canvas>
+          </Suspense>
+          {!compact && <Chamber signal={signal} reduced={reduced} />}
+          {bloom && <Bloom />}
+        </Canvas>
+      </div>
     </Boundary>
   );
 }

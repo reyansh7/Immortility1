@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "consent": "human native selection and Allow click; no automation",
+  "runtime": "real native picker + broker + gateway + UIA worker",
+  "scope": "synthetic fixture only, enforced by extra acceptance filter",
+  "nodes": 12,
+  "code_retrieved": true,
+  "password_canary_absent": true,
+  "single_use_delivery": true,
+  "cloud_calls": 0,
+  "screenshots": 0,
+  "desktop_input_actions": 0,
+  "elapsed_seconds_including_human": 19.41,
+  "general_app_corpus": "unverified",
+  "dashboard_render": "separate acceptance"
+}

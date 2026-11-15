@@ -1,7 +1,7 @@
 import { describe as suite, expect, it } from "vitest";
 import { parseBlocks } from "../Markdown";
 import { redact, type Task, type Transcript } from "../state";
-import { category, collect, describe } from "./Timeline";
+import { category, collect, describe, phase } from "./Timeline";
 
 const entry = (type: string, data: Record<string, string | number>) => ({
   sequence: 1,
@@ -11,6 +11,23 @@ const entry = (type: string, data: Record<string, string | number>) => ({
 });
 
 suite("timeline", () => {
+  it("labels execution stages from structured events only", () => {
+    expect(phase(entry("task.state", { status: "running" }))).toBe(
+      "Request analyzed",
+    );
+    expect(
+      phase(entry("audit.notice", { route_mode: "standard", model: "m" })),
+    ).toBe("Route selected");
+    expect(phase(entry("agent.started", { role: "coding" }))).toBe(
+      "Specialist delegated",
+    );
+    expect(phase(entry("tool.completed", { name: "read", path: "a.py" }))).toBe(
+      "File accessed",
+    );
+    expect(phase(entry("approval.requested", {}))).toBe("Approval required");
+    expect(phase(entry("task.error", { code: "x", attempt: 2 }))).toBe("Retry");
+    expect(phase(entry("unknown.thing", {}))).toBe("Event");
+  });
   it("names real broker events without inventing detail", () => {
     expect(describe(entry("agent.started", { role: "research" }))).toBe(
       "research agent started",

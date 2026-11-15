@@ -80,7 +80,9 @@ def parent_brief(content: str, notes: str, research: str, coding: str, review: s
     )
 
 
-async def _one(factory: Callable[[], Any], role: str, brief: str, history: list[dict[str, str]]) -> str:
+async def _one(
+    factory: Callable[[], Any], role: str, brief: str, history: list[dict[str, str]]
+) -> str:
     runtime = factory()
     parts: list[str] = []
     try:
@@ -153,7 +155,9 @@ async def orchestrate(
         produced["review"] = await _specialist(
             factory,
             "review",
-            _brief("review", content, notes, produced.get("research", ""), produced.get("coding", "")),
+            _brief(
+                "review", content, notes, produced.get("research", ""), produced.get("coding", "")
+            ),
             history,
             emit,
         )

@@ -1,0 +1,21 @@
+{
+  "status": "blocked",
+  "classification": "REAL PROVIDER CHECK FAILED ACCEPTANCE",
+  "task_id": "032ec364-2f6e-464c-9647-a02e457f4a7b",
+  "provider_calls": 1,
+  "error": {
+    "code": "tool_denied",
+    "message": "Provider requested an unapproved broker operation."
+  },
+  "tool_dispatches": 0,
+  "artifacts_published": false,
+  "calls": [
+    {
+      "charged": 1180,
+      "status": "reported",
+      "reported": "{\"prompt_tokens\": 961, \"completion_tokens\": 219, \"prompt_tokens_details\": {\"cached_tokens\": 0, \"cache_write_tokens\": 0, \"audio_tokens\": 0, \"video_tokens\": 0}, \"completion_tokens_details\": {\"reasoning_tokens\": 90, \"image_tokens\": 0, \"audio_tokens\": 0}}"
+    }
+  ],
+  "retry_or_fallback": false,
+  "note": "One authorized task stopped at first rejected tool proposal. Exact invalid field was not retained; do not infer or weaken validation without evidence."
+}

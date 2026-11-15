@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ROOT / ".env", extra="ignore")
     allow_paid_inference: Literal[False] = False
     monthly_paid_budget_usd: Literal[0] = 0
+    # Deployment policy may lower a route's call budget, never increase it.
+    model_call_cap: int = Field(default=6, ge=1, le=6)
     openrouter_api_key: SecretStr = SecretStr("")
     gemini_api_key: SecretStr = SecretStr("")
     groq_api_key: SecretStr = SecretStr("")
@@ -21,8 +23,9 @@ class Settings(BaseSettings):
     data_dir: Path = ROOT / "data/dev"
     credential_source: str = "local environment"
     # Off until the isolated runtime's security and native verification gates are resolved.
-    experimental_qwen_tts: bool = False
+    experimental_qwen_tts: Literal[False] = False
     infernal_voice_enabled: bool = False
+    reference_voice_enabled: bool = False
     # Specialists stay off until the user turns them on. Side-effect tools stay disabled.
     delegation_enabled: bool = False
     local_tools_enabled: bool = False
@@ -32,6 +35,12 @@ class Settings(BaseSettings):
     web_research_enabled: bool = False
     # Local arithmetic MCP server is off until the user enables it.
     mcp_enabled: bool = False
+    # Separate standard SDK gate; never inferred from the legacy demo checkbox.
+    standard_mcp_enabled: bool = False
+    artifact_tools_enabled: bool = False
+    # No autorun/service install. Only explicit, local read workflows may recover.
+    durable_workflows_enabled: bool = False
+    local_only_mode: bool = False
     # Cannot be turned on by environment. No verified Windows isolation boundary.
     code_execution_enabled: Literal[False] = False
     origins: tuple[str, ...] = (
@@ -47,7 +56,7 @@ class Settings(BaseSettings):
     def parse_free_lock(cls, value: object) -> object:
         return False if isinstance(value, str) and value.lower() == "false" else value
 
-    @field_validator("code_execution_enabled", mode="before")
+    @field_validator("code_execution_enabled", "experimental_qwen_tts", mode="before")
     @classmethod
     def execution_stays_off(cls, value: object) -> object:
         del value

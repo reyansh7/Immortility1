@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-14",
+  "candidate_count": 138,
+  "decision_counts": {
+    "KEEP EXISTING": 18,
+    "DEFER": 66,
+    "EXPERIMENT": 20,
+    "REJECT": 28,
+    "INTEGRATE": 6
+  },
+  "matching_matrix_json": true,
+  "relative_links_checked": 27,
+  "broken_links": 0,
+  "application_source_changed_by_audit": false,
+  "feature_implementation_performed": false,
+  "files": {
+    "ECOSYSTEM_ARCHITECTURE_AUDIT_2026-11-14.md": "341478c480ac182ccb6db806f4ef9eb0896539db0039a794d722ff21458cea8d",
+    "ecosystem_audit_probes.py": "ed4cc6e94835fb09fbd764999697c23e1af40d56f0b24c9fc423b6e9ecc510cb",
+    "ECOSYSTEM_CANDIDATE_MATRIX_2026-11-14.md": "771ac17c0e56a2b156db47b86308595950a26bc719cfa81744ec51a43d16d1ac",
+    "ECOSYSTEM_IMPLEMENTATION_ROADMAP_2026-11-14.md": "b6bad68c2756a9521abde4cdceb3424c6fbe1d52969bc9fd2577652e1270b1eb",
+    "ECOSYSTEM_INFERNAL_AUDIT_2026-11-14.json": "a9b643d085cda42e5d67ee267f76db84048fdfe6a54b178c4346fc47ab747e2c",
+    "ECOSYSTEM_LOCAL_INVENTORY_2026-11-14.json": "905ab11f29cb9d36664daa8eeee2175f117827ea3ba4f91cb8c6897fc4db6b9f",
+    "ECOSYSTEM_PNPM_AUDIT_2026-11-14.json": "b93596f3576aed00b4e90505874ed83f46d15aa1fb0cfdcb772b176993a1c06e",
+    "ECOSYSTEM_PYTHON_AUDIT_2026-11-14.json": "7a4925bb009917b81f4c4db0e33cff0140d8984921709a3622b4121fdde805a0",
+    "ECOSYSTEM_QWEN_AUDIT_2026-11-14.json": "37e9574ab0cb47163b94021a4d1fd881584df8073e99d6c9487a84ad2e19ed72",
+    "ECOSYSTEM_REFERENCE_TTS_AUDIT_2026-11-14.json": "872a0aaf09db5058b9e570986e77671fe777577cda279638f292e33bab8e24c0",
+    "ECOSYSTEM_UPSTREAM_EVIDENCE_2026-11-14.json": "5f87097cd81a1f39be583bf78d63e5b63ea746a73da8119f0368a96b231cfed3",
+    "ECOSYSTEM_VERIFICATION_2026-11-14.md": "dc6f348e24179ce1916a9290b8dedb96ca759d737255534ad54c3e1f92b816fc"
+  }
+}

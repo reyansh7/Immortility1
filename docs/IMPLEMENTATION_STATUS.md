@@ -1,5 +1,7 @@
 # Implementation and verification — 2026-11-13
 
+Latest continuation: [critical repairs checkpoint](implementation/CRITICAL_REPAIRS_CHECKPOINT.md), [measured verification and changed-source manifest](implementation/CRITICAL_REPAIRS_VERIFICATION.json). **263 Python / 55 frontend / 6 Rust passed**; native background attachment, stored-result replay, visible chat outcomes and CPU speech repairs have scoped acceptance evidence. General autonomous desktop/coding/artifact capabilities remain incomplete. The older audit below is historical.
+
 ## Current P0 consolidation audit
 
 The latest authoritative record is [P0_AUDIT.md](phases/P0_AUDIT.md), with
@@ -191,8 +193,15 @@ Development and offline tests:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\dev.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-command.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\check.ps1
 ```
+
+`install-command.ps1` puts `immortility` on the user PATH. With no flag it selects the
+high-performance GPU on AC power and the power-saving GPU on battery.
+`-performance`, `-balanced`, `-battery`, and `-headless` select the other modes.
+`-gpu` is the same as `-performance`. The preference is written only for this
+app's executable.
 
 Run the test command in another terminal or after closing dev mode. See README
 for clean dependency setup, native builds and explicitly invoked real/offline

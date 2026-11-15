@@ -1,0 +1,611 @@
+[
+  {
+    "quality": "high",
+    "scenario": "home-idle",
+    "rafPerSec": 9.5,
+    "renderedFramesPerSec": 4.7,
+    "drawCallsPerSec": 112.8,
+    "drawCallsPerRenderedFrame": 24,
+    "reactCommitsPerSec": 1,
+    "scriptMsPerSec": 11,
+    "taskMsPerSec": 22.2,
+    "layoutsPerSec": 7,
+    "styleRecalcsPerSec": 7,
+    "scene": {
+      "stage": {
+        "fps": 5,
+        "frameMs": 194.7,
+        "maxFrameMs": 225.8,
+        "loadMs": 2389,
+        "calls": 24,
+        "triangles": 9507,
+        "textures": 21,
+        "geometries": 9,
+        "programs": 17,
+        "passes": 4,
+        "budget": 30,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "high",
+    "scenario": "home-pointer",
+    "rafPerSec": 8.5,
+    "renderedFramesPerSec": 4.9,
+    "drawCallsPerSec": 117.6,
+    "drawCallsPerRenderedFrame": 24,
+    "reactCommitsPerSec": 2.8,
+    "scriptMsPerSec": 15.1,
+    "taskMsPerSec": 32.3,
+    "layoutsPerSec": 6.8,
+    "styleRecalcsPerSec": 7.1,
+    "scene": {
+      "stage": {
+        "fps": 5,
+        "frameMs": 215.9,
+        "maxFrameMs": 353.5,
+        "loadMs": 595,
+        "calls": 24,
+        "triangles": 9507,
+        "textures": 21,
+        "geometries": 9,
+        "programs": 17,
+        "passes": 4,
+        "budget": 60,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "high",
+    "scenario": "home-speaking",
+    "rafPerSec": 9.3,
+    "renderedFramesPerSec": 4.7,
+    "drawCallsPerSec": 112.8,
+    "drawCallsPerRenderedFrame": 24,
+    "reactCommitsPerSec": 1.2,
+    "scriptMsPerSec": 11.1,
+    "taskMsPerSec": 22.5,
+    "layoutsPerSec": 6.4,
+    "styleRecalcsPerSec": 6.4,
+    "scene": {
+      "stage": {
+        "fps": 5,
+        "frameMs": 184.6,
+        "maxFrameMs": 240.5,
+        "loadMs": 593,
+        "calls": 24,
+        "triangles": 9507,
+        "textures": 21,
+        "geometries": 9,
+        "programs": 17,
+        "passes": 4,
+        "budget": 60,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "high",
+    "scenario": "home-delegating",
+    "rafPerSec": 4,
+    "renderedFramesPerSec": 2,
+    "drawCallsPerSec": 50.4,
+    "drawCallsPerRenderedFrame": 25.2,
+    "reactCommitsPerSec": 3.7,
+    "scriptMsPerSec": 9.6,
+    "taskMsPerSec": 16.9,
+    "layoutsPerSec": 0.8,
+    "styleRecalcsPerSec": 4,
+    "scene": {
+      "stage": {
+        "fps": 2,
+        "frameMs": 503.7,
+        "maxFrameMs": 514.6,
+        "loadMs": 833,
+        "calls": 24,
+        "triangles": 9507,
+        "textures": 21,
+        "geometries": 9,
+        "programs": 17,
+        "passes": 4,
+        "budget": 60,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "high",
+    "scenario": "home-hidden",
+    "rafPerSec": 49.6,
+    "renderedFramesPerSec": 0.4,
+    "drawCallsPerSec": 7.2,
+    "drawCallsPerRenderedFrame": 18,
+    "reactCommitsPerSec": 0.5,
+    "scriptMsPerSec": 4.1,
+    "taskMsPerSec": 13.4,
+    "layoutsPerSec": 3.8,
+    "styleRecalcsPerSec": 3.8,
+    "scene": {
+      "stage": {
+        "fps": 0,
+        "frameMs": 7016.5,
+        "maxFrameMs": 7016.5,
+        "loadMs": 568,
+        "calls": 24,
+        "triangles": 9507,
+        "textures": 21,
+        "geometries": 9,
+        "programs": 17,
+        "passes": 4,
+        "budget": 0,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "high",
+    "scenario": "companion-idle",
+    "rafPerSec": 60,
+    "renderedFramesPerSec": 12,
+    "drawCallsPerSec": 48,
+    "drawCallsPerRenderedFrame": 4,
+    "reactCommitsPerSec": 0.3,
+    "scriptMsPerSec": 7.5,
+    "taskMsPerSec": 14.9,
+    "layoutsPerSec": 0,
+    "styleRecalcsPerSec": 0,
+    "scene": {
+      "compact": {
+        "fps": 12,
+        "frameMs": 83.3,
+        "maxFrameMs": 83.8,
+        "loadMs": 324,
+        "calls": 4,
+        "triangles": 2520,
+        "textures": 8,
+        "geometries": 3,
+        "programs": 3,
+        "passes": 0,
+        "budget": 12,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "high",
+    "scenario": "chat-idle",
+    "rafPerSec": 60,
+    "renderedFramesPerSec": 12.2,
+    "drawCallsPerSec": 48.8,
+    "drawCallsPerRenderedFrame": 4,
+    "reactCommitsPerSec": 0.3,
+    "scriptMsPerSec": 7.9,
+    "taskMsPerSec": 15.8,
+    "layoutsPerSec": 0,
+    "styleRecalcsPerSec": 0,
+    "scene": {
+      "compact": {
+        "fps": 12,
+        "frameMs": 83.3,
+        "maxFrameMs": 83.7,
+        "loadMs": 812,
+        "calls": 4,
+        "triangles": 2520,
+        "textures": 8,
+        "geometries": 3,
+        "programs": 3,
+        "passes": 0,
+        "budget": 12,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "balanced",
+    "scenario": "home-idle",
+    "rafPerSec": 26.1,
+    "renderedFramesPerSec": 10.7,
+    "drawCallsPerSec": 97.2,
+    "drawCallsPerRenderedFrame": 9.1,
+    "reactCommitsPerSec": 1.3,
+    "scriptMsPerSec": 13.3,
+    "taskMsPerSec": 34.5,
+    "layoutsPerSec": 13.9,
+    "styleRecalcsPerSec": 13.9,
+    "scene": {
+      "stage": {
+        "fps": 8,
+        "frameMs": 124.9,
+        "maxFrameMs": 132.1,
+        "loadMs": 685,
+        "calls": 9,
+        "triangles": 9492,
+        "textures": 8,
+        "geometries": 8,
+        "programs": 7,
+        "passes": 0,
+        "budget": 24,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "balanced",
+    "scenario": "home-pointer",
+    "rafPerSec": 23.7,
+    "renderedFramesPerSec": 12.5,
+    "drawCallsPerSec": 111.6,
+    "drawCallsPerRenderedFrame": 8.9,
+    "reactCommitsPerSec": 3,
+    "scriptMsPerSec": 20,
+    "taskMsPerSec": 46.7,
+    "layoutsPerSec": 11.9,
+    "styleRecalcsPerSec": 12.2,
+    "scene": {
+      "stage": {
+        "fps": 20,
+        "frameMs": 49.5,
+        "maxFrameMs": 119.8,
+        "loadMs": 576,
+        "calls": 9,
+        "triangles": 9492,
+        "textures": 8,
+        "geometries": 8,
+        "programs": 7,
+        "passes": 0,
+        "budget": 60,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "balanced",
+    "scenario": "home-speaking",
+    "rafPerSec": 20.6,
+    "renderedFramesPerSec": 10.3,
+    "drawCallsPerSec": 93.6,
+    "drawCallsPerRenderedFrame": 9.1,
+    "reactCommitsPerSec": 1.3,
+    "scriptMsPerSec": 15.5,
+    "taskMsPerSec": 38.8,
+    "layoutsPerSec": 13,
+    "styleRecalcsPerSec": 13,
+    "scene": {
+      "stage": {
+        "fps": 8,
+        "frameMs": 130.2,
+        "maxFrameMs": 140.2,
+        "loadMs": 598,
+        "calls": 9,
+        "triangles": 9492,
+        "textures": 8,
+        "geometries": 8,
+        "programs": 7,
+        "passes": 0,
+        "budget": 60,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "balanced",
+    "scenario": "home-delegating",
+    "rafPerSec": 5.5,
+    "renderedFramesPerSec": 2.8,
+    "drawCallsPerSec": 25.2,
+    "drawCallsPerRenderedFrame": 9,
+    "reactCommitsPerSec": 4.1,
+    "scriptMsPerSec": 11.5,
+    "taskMsPerSec": 21.9,
+    "layoutsPerSec": 0.9,
+    "styleRecalcsPerSec": 5.5,
+    "scene": {
+      "stage": {
+        "fps": 3,
+        "frameMs": 379.5,
+        "maxFrameMs": 386,
+        "loadMs": 620,
+        "calls": 9,
+        "triangles": 9492,
+        "textures": 8,
+        "geometries": 8,
+        "programs": 7,
+        "passes": 0,
+        "budget": 60,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "balanced",
+    "scenario": "home-hidden",
+    "rafPerSec": 53.7,
+    "renderedFramesPerSec": 0.3,
+    "drawCallsPerSec": 1.8,
+    "drawCallsPerRenderedFrame": 6,
+    "reactCommitsPerSec": 0.5,
+    "scriptMsPerSec": 3.6,
+    "taskMsPerSec": 12.3,
+    "layoutsPerSec": 3.3,
+    "styleRecalcsPerSec": 3.3,
+    "scene": {
+      "stage": {
+        "fps": 1,
+        "frameMs": 974.9,
+        "maxFrameMs": 6985.4,
+        "loadMs": 548,
+        "calls": 9,
+        "triangles": 9492,
+        "textures": 8,
+        "geometries": 8,
+        "programs": 7,
+        "passes": 0,
+        "budget": 0,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "balanced",
+    "scenario": "companion-idle",
+    "rafPerSec": 60,
+    "renderedFramesPerSec": 12,
+    "drawCallsPerSec": 48,
+    "drawCallsPerRenderedFrame": 4,
+    "reactCommitsPerSec": 0.3,
+    "scriptMsPerSec": 7.9,
+    "taskMsPerSec": 15.8,
+    "layoutsPerSec": 0,
+    "styleRecalcsPerSec": 0,
+    "scene": {
+      "compact": {
+        "fps": 12,
+        "frameMs": 83.3,
+        "maxFrameMs": 83.6,
+        "loadMs": 321,
+        "calls": 4,
+        "triangles": 2520,
+        "textures": 8,
+        "geometries": 3,
+        "programs": 3,
+        "passes": 0,
+        "budget": 12,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "balanced",
+    "scenario": "chat-idle",
+    "rafPerSec": 60.1,
+    "renderedFramesPerSec": 12.1,
+    "drawCallsPerSec": 48.8,
+    "drawCallsPerRenderedFrame": 4,
+    "reactCommitsPerSec": 0.3,
+    "scriptMsPerSec": 8.1,
+    "taskMsPerSec": 16.5,
+    "layoutsPerSec": 0,
+    "styleRecalcsPerSec": 0,
+    "scene": {
+      "compact": {
+        "fps": 12,
+        "frameMs": 83.4,
+        "maxFrameMs": 83.9,
+        "loadMs": 500,
+        "calls": 4,
+        "triangles": 2520,
+        "textures": 8,
+        "geometries": 3,
+        "programs": 3,
+        "passes": 0,
+        "budget": 12,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "performance",
+    "scenario": "home-idle",
+    "rafPerSec": 25.6,
+    "renderedFramesPerSec": 10.4,
+    "drawCallsPerSec": 93.6,
+    "drawCallsPerRenderedFrame": 9,
+    "reactCommitsPerSec": 1.3,
+    "scriptMsPerSec": 14.1,
+    "taskMsPerSec": 36.7,
+    "layoutsPerSec": 15.6,
+    "styleRecalcsPerSec": 15.6,
+    "scene": {
+      "stage": {
+        "fps": 14,
+        "frameMs": 69.3,
+        "maxFrameMs": 106.7,
+        "loadMs": 677,
+        "calls": 9,
+        "triangles": 9492,
+        "textures": 8,
+        "geometries": 8,
+        "programs": 7,
+        "passes": 0,
+        "budget": 15,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "performance",
+    "scenario": "home-pointer",
+    "rafPerSec": 25.2,
+    "renderedFramesPerSec": 13,
+    "drawCallsPerSec": 117.9,
+    "drawCallsPerRenderedFrame": 9.1,
+    "reactCommitsPerSec": 3,
+    "scriptMsPerSec": 21.7,
+    "taskMsPerSec": 56.6,
+    "layoutsPerSec": 15.4,
+    "styleRecalcsPerSec": 15.7,
+    "scene": {
+      "stage": {
+        "fps": 8,
+        "frameMs": 119.2,
+        "maxFrameMs": 122.6,
+        "loadMs": 591,
+        "calls": 9,
+        "triangles": 9492,
+        "textures": 8,
+        "geometries": 8,
+        "programs": 7,
+        "passes": 0,
+        "budget": 15,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "performance",
+    "scenario": "home-speaking",
+    "rafPerSec": 27.2,
+    "renderedFramesPerSec": 13.5,
+    "drawCallsPerSec": 120.6,
+    "drawCallsPerRenderedFrame": 8.9,
+    "reactCommitsPerSec": 1.3,
+    "scriptMsPerSec": 17,
+    "taskMsPerSec": 39.7,
+    "layoutsPerSec": 14,
+    "styleRecalcsPerSec": 14,
+    "scene": {
+      "stage": {
+        "fps": 10,
+        "frameMs": 102.6,
+        "maxFrameMs": 108.4,
+        "loadMs": 561,
+        "calls": 9,
+        "triangles": 9492,
+        "textures": 8,
+        "geometries": 8,
+        "programs": 7,
+        "passes": 0,
+        "budget": 30,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "performance",
+    "scenario": "home-delegating",
+    "rafPerSec": 6.5,
+    "renderedFramesPerSec": 3.4,
+    "drawCallsPerSec": 29.7,
+    "drawCallsPerRenderedFrame": 8.7,
+    "reactCommitsPerSec": 3.5,
+    "scriptMsPerSec": 11,
+    "taskMsPerSec": 25.4,
+    "layoutsPerSec": 3.8,
+    "styleRecalcsPerSec": 6.5,
+    "scene": {
+      "stage": {
+        "fps": 3,
+        "frameMs": 316.3,
+        "maxFrameMs": 333.8,
+        "loadMs": 602,
+        "calls": 9,
+        "triangles": 9492,
+        "textures": 8,
+        "geometries": 8,
+        "programs": 7,
+        "passes": 0,
+        "budget": 30,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "performance",
+    "scenario": "home-hidden",
+    "rafPerSec": 53.6,
+    "renderedFramesPerSec": 0.4,
+    "drawCallsPerSec": 2.7,
+    "drawCallsPerRenderedFrame": 6.8,
+    "reactCommitsPerSec": 0.3,
+    "scriptMsPerSec": 3.6,
+    "taskMsPerSec": 12.8,
+    "layoutsPerSec": 3.1,
+    "styleRecalcsPerSec": 3.1,
+    "scene": {
+      "stage": {
+        "fps": 1,
+        "frameMs": 1123.9,
+        "maxFrameMs": 7011.6,
+        "loadMs": 610,
+        "calls": 9,
+        "triangles": 9492,
+        "textures": 8,
+        "geometries": 8,
+        "programs": 7,
+        "passes": 0,
+        "budget": 0,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "performance",
+    "scenario": "companion-idle",
+    "rafPerSec": 60,
+    "renderedFramesPerSec": 12,
+    "drawCallsPerSec": 48,
+    "drawCallsPerRenderedFrame": 4,
+    "reactCommitsPerSec": 0.3,
+    "scriptMsPerSec": 7.9,
+    "taskMsPerSec": 15.6,
+    "layoutsPerSec": 0,
+    "styleRecalcsPerSec": 0,
+    "scene": {
+      "compact": {
+        "fps": 12,
+        "frameMs": 83.3,
+        "maxFrameMs": 89.9,
+        "loadMs": 306,
+        "calls": 4,
+        "triangles": 2520,
+        "textures": 8,
+        "geometries": 3,
+        "programs": 3,
+        "passes": 0,
+        "budget": 12,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  },
+  {
+    "quality": "performance",
+    "scenario": "chat-idle",
+    "rafPerSec": 60,
+    "renderedFramesPerSec": 12.1,
+    "drawCallsPerSec": 48.4,
+    "drawCallsPerRenderedFrame": 4,
+    "reactCommitsPerSec": 0.3,
+    "scriptMsPerSec": 8.3,
+    "taskMsPerSec": 16.3,
+    "layoutsPerSec": 0,
+    "styleRecalcsPerSec": 0,
+    "scene": {
+      "compact": {
+        "fps": 12,
+        "frameMs": 83.3,
+        "maxFrameMs": 83.7,
+        "loadMs": 632,
+        "calls": 4,
+        "triangles": 2520,
+        "textures": 8,
+        "geometries": 3,
+        "programs": 3,
+        "passes": 0,
+        "budget": 12,
+        "renderer": "Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver"
+      }
+    }
+  }
+]

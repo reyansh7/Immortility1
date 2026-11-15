@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Broker model mode selection",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "mode": {"enum": ["auto_cloud", "manual_cloud", "local_qwen", "local_heretic"], "default": "auto_cloud"},
+    "route_id": {"type": ["string", "null"], "maxLength": 160, "pattern": "^[A-Za-z0-9._:/-]{1,160}$", "default": null}
+  },
+  "allOf": [{"if": {"properties":{"mode":{"const":"manual_cloud"}}, "required":["mode"]}, "then": {"required":["route_id"],"properties":{"route_id":{"type":"string"}}}, "else": {"properties":{"route_id":{"type":"null"}}}}]
+}

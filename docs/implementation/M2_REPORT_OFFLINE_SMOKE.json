@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "classification": "VERIFIED LOCAL INTEGRATION; synthetic provider selection and draft",
+  "source_transport": "synthetic bytes",
+  "directory": "C:\\Users\\reyan\\OneDrive\\Desktop\\IMMORTILITY\\.cache\\report-workflows\\4515d4e1-4d67-40e1-bf2e-82dbc786c4fd\\artifacts\\166f628e-b06b-4258-a2d5-da9bf6cc4986",
+  "seconds": 12.337,
+  "cloud_calls": 0,
+  "synthetic_provider_calls": 2,
+  "usage": {
+    "calls": 2,
+    "dispatch_attempts": 2,
+    "not_sent_calls": 0,
+    "pending_reservations": 0,
+    "charged_tokens": 1500,
+    "unknown_calls": 0,
+    "prompt_tokens": 1000,
+    "completion_tokens": 500
+  },
+  "real_gateway_operations": 2,
+  "local_finalization": true,
+  "private_history_canary_absent": true,
+  "source_refs": [
+    {
+      "source_id": "mcp-security",
+      "title": "MCP Security Best Practices",
+      "url": "https://raw.githubusercontent.com/modelcontextprotocol/modelcontextprotocol/main/docs/docs/2026-07-28/tutorials/security/security_best_practices.mdx",
+      "sha256": "640e0d4944424ec3b20897737b2fbb40ef99ffba0c47b2f61b0dbd7821b3cee1",
+      "retrieved_at": "2026-11-15T07:40:09.532458+00:00"
+    },
+    {
+      "source_id": "owasp-mcp",
+      "title": "OWASP MCP Security Cheat Sheet",
+      "url": "https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/MCP_Security_Cheat_Sheet.md",
+      "sha256": "ec2c3a4c86c4b5cf1c3d41bc625b4edc6f69293710f244ed7570e050e4e799c5",
+      "retrieved_at": "2026-11-15T07:40:09.532623+00:00"
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact_id": "report.md",
+      "size": 2370,
+      "sha256": "9bf16e8b0b6924ff38409e29aae44007da39a16bd45012fede62e23a6518ace7",
+      "verification": "reopened"
+    },
+    {
+      "artifact_id": "report.pdf",
+      "size": 2634,
+      "sha256": "e8c68e2e404fc2dec1ad8fe337b5349e081bcd62f802d90c62b7bf89b0550bba",
+      "verification": "reopened-and-rendered"
+    }
+  ],
+  "docx_publication": "disabled"
+}

@@ -1,0 +1,1 @@
+{"dependencies": [{"name": "comtypes", "version": "1.5.0", "vulns": []}, {"name": "pywin32", "version": "312", "vulns": []}, {"name": "pywinauto", "version": "0.6.9", "vulns": []}, {"name": "six", "version": "1.17.0", "vulns": []}], "fixes": []}

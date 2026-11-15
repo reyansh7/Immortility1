@@ -1,0 +1,338 @@
+{
+  "status": "Current tested source/config checkpoint; preserve dirty pre-task baseline and later user edits",
+  "baseline": "M0_BASELINE.json",
+  "checked_at_utc": "2026-11-14T11:22:11.289718+00:00",
+  "modified_from_dirty_baseline": [
+    {
+      "path": "services/broker/src/immortility_broker/app.py",
+      "before_sha256": "6a8b70c3c7df7fe1f505f2e9079fe14b03380064f734efbb84f5060a47c5e318",
+      "current_sha256": "2578fa994266f259ec38f0cdf827fab32ebe2249f56a874df1fb8d3d38c75c9f",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/app.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/config.py",
+      "before_sha256": "aa723b38457dbb03a93ef9729a4041144cf86f28939b444e085309b0961a9fd3",
+      "current_sha256": "ee23a00bc3dbbb165a26c3e0b9b621f38418cec39f5aa1dd89337d12f59fc485",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/config.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/contracts.py",
+      "before_sha256": "b49f362caabaec1b03693150925b27027d1dc30d869e8f989621015281cb20f1",
+      "current_sha256": "6c18766b8f61fe7f088f2eb479a77428a2e6efa236c1440738ca2fcad3821011",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/contracts.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/delegation.py",
+      "before_sha256": "aef811fda9e2ed5559c1c91e3735f95763ace573b7acaef6c430b78e39b77cb5",
+      "current_sha256": "6fbaf03c341b14954e369f7ac0855a4d95a647ed4ec09f330a636d16fb36470e",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/delegation.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/hermes.py",
+      "before_sha256": "598a4ac862b4276cdfcd11acf0fd32959973096ae372eac295b6bfe4ea174129",
+      "current_sha256": "842fbb41d6822acce1654487c0339aca0eb678315164e0e43a67a530f75c7419",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/hermes.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/memory.py",
+      "before_sha256": "63e132aab64f8a33d1f362fee8ebde2a9ee343140a0be6c0c3bd09a6dfc8edbe",
+      "current_sha256": "66dc60f104b397d0419db8070531899923cd5282466fcccafc0f5d2724a12eb4",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/memory.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/policy.py",
+      "before_sha256": "5347eb48163c5bf916eb441e93b7838e60d648e0859c5e54730e321f82bae192",
+      "current_sha256": "58a29c55c302ed647b72c1d48d2b0721291cd1943e3409b6a7975dfb6456f4af",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/policy.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/reference_client.py",
+      "before_sha256": "d0d62fb65026bce47e74b4f1483be65ca8f855f48953c33304e90ca3ac45f674",
+      "current_sha256": "95a24bef3e85c72935a7817415919457a1e2b8126864c956c6b1d4baccd42eba",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/reference_client.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/store.py",
+      "before_sha256": "5e16e10d70e975d81606dc3a049e06ebbd58feb35625ab06d93c8bae69de5275",
+      "current_sha256": "381a47448f9f63fb5cdc66529eb191fbb259d71b9fe9d0133b0e9124d091ef54",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/store.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/traces.py",
+      "before_sha256": "e99f8910d555b8d839d576e0cea06d9cf38ccf8dac5e959380c73d2c4948a232",
+      "current_sha256": "cec4c485b45dbff77f2418d7d59182c01a4f8c075deeddad08008c5c2f85b496",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/traces.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/tts_client.py",
+      "before_sha256": "f0a000aa072d1424a6fb769ae1aa8c794e595310dfc6159db8907e199bc3be9a",
+      "current_sha256": "aaa808bed542cc21e897a7b094f2d96c7a6b27f5104712d30a97906829bf4afd",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/tts_client.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/voice.py",
+      "before_sha256": "7eaeeb57c22604c48572ec50b5bad44f305be64d0fc4193e34aa787712941bbf",
+      "current_sha256": "235b4432ee13a30c2bb1bb4cee38792eefde49547ca412ebdc0b9ae99579a2c3",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/voice.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/web.py",
+      "before_sha256": "9784bef5b42fc29fbf7f2402bf270b2c808e38f37a25c06de5bfe4ad73763e8e",
+      "current_sha256": "6ef9d57f7e00f42623052660787e488638b357dc4c9055d8301319b343b75a13",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/web.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/workspace.py",
+      "before_sha256": "816224924487c6a9d99b3e707fe015f62bde08ceca1aef87c0b57a962ca489b7",
+      "current_sha256": "8095da9be7d89491324031996c067f0b18208b2d31d8f6dee59f98b4cdf281fc",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/workspace.py"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/__main__.py",
+      "before_sha256": "83c2a4b1e8c3b5f7f18ea0219b50cf83dfbb6dfd3f51148a9d6d2516372f00b7",
+      "current_sha256": "a8dd14d41ea2c2056aa8b31aa6d8be8122ac5e093b9dc31e6c149ac705f74717",
+      "before_copy": ".cache/engineering-m0/before/services/broker/src/immortility_broker/__main__.py"
+    },
+    {
+      "path": "services/broker/tests/test_broker.py",
+      "before_sha256": "6dd3fc4f0ccc27774b3eb0b5aec62b3f77b4350232645750ef5faef26326636f",
+      "current_sha256": "e2eac7dd22c39abb92ef70aac747ac20de6280e66d3cff64b05857b5a14c694b",
+      "before_copy": ".cache/engineering-m0/before/services/broker/tests/test_broker.py"
+    },
+    {
+      "path": "services/broker/tests/test_capabilities.py",
+      "before_sha256": "486ef966ab7d9fb76adec39b3ec35bd990a96bdc35006de501fdce6bef7e4fb3",
+      "current_sha256": "b9880a3c7c5c772bb10009bb37019111eb1cc359e618b2483639d585f668899f",
+      "before_copy": ".cache/engineering-m0/before/services/broker/tests/test_capabilities.py"
+    },
+    {
+      "path": "services/broker/tests/test_delegation.py",
+      "before_sha256": "3fb22674f3d9f6875aea161dcd6bbb771dd359ad7c1bc92717dfafa377d4f6db",
+      "current_sha256": "d1db781ea7083127bcac6d0dde1f2e9890133059477cd54ef6ed4aea47ab0846",
+      "before_copy": ".cache/engineering-m0/before/services/broker/tests/test_delegation.py"
+    },
+    {
+      "path": "services/broker/tests/test_firewall.py",
+      "before_sha256": "a8cb61feda22ad81c6996f3b428d41dc0b9e7c05f56e16b41992d819b7339c67",
+      "current_sha256": "e72e467fcc48c2754e077433e893f33a0c7aec25bb503406db01f0345f6ce42c",
+      "before_copy": ".cache/engineering-m0/before/services/broker/tests/test_firewall.py"
+    },
+    {
+      "path": "services/broker/tests/test_tts_lifecycle.py",
+      "before_sha256": "6edbd3005b7ece56b67d6082f3a5dc59e46f69dd24c2a0267bbcbcf579bc4ff8",
+      "current_sha256": "8a9576b3e80f1d075e675d2622971388a5a52cc6ba7375ae6f8c3f9656b6ebf5",
+      "before_copy": ".cache/engineering-m0/before/services/broker/tests/test_tts_lifecycle.py"
+    },
+    {
+      "path": "services/broker/tests/test_workspace.py",
+      "before_sha256": "09cdfb22ce065bda8ef4eb5a2715512ad7ea462f249b348f9a39a29f627ea741",
+      "current_sha256": "164dbbb4209de190f0c57aaa0614c22a84281b78ea5c987dd923f4d0f8d1c481",
+      "before_copy": ".cache/engineering-m0/before/services/broker/tests/test_workspace.py"
+    },
+    {
+      "path": "apps/desktop/src/SettingsPanel.tsx",
+      "before_sha256": "072df803de157e28f9b51dad744ec2431208e0e76deb6b52d004cde77cb70ba3",
+      "current_sha256": "d5f042d29358787ab5630efbcaa7235ab2bb8c14dcb608a04cc60fd0c2d367e8",
+      "before_copy": ".cache/engineering-m0/before/apps/desktop/src/SettingsPanel.tsx"
+    },
+    {
+      "path": "apps/desktop/src/transport.test.ts",
+      "before_sha256": "0006849e55f5f1506a1c2c73ad6f0da06487e9d493a20f2d040aac843fc4014a",
+      "current_sha256": "069dde9fd2dbaf3a408414040bff4598b8f0ffa122de8bd43da091c9f073341a",
+      "before_copy": ".cache/engineering-m0/before/apps/desktop/src/transport.test.ts"
+    },
+    {
+      "path": "apps/desktop/src/transport.ts",
+      "before_sha256": "5dc7eb074d9a4b3d0a2278fc2c6f2a2d7677067d04d222451ef766c7bc174083",
+      "current_sha256": "ebb6e235ccb62ab34d46615859cb8193ab030cf69ce76e1cc7d0b515a476c6d9",
+      "before_copy": ".cache/engineering-m0/before/apps/desktop/src/transport.ts"
+    },
+    {
+      "path": "apps/desktop/src-tauri/src/main.rs",
+      "before_sha256": "081c6d73a08dc79b31811f34a10c0ea841a7f8b58cfac71f52116dcf60ff4dba",
+      "current_sha256": "fa5ea822d95c9b84c238c10f2ee3fb3ae066b0a6e27187b51cf948ee978c7adc",
+      "before_copy": ".cache/engineering-m0/before/apps/desktop/src-tauri/src/main.rs"
+    },
+    {
+      "path": "packages/contracts/schemas/execution-trace.schema.json",
+      "before_sha256": "1dbeb27fc002113d6a935711a9abb329d7081ab64666f75c9645451b39eb1bf6",
+      "current_sha256": "7c714250fe9c3cbcd4e48f4173325231ab91d345d6fd37d2bec91d02a3d233f1",
+      "before_copy": ".cache/engineering-m0/before/packages/contracts/schemas/execution-trace.schema.json"
+    },
+    {
+      "path": "packages/contracts/schemas/task-request.schema.json",
+      "before_sha256": "7d555836a6af02db45c5023981d55665b970eb44e4aaaf34bb88445005bdb4bb",
+      "current_sha256": "9816af404c3288770b606c7f20cf7ed4c99fd6aaa9a53dc44ca302e59aa68c8d",
+      "before_copy": ".cache/engineering-m0/before/packages/contracts/schemas/task-request.schema.json"
+    },
+    {
+      "path": "packages/contracts/schemas/task.schema.json",
+      "before_sha256": "7427595ee5da056bbd39cff7f02e33193aa916cf052002057ebc4b2fe6e49016",
+      "current_sha256": "c5176f28492b71744dd5be84b7c97a185ef3decda3bd9c10fad8419d4f3e0743",
+      "before_copy": ".cache/engineering-m0/before/packages/contracts/schemas/task.schema.json"
+    },
+    {
+      "path": "pyproject.toml",
+      "before_sha256": "488587d2f8aa08c77d3aac44caf725ec3ba80810983e001c0f14c799d91c3df2",
+      "current_sha256": "5f4ba5cad29c522afd04e4038af2eafa80c758bc5474f8aa7114b52b2e97e502",
+      "before_copy": ".cache/engineering-m0/before/pyproject.toml"
+    },
+    {
+      "path": "uv.lock",
+      "before_sha256": "808ad06f2bc3b074a077e1797d53ea8c0b6461c9cb857038b9771ec60d0871bd",
+      "current_sha256": "774229b69f32f858d2e41467ae158209c8e1c037f824196194dd2c7dbfa97ffd",
+      "before_copy": ".cache/engineering-m0/before/uv.lock"
+    }
+  ],
+  "new_task_source_files": [
+    {
+      "path": "apps/desktop/src-tauri/src/credentials.rs",
+      "sha256": "83deea5825184d1325c2d67d86dfaabfe00c2a22c3b6f342f23f0e9c1833963c"
+    },
+    {
+      "path": "config/capabilities/arithmetic.add.v1.json",
+      "sha256": "233c711f1b6c3fd8c675ae74c03b7f4599074874d0f004eb149a2f3e79e29c4b"
+    },
+    {
+      "path": "config/capabilities/clock.now.v1.json",
+      "sha256": "06b3871af66fe1af5efe0005dd0a4fac16aacadb7e8c2e200c45972822f16016"
+    },
+    {
+      "path": "config/mcp-requirements.in",
+      "sha256": "d8f4b8502096b3793fa895e6605a423804976abd8ce5fb740073cddc18d18391"
+    },
+    {
+      "path": "config/mcp-requirements.lock",
+      "sha256": "e4c5d0d1f8efdafbee8c00f194016a9001c94f9b726d1b5699b219529d5bc2fe"
+    },
+    {
+      "path": "config/mcp-standard-runtime.json",
+      "sha256": "04e0ebe7798b7265bc23f4b0d7025537c65b293beaf2364411c3443628e03081"
+    },
+    {
+      "path": "config/observer-requirements.in",
+      "sha256": "71600b2a654055b6d41b5fa091a1918c09e285df2477590f7dd09c496cfe3a29"
+    },
+    {
+      "path": "config/observer-requirements.lock",
+      "sha256": "992d6d4341a8f057bc2188ef4d2331588710f4b75a6abb362e605b579b1eb81d"
+    },
+    {
+      "path": "config/observer-runtime.json",
+      "sha256": "8f8250b1cd9f1ff97120fbf97c59ef467a7de8227a16a5081e6f483a44717522"
+    },
+    {
+      "path": "integrations/mcp-standard/arithmetic.py",
+      "sha256": "73c711783f9b23886014f459b44405e977a4935f5a4ad0cd240b042cbabaaf8f"
+    },
+    {
+      "path": "integrations/mcp-standard/benchmark.py",
+      "sha256": "1d729b23440ed86f709f5864188519f0ce37e1f8acb9f1ed8a037ecf9bff6a33"
+    },
+    {
+      "path": "integrations/mcp-standard/conformance.py",
+      "sha256": "742c377a4c0279b070b01a4703aeb34b88dd6e0d8f9589a466078587285c31d8"
+    },
+    {
+      "path": "integrations/mcp-standard/sdk_client.py",
+      "sha256": "ef33f087da3277f4b0c626f5bc0e217367e9c06adb3f793b76e6318a41fe355a"
+    },
+    {
+      "path": "integrations/mcp-standard/wire_fixture.py",
+      "sha256": "aac2e1cbd2a902602a25a4924fe8b548c2f803de9fae348ac256e0a921dbbfe0"
+    },
+    {
+      "path": "integrations/windows-observer/inspect_window.py",
+      "sha256": "52da161228a9cd71a42c8efcd3d1be533203c6cd5c6f8556cf3872d7e706b9c5"
+    },
+    {
+      "path": "integrations/windows-observer/scratch_window.py",
+      "sha256": "f09b3b10edac2af8ff4d186602340ff0628a2e5c81a28a29d457762838de3496"
+    },
+    {
+      "path": "packages/contracts/schemas/workflow-request.schema.json",
+      "sha256": "ee7a9c7e70f4f00ec0a9d68c2d84cc2d887ce73516db5a4cddbf3f728d1da81a"
+    },
+    {
+      "path": "scripts/benchmark-standard-mcp.py",
+      "sha256": "fc8f05e545b882a64fbad45a2bf2cb8bd7c1258b6864e55200c189e63831ec96"
+    },
+    {
+      "path": "scripts/smoke-headless-workflows.py",
+      "sha256": "71ca9401bcaed79753f12ba8fbf988c4c1a895bd0a37fc99a75e3b3ddf7ea6be"
+    },
+    {
+      "path": "scripts/smoke-windows-observer.py",
+      "sha256": "dcad646e65b9c8d021356fce557117a354fdfca287fcb3025900cc79db63aaec"
+    },
+    {
+      "path": "scripts/verify-observer-runtime.py",
+      "sha256": "9385d986e1a7ee29bc2e188739bcb95b449fd44fb84e5624dd85174645288baa"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/capabilities.py",
+      "sha256": "4c76994c1dddb7cd8030591e61399f9ea6df93454d6bc103bbd89887a7ccda47"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/ledger.py",
+      "sha256": "805a6954a17625f9164d1c7ea8318ad4298ab801ea415d0dd1d6fb828d2757ee"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/process_owner.py",
+      "sha256": "9d01f85b2692d3c20ed142a77fd611c6909987e6e62f8c631102e36f9a09b6cc"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/public_fetch.py",
+      "sha256": "970b066ea92ee5db323c7e0693e584dace0464e93cb6bef511e1b3ef5635e200"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/request_limits.py",
+      "sha256": "a5f1a32d7aaf40aa9722da48c9f9e52372d3aff5ccacec831457107945f20955"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/standard_mcp.py",
+      "sha256": "0b0737fee87416f2d5aa7c52c6798db999d86065e83d3d4040b1f5b9c99c4554"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/workflows.py",
+      "sha256": "26b9f9c49df5abd41705fe8a2f50bf2b0864790e0920c6223908ccfb31f9f9e0"
+    },
+    {
+      "path": "services/broker/tests/test_approval_ownership.py",
+      "sha256": "8ed6d41d130f3eb46eec73e57ffac5836f0512f8292a637b1f8975700985b724"
+    },
+    {
+      "path": "services/broker/tests/test_inference_grants.py",
+      "sha256": "664fc7f18971bee9f5a4cb0bc69fbfdb9c0c3c809b695954756a641692af7f5a"
+    },
+    {
+      "path": "services/broker/tests/test_m0_repairs.py",
+      "sha256": "464f24645b27d89b30738bb5a60e1e699f3ccd35074521f04d610acc68ba165c"
+    },
+    {
+      "path": "services/broker/tests/test_process_owner.py",
+      "sha256": "ad8694e82093ad825f261117d0e51463bb3ba130c0b6ef4455113d4194ecfa85"
+    },
+    {
+      "path": "services/broker/tests/test_public_io.py",
+      "sha256": "1bb8b9e336d471bf705d902b69580765c9bf7c7170ce56e1d075195d2417d653"
+    },
+    {
+      "path": "services/broker/tests/test_registry.py",
+      "sha256": "7810834858c4f4a8e44a02f1aec60633352e3eefd84db2c7fb4fa90f51cb99af"
+    },
+    {
+      "path": "services/broker/tests/test_standard_mcp.py",
+      "sha256": "6fa4dde9bb44f3121d8c19b810f452d9daa4a1cd35b6322002233a84a8420c53"
+    },
+    {
+      "path": "services/broker/tests/test_usage_ledger.py",
+      "sha256": "9997f84ecdf0629cdc953aafd72180ce0619cfdcf8e0fac2ee16273d1519c394"
+    },
+    {
+      "path": "services/broker/tests/test_workflows.py",
+      "sha256": "7803179557303aa833479fd366d090b9dcd6222e1dc6fb63270312d955bd4b89"
+    }
+  ],
+  "note": "This source/config register is not permission to delete untracked user files. Docs/evidence and optional isolated environments are listed separately in the milestone reports."
+}

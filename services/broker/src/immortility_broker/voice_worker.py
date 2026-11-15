@@ -41,7 +41,11 @@ class WhisperSTT:
         if device == "auto":
             import ctranslate2
 
+            from .gpu_budget import allow_light_gpu, free_vram_mib
+
             try:
+                if not allow_light_gpu(free_vram_mib()):
+                    raise RuntimeError("gpu_reserve")
                 if (
                     ctranslate2.get_cuda_device_count()
                     and "float16" in ctranslate2.get_supported_compute_types("cuda")
@@ -57,6 +61,9 @@ class WhisperSTT:
                     ctypes.WinDLL("cudnn64_9.dll")
                 except OSError:
                     selected = "cpu"
+        self.root = root
+        self.device = selected
+        emit("stage", stage="stt_load", device=selected)
         try:
             self.model = WhisperModel(
                 str(root / "whisper"),
@@ -69,16 +76,36 @@ class WhisperSTT:
         except (RuntimeError, OSError):
             if selected != "cuda":
                 raise
-            self.model = WhisperModel(
-                str(root / "whisper"),
-                device="cpu",
-                compute_type="int8",
-                cpu_threads=2,
-                num_workers=1,
-                local_files_only=True,
-            )
+            self._cpu_fallback()
+
+    def _cpu_fallback(self) -> None:
+        from faster_whisper import WhisperModel
+
+        # The lazy iterator may fail after producing some segments. Discard that
+        # partial attempt and restart this local recording once on CPU only.
+        self.model = None
+        self.device = "cpu"
+        emit("stage", stage="stt_cpu_fallback", device="cpu")
+        self.model = WhisperModel(
+            str(self.root / "whisper"),
+            device="cpu",
+            compute_type="int8",
+            cpu_threads=2,
+            num_workers=1,
+            local_files_only=True,
+        )
 
     def transcribe(self, path: Path, language: str) -> str:
+        try:
+            return self._transcribe(path, language)
+        except (RuntimeError, OSError):
+            if self.device != "cuda":
+                raise
+            self._cpu_fallback()
+            return self._transcribe(path, language)
+
+    def _transcribe(self, path: Path, language: str) -> str:
+        emit("stage", stage="stt_recognize", device=self.device)
         segments, _ = self.model.transcribe(
             str(path),
             language=None if language == "auto" else language,
@@ -187,10 +214,16 @@ def speak(options: dict[str, Any], render: bool = False) -> None:
         generated = tts.chunks(text)
     if render:
         with wave.open(options["path"], "wb") as output:
+            format_seen = None
             for render_chunk in generated:
-                output.setnchannels(render_chunk.sample_channels)
-                output.setsampwidth(2)
-                output.setframerate(render_chunk.sample_rate)
+                current_format = (render_chunk.sample_channels, render_chunk.sample_rate)
+                if format_seen is None:
+                    output.setnchannels(current_format[0])
+                    output.setsampwidth(2)
+                    output.setframerate(current_format[1])
+                    format_seen = current_format
+                elif current_format != format_seen:
+                    raise ValueError("inconsistent_audio_format")
                 output.writeframes(render_chunk.audio_int16_bytes)
         emit("done")
         return
@@ -243,8 +276,17 @@ def speak(options: dict[str, Any], render: bool = False) -> None:
 
 
 def handle(options: dict[str, Any]) -> None:
+    mode = options.get("operation")
+    stage = {
+        "devices": "device_enumeration",
+        "prepare": "model_prepare",
+        "record": "audio_capture",
+        "transcribe": "speech_recognition",
+        "speak": "speech_playback",
+        "render": "speech_synthesis",
+    }.get(str(mode), "operation_validation")
     try:
-        mode = options["operation"]
+        emit("stage", stage=stage)
         if mode == "devices":
             emit("done", devices=devices())
         elif mode == "prepare":
@@ -260,9 +302,19 @@ def handle(options: dict[str, Any]) -> None:
             speak(options, mode == "render")
         else:
             emit("error", code="operation_denied")
-    except Exception:
+    except Exception as issue:
         # Never forward exception payloads or model text to process logs.
-        emit("error", code="audio_device_or_engine_unavailable")
+        emit(
+            "error",
+            code={
+                "transcribe": "speech_recognition_unavailable",
+                "record": "audio_capture_unavailable",
+                "render": "speech_synthesis_unavailable",
+                "speak": "audio_playback_unavailable",
+            }.get(str(mode), "audio_device_or_engine_unavailable"),
+            stage=stage,
+            error_type="os_error" if isinstance(issue, OSError) else "runtime_error",
+        )
 
 
 def main() -> None:

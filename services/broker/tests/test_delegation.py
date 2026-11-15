@@ -83,7 +83,12 @@ async def test_two_specialists_are_verified_and_combined(tmp_path):
     store = Store(tmp_path / "state.sqlite3")
     session = store.session()
     task, _ = store.create(
-        TaskRequest(session_id=session["id"], request_id="deleg", content="Rename the label", cloud_consent=True)
+        TaskRequest(
+            session_id=session["id"],
+            request_id="deleg",
+            content="Rename the label",
+            cloud_consent=True,
+        )
     )
     store.state(task["task_id"], "queued")
     store.state(task["task_id"], "running")

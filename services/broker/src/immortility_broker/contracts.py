@@ -41,6 +41,18 @@ class TaskRequest(BaseModel):
     cloud_consent: Literal[True]
     source: Literal["text", "voice"] = "text"
     response_length: Literal["brief", "normal", "detailed"] = "normal"
+    budget_mode: Literal["auto", "fast", "standard", "deep"] = "auto"
+    requested_artifacts: Literal["none", "markdown-and-pdf"] = "none"
+    allowed_capabilities: list[
+        Literal["arithmetic.add.v1", "clock.now.v1", "public.research.v1", "report.create.v1"]
+    ] = Field(default_factory=list, max_length=4)
+
+    @field_validator("allowed_capabilities")
+    @classmethod
+    def unique_capabilities(cls, value: list[str]) -> list[str]:
+        if len(value) != len(set(value)):
+            raise ValueError("Duplicate capability scope")
+        return value
 
     @field_validator("cloud_consent", mode="before")
     @classmethod
@@ -51,6 +63,9 @@ class TaskRequest(BaseModel):
 
 
 class BrokerError(Exception):
-    def __init__(self, code: str, message: str, status: int = 409):
+    def __init__(
+        self, code: str, message: str, status: int = 409, *, diagnostic: str | None = None
+    ):
         self.code, self.message, self.status = code, message, status
+        self.diagnostic = diagnostic
         super().__init__(code)

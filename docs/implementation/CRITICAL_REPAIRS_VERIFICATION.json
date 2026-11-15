@@ -1,0 +1,511 @@
+{
+  "checked_at_utc": "2026-11-14T18:46:59.136291+00:00",
+  "status": "verified bounded M0/M1 usability increments; general autonomous roadmap incomplete",
+  "checks": {
+    "python_passed": 263,
+    "python_seconds": 63.65,
+    "frontend_passed": 55,
+    "frontend_seconds": 3.06,
+    "rust_passed": 6,
+    "rust_compile_seconds": 60,
+    "ruff_files": 74,
+    "mypy_sources": 41,
+    "types_lint_format_contracts_blueprint_frontend_build": "passed",
+    "configured_key_source_bundle_docs_config_scan": "passed",
+    "hermes_real_offline_prompt_assertions": "passed",
+    "voice_pipe_setup_failure_and_cancel": "passed, deterministic mocks"
+  },
+  "live_scope": {
+    "scope": "two authorized public-only prompts; real Hermes and live free router; UI display is separate acceptance",
+    "route": "openrouter/free",
+    "provider_calls": 2,
+    "call_cap_per_task": 1,
+    "token_cap_per_task": 4000,
+    "private_content_sent": false,
+    "paid_fallback": false,
+    "turns": [
+      {
+        "prompt": "Who are you?",
+        "status": "succeeded",
+        "response": "I'm Immortility, your Windows assistant running through Hermes. The underlying model isn't verified \u2014 it's routed via OpenRouter's free tier.",
+        "error": null,
+        "seconds": 16.005,
+        "usage": {
+          "calls": 1,
+          "charged_tokens": 737,
+          "unknown_calls": 0,
+          "prompt_tokens": 677,
+          "completion_tokens": 60
+        }
+      },
+      {
+        "prompt": "What can you actually do right now?",
+        "status": "succeeded",
+        "response": "Honestly, in this session: very little beyond conversation. I can't inspect your windows, run commands, edit files, or see your screen right now \u2014 those broker workflows are all disabled and I have no direct tools.\n\nWhat's available: talking through a problem, answering from what I know, drafting or explaining code, and reasoning through something with you. Voice needs its own controls, and any window text read would require you to select a window and approve it in Settings.\n\nWhat would you like to do with that?",
+        "error": null,
+        "seconds": 7.62,
+        "usage": {
+          "calls": 1,
+          "charged_tokens": 772,
+          "unknown_calls": 0,
+          "prompt_tokens": 666,
+          "completion_tokens": 106
+        }
+      }
+    ]
+  },
+  "local_background": {
+    "status": "passed",
+    "runtime": "real local-only Uvicorn broker + isolated official MCP SDK",
+    "dpapi_discovery": true,
+    "stdout_credential_absent": true,
+    "control_pipe_eof_survived": true,
+    "client_detached_after_real_dispatch": true,
+    "reattached_same_instance": true,
+    "replayed_events": 18,
+    "completed_sdk_steps": 8,
+    "cloud_calls": 0,
+    "cloud_tokens": 0,
+    "forbidden_inference_denied": true,
+    "graceful_shutdown": true,
+    "publication_removed": true,
+    "seconds_including_optional_hold": 23.787,
+    "native_dashboard": "separate acceptance"
+  },
+  "whole_job_stop": {
+    "scope": "native Windows Job with ready synthetic parent and child, including venv launchers; Stop includes whole-job quiescence; not a UI or SDK latency measurement",
+    "n": 30,
+    "observed_process_counts": [
+      5
+    ],
+    "p50_ms": 1.519,
+    "p95_ms": 1.851,
+    "max_ms": 1.876,
+    "max_peak_job_commit_bytes": 17526784,
+    "cloud_calls": 0,
+    "cloud_tokens": 0,
+    "idle_cpu": null,
+    "idle_ram": null
+  },
+  "cpu_voice_fixture": {
+    "schema_version": "1.0",
+    "microphone_opened": false,
+    "cloud_calls": 0,
+    "fixture_render_ms": 4621.7,
+    "fixture_seconds": 5.317369614512471,
+    "stt_cpu_ms": 6237.6,
+    "fixture_word_error_rate": 0.0625,
+    "input_device_count": 19,
+    "output_device_count": 20,
+    "unavailable_output_rejected": true
+  },
+  "native_dashboard": {
+    "runtime": "owned synthetic root, real native binary and Vite frontend",
+    "attach": true,
+    "dispatch_eight_sdk_steps": true,
+    "stored_workflows_succeeded": 2,
+    "detach_preserves_broker": true,
+    "close_preserves_broker": true,
+    "explicit_reopen_reattach_same_instance": true,
+    "displayed_stored_results": true,
+    "local_only_labels_and_hidden_unavailable_controls": true,
+    "normal_user_database_used": false,
+    "cloud_calls": 0,
+    "shutdown_publication_removed": true,
+    "dpi_matrix": "pending",
+    "full_general_application_acceptance": false
+  },
+  "prior_human_native_observation": "NATIVE_WINDOW_CONSENT_SMOKE.json, synthetic fixture only",
+  "remaining": [
+    "Physical microphone and speaker/Stop",
+    "Full DPI/multimonitor corpus",
+    "MCP cold startup under contention, failure stage unresolved, 10-second deadline retained",
+    "General desktop/browser/coding/artifact/memory/scheduling/connector milestones",
+    "Shared Hermes advisory remediation",
+    "Combined idle CPU/RAM/VRAM soak"
+  ],
+  "source_sha256": {
+    "apps/desktop/src-tauri/Cargo.toml": "849e0a4d9ff7a9fb59134a315f5b5534089f4da72bb3c036d023ab633f1466e0",
+    "apps/desktop/src-tauri/src/attachment.rs": "eec787fd2b8cb0d3e92a1a1c302cbe1b9ce49a3547e267fcfe242d6cd6e1f545",
+    "apps/desktop/src-tauri/src/credentials.rs": "83deea5825184d1325c2d67d86dfaabfe00c2a22c3b6f342f23f0e9c1833963c",
+    "apps/desktop/src-tauri/src/main.rs": "7396360670edfe883030f7d7d44ce03088d1e82f5e1ee12f82ff1d7fbadb5193",
+    "apps/desktop/src/BackgroundConnection.tsx": "57f4f7921fa6d736debd3fbe09441f529ff87655b2c536438cc2a642cc196d8c",
+    "apps/desktop/src/Conversation.test.tsx": "8289062ff90f1e3c8ebbce3627a8c51eb54c13cf3a8f0677316944bf710bc955",
+    "apps/desktop/src/Conversation.tsx": "468eb0343256090a70e9bf3fb2ac970dafcb6d3e66253e66bd8d3bc28ffc562a",
+    "apps/desktop/src/Markdown.tsx": "7b6dd9a9c4989570773193c19ffd1694ff49e629f9fa984e88ae4dbce781cfa4",
+    "apps/desktop/src/ScreenInspection.tsx": "1d0fe32865095e09588f226d6008d53ff6782acf694aff8b0f34ccce6053564d",
+    "apps/desktop/src/SettingsPanel.tsx": "a52235ca52d0d77f310f136cbb5ce9ce19f8012c82033d97ce159492fea76aca",
+    "apps/desktop/src/VoiceControls.tsx": "36c4a7cd9295c03aa9d36f13eb1c72f14cc52e0345065e4b763b501cb4819d10",
+    "apps/desktop/src/chat.test.ts": "5b1da27422b1e9506221dc6fa24dc0fa94dd64775c6b07cc29f2ef7f3c6d72ec",
+    "apps/desktop/src/chat.ts": "8caa414175fa4e334568e067cbba49535a59f9477e9d6530278e00b5d36e612b",
+    "apps/desktop/src/command/CommandCenter.tsx": "a8041a174d2a4af2e94ebee7d40150262b72e7af6b888595065f0cdb376c585a",
+    "apps/desktop/src/command/Timeline.tsx": "ed13602e014accad83c80a42c3987b367fd759e643bb95811f3f8516e40baa43",
+    "apps/desktop/src/command/stats.test.ts": "fbc6c8311f2857fe095e8630801cd14d70c5c5a1a4b004eea79ac68a168f4029",
+    "apps/desktop/src/command/stats.ts": "778e2086aded4b640e928506febcc2bfe0dee237bd1f899807f12aeec976a403",
+    "apps/desktop/src/command/timeline.test.ts": "24d8e9f209dbc7fb32df9915df49f4a94e340242cf899818330572afe32c9337",
+    "apps/desktop/src/companion/Overlay.tsx": "adf08d44728e5a42b473872b190a39d14dff67f0ea82e4069167e98bc2102dd8",
+    "apps/desktop/src/contracts.generated.ts": "52dae58a9dcd46aa2b37966b39385baed8b57453d0fdf5c0360db51ae54217a3",
+    "apps/desktop/src/face/FlatFace.tsx": "0119b918e2a961dc5efb667d211652e4e4f1ae2937592a76ac02db8cad4d19bd",
+    "apps/desktop/src/face/HeadScene.tsx": "710d9ed52f8ffc607b1c9db8f1b090f855cef9cd79d9861e562d6eea08d885bd",
+    "apps/desktop/src/face/boneDriver.ts": "7999fcb5ffd559c2170da7e9ec55275fbd6a0ced6f11d62a4fc9598100b92ca0",
+    "apps/desktop/src/face/faceState.test.ts": "db64d3f1880b14686dd2dd6411dca65da493cba51fa26818893d64f9a4423a95",
+    "apps/desktop/src/face/faceState.ts": "a09611fbcb6d6b65265283abc8b344e0b4eebd09d8fff1dc26d0f846b5c5ac69",
+    "apps/desktop/src/face/rig.test.ts": "1a6dfa6facb42fab931b8c5f83cf3aae2fdafe3b4e26950953ba987c6f65ab18",
+    "apps/desktop/src/face/rig.ts": "be59f038bc9154f8874d0f80f866290f675dbf678b6d97fd7e92fe068a85da79",
+    "apps/desktop/src/main.tsx": "8c097d64e24f93211893612709d79dfcb4175e3c874f013fa62aa85d5c3435cc",
+    "apps/desktop/src/observation.test.ts": "12d12f0dab646364624db95b71f87895ab59447c046c8e217cd81d02a9f69c0a",
+    "apps/desktop/src/observation.ts": "62a3c40e7130595f904ed0d6f6d1ec0c8de265f3cfcb2bb5dccaa329c28755be",
+    "apps/desktop/src/state.test.ts": "81135b86ba97f40f274e7d6bcf64b703de35751a40cec81b2cc6192575ec7a10",
+    "apps/desktop/src/state.ts": "f21b5abc30b446685e4b6139f06cdb7a2f98f0f23d912697fe381f0dd5a46a68",
+    "apps/desktop/src/transport.test.ts": "069dde9fd2dbaf3a408414040bff4598b8f0ffa122de8bd43da091c9f073341a",
+    "apps/desktop/src/transport.ts": "8132dd37f4fe6141c95b8568d392a94db963f20599d6296bc58be379f3c22050",
+    "apps/desktop/src/ui/Icon.tsx": "28ed3c5d4db14350e35a9eb664d303bd2896c1ffc6ee3a71e9fa787d567db7d8",
+    "apps/desktop/src/ui/motion.tsx": "e198bc3baee4c74b97b8ef5d25c9ea572251a57463e5a3cbf21947f00cb12df5",
+    "apps/desktop/src/ui/sceneStats.ts": "d26f35f302c7f09470623d1df127ea8eba6a6c26ac5e42210a7fbd258a5f1a30",
+    "apps/desktop/src/useVoice.ts": "370a29ddc4d3766b9bff657b77d2e6745673abcd5df5b0ec2e57affc283e3077",
+    "apps/desktop/src/vite-env.d.ts": "67f92a4742b0f73397e1f9b002899008e7caf9da20532e3029c613159d63432c",
+    "apps/desktop/src/voice.test.ts": "7f383f674554173eac39cbf26e4dbad0e12abe7fdf8afa8ed42da802e4a58994",
+    "config/capabilities/arithmetic.add.v1.json": "233c711f1b6c3fd8c675ae74c03b7f4599074874d0f004eb149a2f3e79e29c4b",
+    "config/capabilities/clock.now.v1.json": "06b3871af66fe1af5efe0005dd0a4fac16aacadb7e8c2e200c45972822f16016",
+    "config/mcp-requirements.in": "d8f4b8502096b3793fa895e6605a423804976abd8ce5fb740073cddc18d18391",
+    "config/mcp-requirements.lock": "e4c5d0d1f8efdafbee8c00f194016a9001c94f9b726d1b5699b219529d5bc2fe",
+    "config/mcp-standard-runtime.json": "04e0ebe7798b7265bc23f4b0d7025537c65b293beaf2364411c3443628e03081",
+    "config/observer-requirements.in": "71600b2a654055b6d41b5fa091a1918c09e285df2477590f7dd09c496cfe3a29",
+    "config/observer-requirements.lock": "992d6d4341a8f057bc2188ef4d2331588710f4b75a6abb362e605b579b1eb81d",
+    "config/observer-runtime.json": "fc04e5f48fb37064e08d22107dc44536b54a4eddbb6def6582d116a0e66e7020",
+    "integrations/mcp-standard/arithmetic.py": "73c711783f9b23886014f459b44405e977a4935f5a4ad0cd240b042cbabaaf8f",
+    "integrations/mcp-standard/benchmark.py": "1d729b23440ed86f709f5864188519f0ce37e1f8acb9f1ed8a037ecf9bff6a33",
+    "integrations/mcp-standard/conformance.py": "742c377a4c0279b070b01a4703aeb34b88dd6e0d8f9589a466078587285c31d8",
+    "integrations/mcp-standard/sdk_client.py": "ef33f087da3277f4b0c626f5bc0e217367e9c06adb3f793b76e6318a41fe355a",
+    "integrations/mcp-standard/wire_fixture.py": "aac2e1cbd2a902602a25a4924fe8b548c2f803de9fae348ac256e0a921dbbfe0",
+    "integrations/windows-observer/inspect_window.py": "05a6753b233dcf74998a9ea22ba640e4a5c014ce0705e191b5bd3a7e977f485d",
+    "integrations/windows-observer/native_picker.py": "cc26875d1ac4c64ff15fa5589aa71b5341a35753a5680d05ebd1225150ea7d0d",
+    "integrations/windows-observer/scratch_window.py": "f09b3b10edac2af8ff4d186602340ff0628a2e5c81a28a29d457762838de3496",
+    "packages/contracts/schemas/approval.schema.json": "393ffe98c56c078434cb250cf3ef96c9370f349d404a60f6106df3947b73129a",
+    "packages/contracts/schemas/avatar-state.schema.json": "1fa23e011f190467cdf3e2759ce9e1b10161ff8bc4a98638fc7f61b7e9ec6f88",
+    "packages/contracts/schemas/event.schema.json": "a9ac826d94fadc7b0a805e23a79a1eece2b8f7e42e4f7a602e68054b8dc9170c",
+    "packages/contracts/schemas/execution-trace.schema.json": "85c7be2d639c03de5a9f861e9230f236d976312cbd72a9b9b2c19ae961b0a022",
+    "packages/contracts/schemas/task-request.schema.json": "9816af404c3288770b606c7f20cf7ed4c99fd6aaa9a53dc44ca302e59aa68c8d",
+    "packages/contracts/schemas/task.schema.json": "c5176f28492b71744dd5be84b7c97a185ef3decda3bd9c10fad8419d4f3e0743",
+    "packages/contracts/schemas/tool-manifest.schema.json": "0a5145bff48d6477a3070bb83c0f4ed33e60be8f01e014d99566e45b247e34d0",
+    "packages/contracts/schemas/window-snapshot.schema.json": "a0d552a15c3c82873e7ccf549f948d7e02829a43a1d5510f5def07e5ce63d3c5",
+    "packages/contracts/schemas/workflow-request.schema.json": "ee7a9c7e70f4f00ec0a9d68c2d84cc2d887ce73516db5a4cddbf3f728d1da81a",
+    "pyproject.toml": "5f4ba5cad29c522afd04e4038af2eafa80c758bc5474f8aa7114b52b2e97e502",
+    "scripts/benchmark-process-stop.py": "7510ebd16f51f67a88bfcc22208d19522b78354ef1459c3a542fb0596fff01a1",
+    "scripts/benchmark-standard-mcp.py": "fc8f05e545b882a64fbad45a2bf2cb8bd7c1258b6864e55200c189e63831ec96",
+    "scripts/smoke-background-attachment.py": "81cc7817e263668663f49e6c8a23d3c572d3968c1fedda5ddf882427719aa23f",
+    "scripts/smoke-chat-identity.py": "0d056232b07455c6e9e8021bdfe96041ee738a6d5c58a4f75449dc944327f67c",
+    "scripts/smoke-headless-workflows.py": "71ca9401bcaed79753f12ba8fbf988c4c1a895bd0a37fc99a75e3b3ddf7ea6be",
+    "scripts/smoke-hermes.py": "2b1930012ddd66c96d4dd17802be180b26159aab0a32c091739920fa6efe6c50",
+    "scripts/smoke-native-window-consent.py": "9b3d61e7599896ac06bb71c7b3c900cdcf7f50bb810a61d05a250a1638f19b66",
+    "scripts/smoke-windows-observer.py": "dcad646e65b9c8d021356fce557117a354fdfca287fcb3025900cc79db63aaec",
+    "scripts/verify-observer-runtime.py": "9d8b56262c3ba40f1fc987756084fcfefd19ac4f13ca58911626b90bde9e771d",
+    "scripts/verify-voice.py": "2b4be4405a3af9c65d18f7c0c31a506187d3e14c5f89329bdc3fc7acc07dbb56",
+    "services/broker/src/immortility_broker/__init__.py": "ed1d276aca38e64526823fea3a8e4a2c97f754c9fbefc126d40a63d2fd036ba8",
+    "services/broker/src/immortility_broker/__main__.py": "7fd27056aa9c2c975b281b507ae96e09002f8839228e5f065d9bbabeca97623b",
+    "services/broker/src/immortility_broker/app.py": "49b34f1954e4ed0540d805e1f4c9445f6c2d4a520e95041d978930bf9fcc3d6e",
+    "services/broker/src/immortility_broker/attachment.py": "e89c0175cf75e85bad6721133d78b94d76b1f61ab95aeb8870fc4f9c46d28a43",
+    "services/broker/src/immortility_broker/capabilities.py": "1174e79ca5fb9b3fd9bb44e4da8e7ec38973fb7a79fb59de8467c89c23df1efb",
+    "services/broker/src/immortility_broker/config.py": "3396d7729a78a1af0954c4b33b97c673bcb19cf0a107ae911c3047dcc6333826",
+    "services/broker/src/immortility_broker/contracts.py": "6c18766b8f61fe7f088f2eb479a77428a2e6efa236c1440738ca2fcad3821011",
+    "services/broker/src/immortility_broker/delegation.py": "6fbaf03c341b14954e369f7ac0855a4d95a647ed4ec09f330a636d16fb36470e",
+    "services/broker/src/immortility_broker/hermes.py": "a4ee8bce5aff21e33fcf051d02db9f214795a51383948bebc8d0925a7c3cc939",
+    "services/broker/src/immortility_broker/infernal.py": "1d03e9c300ae6bdc832359a27624ae6be0146fbe15aa9fd39db71a056bfc8585",
+    "services/broker/src/immortility_broker/infernal_tts.py": "fa22eefdc2624770d73f8b956bcf4905b2e3304e59d6d8bed8066fc64edbe875",
+    "services/broker/src/immortility_broker/ledger.py": "805a6954a17625f9164d1c7ea8318ad4298ab801ea415d0dd1d6fb828d2757ee",
+    "services/broker/src/immortility_broker/local_tools.py": "003115bb9bb87b26c1fbd976677afc20e3b9226e091bf2703792ea970d349d6a",
+    "services/broker/src/immortility_broker/mcp_bridge.py": "8da95bc95e00b91b42effdb1791024cf6eae869936bf5c97c3fcf198961b0cc1",
+    "services/broker/src/immortility_broker/memory.py": "66dc60f104b397d0419db8070531899923cd5282466fcccafc0f5d2724a12eb4",
+    "services/broker/src/immortility_broker/playback.py": "f213275d4f758a9aa0a838737d5b0056b7c59b3c5b51c4423739be6bb8cd483d",
+    "services/broker/src/immortility_broker/policy.py": "58a29c55c302ed647b72c1d48d2b0721291cd1943e3409b6a7975dfb6456f4af",
+    "services/broker/src/immortility_broker/process_owner.py": "ed8bc78bb25a84a37b23db46d3522aa4b242a2fe539601b6dbc963e21640740e",
+    "services/broker/src/immortility_broker/public_fetch.py": "970b066ea92ee5db323c7e0693e584dace0464e93cb6bef511e1b3ef5635e200",
+    "services/broker/src/immortility_broker/reference_client.py": "95a24bef3e85c72935a7817415919457a1e2b8126864c956c6b1d4baccd42eba",
+    "services/broker/src/immortility_broker/reference_contracts.py": "ff191de1d9416cfefe3c3ecca2bd8b5eb06364075dc1a7a8098c3102c0806e03",
+    "services/broker/src/immortility_broker/reference_effects.py": "027576851a66dfaf1f50de2ded4da3abd95e51b089b1c367e24090597fe52f51",
+    "services/broker/src/immortility_broker/reference_worker.py": "fc9c0396341772b7f97a11cf752641c172130901f404c8957d68631cc42788f2",
+    "services/broker/src/immortility_broker/reference_xtts.py": "e3144ca0d0ab1547b36ce4ad5c6f7717e364a3f6952c1b063b9311b918b60c00",
+    "services/broker/src/immortility_broker/request_limits.py": "a5f1a32d7aaf40aa9722da48c9f9e52372d3aff5ccacec831457107945f20955",
+    "services/broker/src/immortility_broker/routing.py": "f34109cd937df53cf6e764e0944eba1f7320fd7fe0785b9a15f6bcda1f009aa1",
+    "services/broker/src/immortility_broker/secrets.py": "03aff5c37e70b4ccd3e720dc155603261fd761286fb5c41a78b902e4aea21dcb",
+    "services/broker/src/immortility_broker/speech_text.py": "fafd470261727df7848b56bcab375c960492c770152083ea684ad8724d9b4c0c",
+    "services/broker/src/immortility_broker/standard_mcp.py": "0b0737fee87416f2d5aa7c52c6798db999d86065e83d3d4040b1f5b9c99c4554",
+    "services/broker/src/immortility_broker/store.py": "68e42ab1d283c850803598b8ea6d7d34787295ae23a2a8f7ebaf7410a60da3ab",
+    "services/broker/src/immortility_broker/traces.py": "0c5b7ae0b5bfc8153e509d9dd205f2ebd7ed439fab8940b5d22a6a13f2e36241",
+    "services/broker/src/immortility_broker/tts_client.py": "aaa808bed542cc21e897a7b094f2d96c7a6b27f5104712d30a97906829bf4afd",
+    "services/broker/src/immortility_broker/voice.py": "84e98c0f65a2039986be44388035200c667c91b9b4b317c624811fb6c5517c8d",
+    "services/broker/src/immortility_broker/voice_models.py": "f7f2fda6e74506bc14c81c0bcc2045dc4130e60588fe1f6eec77575cc6178df2",
+    "services/broker/src/immortility_broker/voice_store.py": "c539d43ec6244476f437bff86fc321cc4891f0dfae33dc428cf8f3c997a761a5",
+    "services/broker/src/immortility_broker/voice_worker.py": "2512a28e82ad85cf8175635444536115e1745b57b40c930ed2e2387b3450f70e",
+    "services/broker/src/immortility_broker/web.py": "6ef9d57f7e00f42623052660787e488638b357dc4c9055d8301319b343b75a13",
+    "services/broker/src/immortility_broker/windows_observer.py": "21aeac138750c119ff18380d707367d941e252c892eb4afda20d2bbe18bbb386",
+    "services/broker/src/immortility_broker/workflows.py": "26b9f9c49df5abd41705fe8a2f50bf2b0864790e0920c6223908ccfb31f9f9e0",
+    "services/broker/src/immortility_broker/workspace.py": "8095da9be7d89491324031996c067f0b18208b2d31d8f6dee59f98b4cdf281fc",
+    "services/broker/tests/test_approval_ownership.py": "8ed6d41d130f3eb46eec73e57ffac5836f0512f8292a637b1f8975700985b724",
+    "services/broker/tests/test_attachment.py": "22705de71bb23637f8f841b6e3ce826fda2402aecaa7685609d8f1f5c7b69e59",
+    "services/broker/tests/test_broker.py": "e2eac7dd22c39abb92ef70aac747ac20de6280e66d3cff64b05857b5a14c694b",
+    "services/broker/tests/test_capabilities.py": "b9880a3c7c5c772bb10009bb37019111eb1cc359e618b2483639d585f668899f",
+    "services/broker/tests/test_chat_regressions.py": "664f7ef807c07246da60e96f44c52e808ca3c0cb9c4fde92eca2d98b4a181a4b",
+    "services/broker/tests/test_delegation.py": "d1db781ea7083127bcac6d0dde1f2e9890133059477cd54ef6ed4aea47ab0846",
+    "services/broker/tests/test_firewall.py": "e72e467fcc48c2754e077433e893f33a0c7aec25bb503406db01f0345f6ce42c",
+    "services/broker/tests/test_inference_grants.py": "664fc7f18971bee9f5a4cb0bc69fbfdb9c0c3c809b695954756a641692af7f5a",
+    "services/broker/tests/test_infernal.py": "9879762b446a80ad9c2c442ef88eedeae12f8fccd947d99264c13e90ded87715",
+    "services/broker/tests/test_m0_repairs.py": "464f24645b27d89b30738bb5a60e1e699f3ccd35074521f04d610acc68ba165c",
+    "services/broker/tests/test_memory.py": "ea75c1d70256075f912f6f36f27b0796e1b46157dd3f019c9ba915c4e6c0845a",
+    "services/broker/tests/test_observation.py": "8de3ca416f047515c114d05142cf81c1bdc1de6a6c3e44067c2ff9196a4f5ad2",
+    "services/broker/tests/test_process_owner.py": "53dc679fd61ca39028ca6eea8c7c86f48294d043585a94651e590d212eda39d1",
+    "services/broker/tests/test_public_io.py": "1bb8b9e336d471bf705d902b69580765c9bf7c7170ce56e1d075195d2417d653",
+    "services/broker/tests/test_reference_runtime.py": "0d9c6b9075136a06a7c995b8cff67f5ea3282d6c226f4414fff886671790bb28",
+    "services/broker/tests/test_reference_tts.py": "0ca3ff1edd59207a09dcb87543cf8465f208b83e9d3e6a314e0d3a57a09f836a",
+    "services/broker/tests/test_registry.py": "7810834858c4f4a8e44a02f1aec60633352e3eefd84db2c7fb4fa90f51cb99af",
+    "services/broker/tests/test_routing.py": "b7eb4f3a382a44cad87242b100b233975a8b70baea3ed8b9113efa2f5c4dcb8b",
+    "services/broker/tests/test_runtime_integrity.py": "6a4f690d41ba2c97a8f192662ad52f3873f7c170794813b81f3c0776be56153e",
+    "services/broker/tests/test_secrets.py": "cf3814462221101da8eff98e2560b3492ca2d2fc8ec9bc80e8d469b91e9195d7",
+    "services/broker/tests/test_speech_recovery.py": "d2350a1bdd8703e6575c51cef4c5fa3aa1a782f46cd51ca412b6c6a1d4969f58",
+    "services/broker/tests/test_standard_mcp.py": "6fa4dde9bb44f3121d8c19b810f452d9daa4a1cd35b6322002233a84a8420c53",
+    "services/broker/tests/test_tts_lifecycle.py": "8a9576b3e80f1d075e675d2622971388a5a52cc6ba7375ae6f8c3f9656b6ebf5",
+    "services/broker/tests/test_usage_ledger.py": "9997f84ecdf0629cdc953aafd72180ce0619cfdcf8e0fac2ee16273d1519c394",
+    "services/broker/tests/test_voice.py": "eba85ff02930704f49d5e87553ea043562748514789a666dda9e290a0e9c29cb",
+    "services/broker/tests/test_voice_clone.py": "bfe167f7d148b2c4df8d4cb7d551803aa2ea68d6d12d8d794463f9531093b648",
+    "services/broker/tests/test_workflows.py": "7803179557303aa833479fd366d090b9dcd6222e1dc6fb63270312d955bd4b89",
+    "services/broker/tests/test_workspace.py": "164dbbb4209de190f0c57aaa0614c22a84281b78ea5c987dd923f4d0f8d1c481",
+    "uv.lock": "774229b69f32f858d2e41467ae158209c8e1c037f824196194dd2c7dbfa97ffd"
+  },
+  "baseline": "OBSERVATION_BASELINE.json",
+  "changed_since_baseline": [
+    {
+      "path": "apps/desktop/src-tauri/src/main.rs",
+      "before_sha256": "fa5ea822d95c9b84c238c10f2ee3fb3ae066b0a6e27187b51cf948ee978c7adc",
+      "current_sha256": "7396360670edfe883030f7d7d44ce03088d1e82f5e1ee12f82ff1d7fbadb5193",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/Conversation.tsx",
+      "before_sha256": "f970dc79f10607dc46d6c081766da4d69cd95c4eaff372b91ca07ee2b7739e5b",
+      "current_sha256": "468eb0343256090a70e9bf3fb2ac970dafcb6d3e66253e66bd8d3bc28ffc562a",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/SettingsPanel.tsx",
+      "before_sha256": "d5f042d29358787ab5630efbcaa7235ab2bb8c14dcb608a04cc60fd0c2d367e8",
+      "current_sha256": "a52235ca52d0d77f310f136cbb5ce9ce19f8012c82033d97ce159492fea76aca",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/VoiceControls.tsx",
+      "before_sha256": "e127790e2e80f39ea4d5511f63567f6fb306644e98c331535c7ad9be71d8b3c6",
+      "current_sha256": "36c4a7cd9295c03aa9d36f13eb1c72f14cc52e0345065e4b763b501cb4819d10",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/command/CommandCenter.tsx",
+      "before_sha256": "1acf1d05af38ba0e05ced8e9823f82d32a4d8813118eed6facf81189d1cb1d9c",
+      "current_sha256": "a8041a174d2a4af2e94ebee7d40150262b72e7af6b888595065f0cdb376c585a",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/command/Timeline.tsx",
+      "before_sha256": "13037ca3cf8e4f5cb62e92d53c8cf63e4c52b20e624531804577c2df2d538a9a",
+      "current_sha256": "ed13602e014accad83c80a42c3987b367fd759e643bb95811f3f8516e40baa43",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/contracts.generated.ts",
+      "before_sha256": "02d16c3b7e3843e360fe8edbb13d358d5f5999b09a95e56aadb52d7e6c9def10",
+      "current_sha256": "52dae58a9dcd46aa2b37966b39385baed8b57453d0fdf5c0360db51ae54217a3",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/face/FlatFace.tsx",
+      "before_sha256": "641c659e384ea736848afda3af363e91d37d3e1bfde4f9ea0f3cb8a72a001d11",
+      "current_sha256": "0119b918e2a961dc5efb667d211652e4e4f1ae2937592a76ac02db8cad4d19bd",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/face/HeadScene.tsx",
+      "before_sha256": "70a1750caad7baf9d1b772aeb6556688e6346ce922d76d98a921d21177a8768b",
+      "current_sha256": "710d9ed52f8ffc607b1c9db8f1b090f855cef9cd79d9861e562d6eea08d885bd",
+      "ownership": "concurrent editor, preserved"
+    },
+    {
+      "path": "apps/desktop/src/face/rig.test.ts",
+      "before_sha256": "80ba0166629648c594bf496060cea7293a96fe5a42d892823873579c841d14b8",
+      "current_sha256": "1a6dfa6facb42fab931b8c5f83cf3aae2fdafe3b4e26950953ba987c6f65ab18",
+      "ownership": "concurrent editor, preserved"
+    },
+    {
+      "path": "apps/desktop/src/face/rig.ts",
+      "before_sha256": "950a794eada9a39203ba5e8adc0a401f99358e5c502ec7f62c7fbccdf6cd1482",
+      "current_sha256": "be59f038bc9154f8874d0f80f866290f675dbf678b6d97fd7e92fe068a85da79",
+      "ownership": "concurrent editor, preserved"
+    },
+    {
+      "path": "apps/desktop/src/main.tsx",
+      "before_sha256": "8857ee277896a739440bbac030a59ccb53ca11a27d5317335f165be8bd007557",
+      "current_sha256": "8c097d64e24f93211893612709d79dfcb4175e3c874f013fa62aa85d5c3435cc",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/state.test.ts",
+      "before_sha256": "ab0aac66517d981934105b9241504f85968a7bbd3ea99bf29445dcf30739c392",
+      "current_sha256": "81135b86ba97f40f274e7d6bcf64b703de35751a40cec81b2cc6192575ec7a10",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/state.ts",
+      "before_sha256": "b5659183b1add9225a787fea39cf6e8f42b3b5c125f9fdea019ae46dd3258428",
+      "current_sha256": "f21b5abc30b446685e4b6139f06cdb7a2f98f0f23d912697fe381f0dd5a46a68",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/transport.ts",
+      "before_sha256": "ebb6e235ccb62ab34d46615859cb8193ab030cf69ce76e1cc7d0b515a476c6d9",
+      "current_sha256": "8132dd37f4fe6141c95b8568d392a94db963f20599d6296bc58be379f3c22050",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/useVoice.ts",
+      "before_sha256": "598ba1be1ff0f529999b7dde72abde00cf5bc2f491dcc30ff1c3a708c118ce00",
+      "current_sha256": "370a29ddc4d3766b9bff657b77d2e6745673abcd5df5b0ec2e57affc283e3077",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "apps/desktop/src/vite-env.d.ts",
+      "before_sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
+      "current_sha256": "67f92a4742b0f73397e1f9b002899008e7caf9da20532e3029c613159d63432c",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "config/observer-runtime.json",
+      "before_sha256": "8f8250b1cd9f1ff97120fbf97c59ef467a7de8227a16a5081e6f483a44717522",
+      "current_sha256": "fc04e5f48fb37064e08d22107dc44536b54a4eddbb6def6582d116a0e66e7020",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "integrations/windows-observer/inspect_window.py",
+      "before_sha256": "52da161228a9cd71a42c8efcd3d1be533203c6cd5c6f8556cf3872d7e706b9c5",
+      "current_sha256": "05a6753b233dcf74998a9ea22ba640e4a5c014ce0705e191b5bd3a7e977f485d",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "packages/contracts/schemas/event.schema.json",
+      "before_sha256": "ae5692f8ca991c93d1cd20d626377af46a50f9eabad9c5931e8e41c2d002c707",
+      "current_sha256": "a9ac826d94fadc7b0a805e23a79a1eece2b8f7e42e4f7a602e68054b8dc9170c",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "packages/contracts/schemas/execution-trace.schema.json",
+      "before_sha256": "7c714250fe9c3cbcd4e48f4173325231ab91d345d6fd37d2bec91d02a3d233f1",
+      "current_sha256": "85c7be2d639c03de5a9f861e9230f236d976312cbd72a9b9b2c19ae961b0a022",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "scripts/verify-observer-runtime.py",
+      "before_sha256": "9385d986e1a7ee29bc2e188739bcb95b449fd44fb84e5624dd85174645288baa",
+      "current_sha256": "9d8b56262c3ba40f1fc987756084fcfefd19ac4f13ca58911626b90bde9e771d",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/__main__.py",
+      "before_sha256": "a8dd14d41ea2c2056aa8b31aa6d8be8122ac5e093b9dc31e6c149ac705f74717",
+      "current_sha256": "7fd27056aa9c2c975b281b507ae96e09002f8839228e5f065d9bbabeca97623b",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/app.py",
+      "before_sha256": "2578fa994266f259ec38f0cdf827fab32ebe2249f56a874df1fb8d3d38c75c9f",
+      "current_sha256": "49b34f1954e4ed0540d805e1f4c9445f6c2d4a520e95041d978930bf9fcc3d6e",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/capabilities.py",
+      "before_sha256": "4c76994c1dddb7cd8030591e61399f9ea6df93454d6bc103bbd89887a7ccda47",
+      "current_sha256": "1174e79ca5fb9b3fd9bb44e4da8e7ec38973fb7a79fb59de8467c89c23df1efb",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/config.py",
+      "before_sha256": "ee23a00bc3dbbb165a26c3e0b9b621f38418cec39f5aa1dd89337d12f59fc485",
+      "current_sha256": "3396d7729a78a1af0954c4b33b97c673bcb19cf0a107ae911c3047dcc6333826",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/hermes.py",
+      "before_sha256": "842fbb41d6822acce1654487c0339aca0eb678315164e0e43a67a530f75c7419",
+      "current_sha256": "a4ee8bce5aff21e33fcf051d02db9f214795a51383948bebc8d0925a7c3cc939",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/process_owner.py",
+      "before_sha256": "9d01f85b2692d3c20ed142a77fd611c6909987e6e62f8c631102e36f9a09b6cc",
+      "current_sha256": "ed8bc78bb25a84a37b23db46d3522aa4b242a2fe539601b6dbc963e21640740e",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/reference_worker.py",
+      "before_sha256": "69d064dba13b0a262180ee460734f3f24651942da90c085d8a0cff76c1c90611",
+      "current_sha256": "fc9c0396341772b7f97a11cf752641c172130901f404c8957d68631cc42788f2",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/store.py",
+      "before_sha256": "381a47448f9f63fb5cdc66529eb191fbb259d71b9fe9d0133b0e9124d091ef54",
+      "current_sha256": "68e42ab1d283c850803598b8ea6d7d34787295ae23a2a8f7ebaf7410a60da3ab",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/traces.py",
+      "before_sha256": "cec4c485b45dbff77f2418d7d59182c01a4f8c075deeddad08008c5c2f85b496",
+      "current_sha256": "0c5b7ae0b5bfc8153e509d9dd205f2ebd7ed439fab8940b5d22a6a13f2e36241",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/voice.py",
+      "before_sha256": "235b4432ee13a30c2bb1bb4cee38792eefde49547ca412ebdc0b9ae99579a2c3",
+      "current_sha256": "84e98c0f65a2039986be44388035200c667c91b9b4b317c624811fb6c5517c8d",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/src/immortility_broker/voice_worker.py",
+      "before_sha256": "4e2234978e637b13da656ef0ff79a61c0f179db328fcfa9b7d01929f6a0a809c",
+      "current_sha256": "2512a28e82ad85cf8175635444536115e1745b57b40c930ed2e2387b3450f70e",
+      "ownership": "shared working checkout; review hunks"
+    },
+    {
+      "path": "services/broker/tests/test_process_owner.py",
+      "before_sha256": "ad8694e82093ad825f261117d0e51463bb3ba130c0b6ef4455113d4194ecfa85",
+      "current_sha256": "53dc679fd61ca39028ca6eea8c7c86f48294d043585a94651e590d212eda39d1",
+      "ownership": "shared working checkout; review hunks"
+    }
+  ],
+  "new_task_source_files": [
+    "apps/desktop/src-tauri/src/attachment.rs",
+    "apps/desktop/src/BackgroundConnection.tsx",
+    "apps/desktop/src/ScreenInspection.tsx",
+    "apps/desktop/src/observation.ts",
+    "apps/desktop/src/observation.test.ts",
+    "apps/desktop/src/chat.ts",
+    "apps/desktop/src/chat.test.ts",
+    "apps/desktop/src/Conversation.test.tsx",
+    "services/broker/src/immortility_broker/attachment.py",
+    "services/broker/src/immortility_broker/windows_observer.py",
+    "services/broker/tests/test_attachment.py",
+    "services/broker/tests/test_observation.py",
+    "services/broker/tests/test_chat_regressions.py",
+    "services/broker/tests/test_speech_recovery.py",
+    "integrations/windows-observer/native_picker.py",
+    "scripts/smoke-native-window-consent.py",
+    "scripts/smoke-background-attachment.py",
+    "scripts/smoke-chat-identity.py",
+    "scripts/benchmark-process-stop.py",
+    "packages/contracts/schemas/window-snapshot.schema.json"
+  ],
+  "excluded_from_task_ownership": [
+    "apps/desktop/src/face/HeadScene.tsx",
+    "apps/desktop/src/face/rig.test.ts",
+    "apps/desktop/src/face/rig.ts",
+    "services/broker/src/immortility_broker/gpu_budget.py"
+  ],
+  "note": "Hashes are a build/review snapshot of a shared dirty checkout, not permission to reset, restore whole shared files or delete untracked work. Old M0 reports remain historical.",
+  "check_commands": "Executed individually: Python suite, Ruff check/format, mypy, blueprint/contracts, pnpm check/test/build, offline repo-local cargo test, secret-isolation scan; no failed check omitted."
+}

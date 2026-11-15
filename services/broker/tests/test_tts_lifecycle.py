@@ -11,6 +11,7 @@ import pytest
 from immortility_broker.contracts import BrokerError
 from immortility_broker.tts_client import QwenWorker
 from immortility_broker.voice import VoiceOptions
+from immortility_broker.process_owner import spawn_owned
 
 
 class LocalWorker(QwenWorker):
@@ -23,7 +24,7 @@ class LocalWorker(QwenWorker):
         if self.process and self.process.returncode is None:
             return
         self.starts += 1
-        self.process = await asyncio.create_subprocess_exec(
+        self.process, self.owner = await spawn_owned(
             sys.executable,
             "-u",
             "-c",
@@ -99,6 +100,33 @@ async def test_concurrent_start_only_spawns_one_process():
     )
     assert all(result["kind"] == "ok" for result in results) and worker.starts == 1
     await worker.shutdown()
+
+
+async def test_one_hundred_real_stop_cycles_are_bounded_and_leave_no_worker(tmp_path):
+    import time
+
+    timings = []
+    for index in range(100):
+        ready = tmp_path / str(index)
+        program = (
+            "from pathlib import Path; import sys,time; Path("
+            + repr(str(ready))
+            + ").write_text('ready'); sys.stdin.readline(); time.sleep(60)"
+        )
+        worker = LocalWorker(program)
+        operation = asyncio.create_task(worker.request({"op": "status", "id": str(index)}, 60))
+        while worker.process is None or not worker.pending or not ready.exists():
+            await asyncio.sleep(0.001)
+        process = worker.process
+        start = time.perf_counter()
+        await asyncio.wait_for(worker.cancel(), 3)
+        timings.append(time.perf_counter() - start)
+        with pytest.raises(BrokerError):
+            await asyncio.wait_for(operation, 1)
+        assert process.returncode is not None and worker.owner is None and not worker.pending
+    print(
+        f"Stop cycles n=100 p50_ms={sorted(timings)[49] * 1000:.2f} p95_ms={sorted(timings)[94] * 1000:.2f}"
+    )
 
 
 async def test_stop_racing_a_queued_request_does_not_orphan_the_restarted_worker():

@@ -67,7 +67,11 @@ def prior_task_notes(tasks: list[dict[str, Any]], query: str, skip: str, limit: 
     query_words = words(query)
     scored: list[tuple[int, str, str]] = []
     for task in tasks:
-        if task.get("task_id") == skip or task.get("status") != "succeeded":
+        if (
+            task.get("task_id") == skip
+            or task.get("status") != "succeeded"
+            or task.get("recall_excluded")
+        ):
             continue
         request = str(task.get("input", {}).get("content", ""))
         overlap = len(words(request) & query_words)

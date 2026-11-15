@@ -1,0 +1,28 @@
+{
+  "engine": "coqui-tts==0.28.0",
+  "model": "coqui/XTTS-v2",
+  "revision": "6c2b0d75eae4b7047358e3b6bd9325f857d43f77",
+  "model_license": "CPML-1.0.0; non-commercial evaluation and outputs only",
+  "files": {
+    "config.json": {
+      "url": "https://huggingface.co/coqui/XTTS-v2/resolve/6c2b0d75eae4b7047358e3b6bd9325f857d43f77/config.json",
+      "bytes": 4368,
+      "sha256": "ef262b1454dd2a77e1461b0b2cd53e19b8a7624cc131b837d36df67356bc75e8"
+    },
+    "vocab.json": {
+      "url": "https://huggingface.co/coqui/XTTS-v2/resolve/6c2b0d75eae4b7047358e3b6bd9325f857d43f77/vocab.json",
+      "bytes": 361219,
+      "sha256": "928260878a59da8a72a2a5b7687fea29d5106137669d90945430fe17e415304a"
+    },
+    "model.pth": {
+      "url": "https://huggingface.co/coqui/XTTS-v2/resolve/6c2b0d75eae4b7047358e3b6bd9325f857d43f77/model.pth",
+      "bytes": 1867929118,
+      "sha256": "c7ea20001c6a0a841c77e252d8409f6a74fb423e79b3206a0771ba5989776187"
+    },
+    "LICENSE.txt": {
+      "url": "https://huggingface.co/coqui/XTTS-v2/resolve/6c2b0d75eae4b7047358e3b6bd9325f857d43f77/LICENSE.txt",
+      "bytes": 4014,
+      "sha256": "190f6d7c19b8984f91b97712b94ce92d2b2e640fc677dacab966e955ece9d043"
+    }
+  }
+}

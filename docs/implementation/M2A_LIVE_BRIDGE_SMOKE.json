@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "classification": "VERIFIED REAL OPERATION",
+  "runtime": "real pinned Hermes native loop + SDK MCP bridge + authoritative broker gateway",
+  "provider_requests": 2,
+  "real_tool_dispatches": 1,
+  "actual_result_reached_provider": true,
+  "cloud_calls": 2,
+  "seconds": 15.802,
+  "usage": {
+    "calls": 2,
+    "charged_tokens": 2020,
+    "unknown_calls": 0,
+    "prompt_tokens": 1814,
+    "completion_tokens": 206
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "checkpoint_date": "2026-11-15 Asia/Calcutta",
+  "milestone_status": {
+    "M2_compatibility": "IMPLEMENTED / OFFLINE VERIFIED; live acceptance BLOCKED",
+    "M3A_M3B": "IMPLEMENTED / OFFLINE VERIFIED foundation; not production multi-provider activation",
+    "overall_regression": "BLOCKED by four fixed SDK startup/arithmetic/workflow paths",
+    "native_interactive_model_hub": "PENDING",
+    "DOCX_publication": "DISABLED"
+  },
+  "checks": {
+    "scripts/check.ps1": {
+      "status": "failed",
+      "python_passed": 348,
+      "python_failed": 8,
+      "python_seconds": 411.71,
+      "note": "Four newly added health-visibility fixture failures omitted authentication; corrected and all four pass in the subsequent focused suite. Four SDK failures remain. Script stopped before its later checks. No full-suite pass claimed.",
+      "details": "M3_FULL_RUN_SLOW_FAILURE.json"
+    },
+    "focused_python": {
+      "status": "passed",
+      "tests": 94,
+      "seconds": 94.66,
+      "command": ".venv/Scripts/python.exe -m pytest -q services/broker/tests/test_providers.py services/broker/tests/test_provider_stream.py services/broker/tests/test_tool_streams.py services/broker/tests/test_inference_grants.py services/broker/tests/test_reports.py services/broker/tests/test_usage_ledger.py",
+      "cloud_calls": 0
+    },
+    "python_lint": "passed: .venv/Scripts/ruff.exe check services/broker services/tts",
+    "python_format": "passed: .venv/Scripts/ruff.exe format --check services/broker services/tts (84 files)",
+    "python_typing": {
+      "status": "passed",
+      "sources": 46,
+      "command": ".venv/Scripts/mypy.exe services/broker/src"
+    },
+    "contracts": "passed: scripts/validate-blueprint.py and scripts/generate-contracts.py --check",
+    "frontend_check": "passed: pnpm check (TypeScript, ESLint, Prettier)",
+    "frontend_tests": {
+      "status": "passed",
+      "tests": 62,
+      "files": 11,
+      "seconds": 9.21,
+      "command": "pnpm test"
+    },
+    "frontend_build": {
+      "status": "passed",
+      "seconds": 21.14,
+      "command": "pnpm build"
+    },
+    "rust_unit_tests": {
+      "status": "passed",
+      "tests": 9,
+      "scope": "Same native source revision in this slice; not interactive GUI acceptance",
+      "command": ". ./scripts/dev-env.ps1; cargo test --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
+    },
+    "configured_key_source_bundle_docs_config_scan": "passed",
+    "git_diff_check": "passed; existing LF/CRLF warnings only"
+  },
+  "acceptance": {
+    "real_native_hermes_report_synthetic_inference": {
+      "status": "passed",
+      "seconds": 62.776,
+      "cloud_calls": 0,
+      "synthetic_provider_turns": 2,
+      "real_gateway_operations": 2,
+      "editable_markdown": "reopened",
+      "PDF": "reopened-and-rendered",
+      "source_transport": "synthetic bytes",
+      "evidence": "M2_REPORT_OFFLINE_SMOKE.json"
+    },
+    "authorized_live_report": {
+      "status": "failed / authorization consumed",
+      "provider_calls": 1,
+      "tool_dispatches": 0,
+      "artifacts": 0,
+      "reported_token_usage": null,
+      "conservative_unknown_token_charge": 6002,
+      "retry": false,
+      "paid_fallback": false,
+      "failure": "provider_stream_failed; exact cause not established",
+      "new_stream_categories_added_after_this_attempt": true,
+      "evidence": "M2_REPORT_LIVE_SMOKE.json"
+    },
+    "SDK_startup_diagnostic": {
+      "status": "measured local protocol success outside production deadline",
+      "seconds": 10.684,
+      "samples": 1,
+      "production_deadline_seconds": 10,
+      "production_timers_changed": false,
+      "evidence": "M3_MCP_STARTUP_DIAGNOSTIC.json"
+    }
+  },
+  "providers": {
+    "openrouter": "Existing virtual free route only; fresh zero-price check before every dispatch; current report live acceptance failed. No paid fallback.",
+    "groq": "Fixed compatible transport OFFLINE VERIFIED; production BLOCKED pending account/model zero-cost verifier.",
+    "gemini": "Fixed compatible transport OFFLINE VERIFIED; production BLOCKED pending project/account zero-cost verifier.",
+    "nvidia": "Fixed compatible transport OFFLINE VERIFIED; production BLOCKED pending account/model zero-cost verifier."
+  },
+  "routing": {
+    "owner": "broker registry via keyless native Hermes-compatible proxy",
+    "classify": "deterministic local rules",
+    "rank": "verified task outcomes then p95 over latest 100 qualifying observations; at least three observations for measured branch",
+    "same_task_retry_or_provider_fallback": false,
+    "manual_free_alias": "Pins route, not underlying model",
+    "multimodal": "metadata/filter contract only; no vision inference enabled"
+  },
+  "budgets": {
+    "report_max_external_calls": 2,
+    "report_max_total_tokens": 8000,
+    "lower_user_caps_preserved": true,
+    "local_provider_daily_reservation_ceiling": 50,
+    "local_provider_daily_token_ceiling": 100000,
+    "provider_quota_claim": false,
+    "unknown_usage": "Conservatively charged; distinct from reported usage and proved-unsent reservations."
+  },
+  "benchmarks": {
+    "evidence": "M3_ROUTER_BENCHMARK.json",
+    "warm_routing_samples": 1000,
+    "warm_p95_ms": 0.081,
+    "quality_ranking_fixture_p95_ms": 0.1661,
+    "cold_store_registry_ms_n1": 26.278,
+    "model_quality_or_cloud_latency_measured": false,
+    "idle_CPU_RAM_VRAM_peaks": "unmeasured"
+  },
+  "security": {
+    "keys_sent_to_frontend": false,
+    "new_private_uploads": false,
+    "new_privileged_external_tools_enabled": false,
+    "new_dependencies_or_model_downloads": false,
+    "new_accounts_connected": false,
+    "system_settings_changed": false,
+    "unrelated_processes_terminated": false,
+    "hermes_primary": true,
+    "broker_boundary_preserved": true,
+    "single_store_owner": true,
+    "schema_version": 4,
+    "migration": "Consistent v3 backup; downgrade denial; tested on isolated databases only",
+    "new_license_dependency_inventory": "unchanged; no upstream code vendored",
+    "existing_hermes_advisories": "unresolved prior audit, not a new security scan"
+  },
+  "preservation": {
+    "initial_m2_hashes_matched": 36,
+    "baseline": "M3_BASELINE.json",
+    "protected_m2_files_sha256_still_match": {
+      ".gitignore": true,
+      "services/broker/src/immortility_broker/artifacts.py": true,
+      "services/broker/src/immortility_broker/research.py": true,
+      "services/broker/src/immortility_broker/hermes.py": true,
+      "services/broker/src/immortility_broker/policy.py": true,
+      "services/broker/src/immortility_broker/contracts.py": true,
+      "services/broker/src/immortility_broker/config.py": true,
+      "services/broker/src/immortility_broker/capabilities.py": true,
+      "services/broker/src/immortility_broker/standard_mcp.py": true,
+      "services/broker/src/immortility_broker/public_fetch.py": true,
+      "integrations/artifacts/report_worker.py": true,
+      "integrations/mcp-standard/agent_bridge.py": true,
+      "packages/contracts/schemas/task-request.schema.json": true,
+      "apps/desktop/src/Conversation.tsx": true,
+      "apps/desktop/src/state.ts": true,
+      "apps/desktop/src/Conversation.test.tsx": true,
+      "apps/desktop/src-tauri/Cargo.toml": true,
+      "apps/desktop/src-tauri/Cargo.lock": true,
+      "services/broker/tests/test_agent_bridge.py": true,
+      "config/artifact-requirements.in": true,
+      "config/artifact-requirements.lock": true,
+      "config/artifact-runtime.json": true,
+      "scripts/prepare-artifact-runtime.py": true,
+      "scripts/smoke-artifacts.py": true,
+      "scripts/smoke-research-report.py": true,
+      "scripts/smoke-report-dashboard.py": true
+    },
+    "unrelated_avatar_GPU_voice_edits": "not edited by this slice; existing dirty work preserved",
+    "unexpected_untracked_SystemDrive_directory": "preserved",
+    "git_reset_commit_push": false
+  },
+  "next_steps": [
+    "Repair/rebenchmark SDK cold-start within the original deadline; pass the full regression gate.",
+    "Obtain a successful separately authorized real-model report acceptance with safe categorical diagnostics.",
+    "Implement account-specific reviewed zero-cost/model/quota verification before activating Groq/Gemini/NVIDIA.",
+    "Native interactive Model Hub acceptance and representative held-out live route corpus before claiming optimized provider ranking.",
+    "DOCX renderer/visual approval gate and later milestones remain separate; no installation or M4 runtime automatically enabled."
+  ],
+  "source_hashes": {
+    "services/broker/src/immortility_broker/providers.py": "4f05771fbe22c405ac543000f2ff9e864060515c235b4c9b37299a46ced2bc60",
+    "services/broker/src/immortility_broker/provider_stream.py": "6bfc0aa67539e68959f754c8c458f197a30a32c57f9b16938e9dc2c1d0bf9bb5",
+    "services/broker/src/immortility_broker/agent_bridge.py": "d71b731bc0a6b6194688bc82a1bb4bb02572a776af84eab1d86e89e031756cf5",
+    "services/broker/src/immortility_broker/app.py": "6633b8050b4b356caa7925261b545fc7a58ecd056542418e46136ef11f553f9f",
+    "services/broker/src/immortility_broker/store.py": "8ded43ee7e6e6ea01b5c2ac26fcd119887c7801f06be44983e75ca11f38a8493",
+    "services/broker/src/immortility_broker/ledger.py": "9143eafe876b2729b889aecdcd97dbda8f1fee9603c62eafef5e8a78a0d233d6",
+    "services/broker/src/immortility_broker/traces.py": "5190876ddac4e0488fcf6ae059a98c30d1cfce56ea7d145546650bdeac6db4dc",
+    "services/broker/tests/test_tool_streams.py": "4686355dab658a6000628b85495cf7ea4445190d0dbde8b16306af3124ae8966",
+    "services/broker/tests/test_provider_stream.py": "b2d346bb4ae46ed266fe1f209a68ff5c17d01868d983b390a7dbcb091ee34fc3",
+    "services/broker/tests/test_providers.py": "5a52fe5826246d4d4e4e705088f2ca1157e5516e572ce44dd7b807990e14c229",
+    "services/broker/tests/test_inference_grants.py": "5b829c35d5bffe260a34fad58147fd93ad80e57fff8167e22b8abfdea489be8d",
+    "services/broker/tests/test_reports.py": "49b61853fab07d400775419d81014cf777b3f5b720ffbb92572303aad887a81d",
+    "services/broker/tests/test_usage_ledger.py": "e92f96b9679663236665caf6d14c9747e0f4e59c32baa01b0cd46aebadeadf70",
+    "services/broker/tests/test_broker.py": "cdbddaac42ffb80f1379b8c1158df56be9781fbfdd0c12ce04db86125b0d11b9",
+    "services/broker/tests/test_m0_repairs.py": "c0925e104a26d7b2f845f7c8e2047297b97c264ccc95cb6e3d116ece108d8427",
+    "services/broker/tests/test_firewall.py": "4185de65198a0846ffc3c7be91ff92284b8439d1abacd4f370b45305738124d7",
+    "apps/desktop/src/ModelHub.tsx": "3f6407aae7078d173088a915b38bb3c8bee4ee23b2ec259b4b53ec6a7458b32b",
+    "apps/desktop/src/ModelHub.test.tsx": "bcd17558de5ed5e440f4efe0f0925baf2d5b654ca44ed11955a6500a3ac95c77",
+    "apps/desktop/src/SettingsPanel.tsx": "5273e79aebda87ad7acaced7ecf39a9b5d5ce95b8ad3068a48ecb5aad6d6f1d1",
+    "apps/desktop/src/main.tsx": "63256799e1bc5e588ec40310b5310417820367e223ee7d16a96410cc7788843a",
+    "apps/desktop/src/transport.ts": "51b799fa787247ca890001113cc1da971013cb07093af254f7dbac87eaadef95",
+    "apps/desktop/src/transport.test.ts": "6cc448e1dac11c52ae4cc8b149e9c4ad565c7e74086a783b8ece103d3d6c31f1",
+    "apps/desktop/src/contracts.generated.ts": "366619856001e19cb3fa0d86fb2fdb6e9f7e8bb0e42efc7fce8290039b165bb5",
+    "apps/desktop/src-tauri/src/main.rs": "d8c2dc6dc10f40179a2219d5af9daf8273727e03afe540e81dbe13d5ff41ae7c",
+    "packages/contracts/schemas/execution-trace.schema.json": "94446d3f847d571694f5bf2998ad3f15ddf626d95f41234c22a0411a1add7daf",
+    "packages/contracts/schemas/model-selection.schema.json": "0cae17faad989d00377355bfde52b386af466d27ffd405ff0ab41b21c80ec533",
+    "scripts/generate-contracts.py": "9cc241dbea1b970bc5b301e84201459ad0b42080d3a3f01886ce527613f8478c",
+    "scripts/benchmark-model-router.py": "1066310890c59578f234abf6393aa6b5d03a4adc714baf6c5e923372fdb0c2a7"
+  },
+  "note": "94 focused tests and all separately executed static/frontend/security checks pass. This does not convert the failed whole-suite run or failed live report into a pass."
+}

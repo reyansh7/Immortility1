@@ -1,0 +1,2459 @@
+{
+  "scope": "Read-only GitHub landing-page and license/README checks for all 138 input URLs; detailed source and compatibility findings are in the audit report. No upstream code installed or executed.",
+  "candidates": [
+    {
+      "id": 1,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "MIT",
+      "repository": "NousResearch/hermes-agent",
+      "url": "https://github.com/NousResearch/hermes-agent",
+      "category": "Agent core and Hermes (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/NousResearch/hermes-agent",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 2,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "NousResearch/hermes-official-plugins",
+      "url": "https://github.com/NousResearch/hermes-official-plugins",
+      "category": "Agent core and Hermes (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/NousResearch/hermes-official-plugins",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 3,
+      "decision": "EXPERIMENT",
+      "license_assessment": "Input download repository conflicts; verified milind-soni source Apache-2.0 outside enterprise; third-party notices separate",
+      "verified_source_url": "https://github.com/milind-soni/OpenMausBot",
+      "source_manifest_url": "https://github.com/milind-soni/OpenMausBot/blob/main/package.json",
+      "source_licensing_url": "https://github.com/milind-soni/OpenMausBot/blob/main/LICENSING.md",
+      "source_manifest_version_observed": "0.1.158",
+      "source_node_requirement_observed": ">=24",
+      "repository": "OpenMausBot/OpenMausBot",
+      "url": "https://github.com/OpenMausBot/OpenMausBot",
+      "category": "Agent core and Hermes (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/OpenMausBot/OpenMausBot",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 4,
+      "decision": "REJECT",
+      "license_assessment": "MIT (README)",
+      "repository": "JPeetz/Hermes-Studio",
+      "url": "https://github.com/JPeetz/Hermes-Studio",
+      "category": "Agent core and Hermes (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/JPeetz/Hermes-Studio",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 5,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "langchain-ai/langgraph",
+      "url": "https://github.com/langchain-ai/langgraph",
+      "category": "Agent core and Hermes (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/langchain-ai/langgraph",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 6,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "pydantic/pydantic-ai",
+      "url": "https://github.com/pydantic/pydantic-ai",
+      "category": "Agent core and Hermes (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pydantic/pydantic-ai",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 7,
+      "decision": "REJECT",
+      "license_assessment": "Apache-2.0",
+      "repository": "huggingface/smolagents",
+      "url": "https://github.com/huggingface/smolagents",
+      "category": "Agent core and Hermes (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/huggingface/smolagents",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 8,
+      "decision": "REJECT",
+      "license_assessment": "MIT (page)",
+      "repository": "crewAIInc/crewAI",
+      "url": "https://github.com/crewAIInc/crewAI",
+      "category": "Agent core and Hermes (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/crewAIInc/crewAI",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 9,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "openinterpreter/openinterpreter",
+      "url": "https://github.com/openinterpreter/openinterpreter",
+      "category": "Agent core and Hermes (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/openinterpreter/openinterpreter",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 10,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "microsoft/agent-framework",
+      "url": "https://github.com/microsoft/agent-framework",
+      "category": "Agent core and Hermes (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/microsoft/agent-framework",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 11,
+      "decision": "EXPERIMENT",
+      "license_assessment": "MIT",
+      "repository": "garrytan/gbrain",
+      "url": "https://github.com/garrytan/gbrain",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/garrytan/gbrain",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 12,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "veltri-23/hermes-gbrain-memory",
+      "url": "https://github.com/veltri-23/hermes-gbrain-memory",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/veltri-23/hermes-gbrain-memory",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 13,
+      "decision": "DEFER",
+      "license_assessment": "UNRESOLVED: no license text surfaced",
+      "repository": "BrightCollage/hermes-gbrain-memory-plugin",
+      "url": "https://github.com/BrightCollage/hermes-gbrain-memory-plugin",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/BrightCollage/hermes-gbrain-memory-plugin",
+      "cache_age": "2 months ago",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 14,
+      "decision": "EXPERIMENT",
+      "license_assessment": "Apache-2.0 / MIT",
+      "repository": "asg017/sqlite-vec",
+      "url": "https://github.com/asg017/sqlite-vec",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/asg017/sqlite-vec",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 15,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "UKPLab/sentence-transformers",
+      "url": "https://github.com/UKPLab/sentence-transformers",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/huggingface/sentence-transformers",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 16,
+      "decision": "EXPERIMENT",
+      "license_assessment": "Apache-2.0",
+      "repository": "qdrant/fastembed",
+      "url": "https://github.com/qdrant/fastembed",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/qdrant/fastembed",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 17,
+      "decision": "REJECT",
+      "license_assessment": "Apache-2.0",
+      "repository": "mem0ai/mem0",
+      "url": "https://github.com/mem0ai/mem0",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/mem0ai/mem0",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 18,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "getzep/graphiti",
+      "url": "https://github.com/getzep/graphiti",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/getzep/graphiti",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 19,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "qdrant/qdrant",
+      "url": "https://github.com/qdrant/qdrant",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/qdrant/qdrant",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 20,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "chroma-core/chroma",
+      "url": "https://github.com/chroma-core/chroma",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/chroma-core/chroma",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 21,
+      "decision": "REJECT",
+      "license_assessment": "Screenpipe Commercial License; source-available",
+      "repository": "screenpipe/screenpipe",
+      "url": "https://github.com/screenpipe/screenpipe",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/screenpipe/screenpipe",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 22,
+      "decision": "REJECT",
+      "license_assessment": "Apache-2.0",
+      "repository": "letta-ai/letta-code",
+      "url": "https://github.com/letta-ai/letta-code",
+      "category": "Memory and retrieval (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/letta-ai/letta-code",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 23,
+      "decision": "EXPERIMENT",
+      "license_assessment": "Apache-2.0",
+      "repository": "microsoft/playwright",
+      "url": "https://github.com/microsoft/playwright",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/microsoft/playwright",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 24,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "microsoft/playwright-mcp",
+      "url": "https://github.com/microsoft/playwright-mcp",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/microsoft/playwright-mcp",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 25,
+      "decision": "EXPERIMENT",
+      "license_assessment": "Apache-2.0",
+      "repository": "h4ckf0r0day/obscura",
+      "url": "https://github.com/h4ckf0r0day/obscura",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/h4ckf0r0day/obscura",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 26,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "SGavrl/hermes-plugin-obscura",
+      "url": "https://github.com/SGavrl/hermes-plugin-obscura",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/SGavrl/hermes-plugin-obscura",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 27,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "unclecode/crawl4ai",
+      "url": "https://github.com/unclecode/crawl4ai",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/unclecode/crawl4ai",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 28,
+      "decision": "INTEGRATE",
+      "license_assessment": "Apache-2.0",
+      "repository": "adbar/trafilatura",
+      "url": "https://github.com/adbar/trafilatura",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/adbar/trafilatura",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 29,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "Panniantong/Agent-Reach",
+      "url": "https://github.com/Panniantong/Agent-Reach",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/Panniantong/Agent-Reach",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 30,
+      "decision": "DEFER",
+      "license_assessment": "UNRESOLVED: no license text surfaced",
+      "repository": "thanhtantran/agent-reach-hermes",
+      "url": "https://github.com/thanhtantran/agent-reach-hermes",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/thanhtantran/agent-reach-hermes",
+      "cache_age": "2 days ago",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 31,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "browser-use/browser-use",
+      "url": "https://github.com/browser-use/browser-use",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/browser-use/browser-use",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 32,
+      "decision": "DEFER",
+      "license_assessment": "AGPL-3.0 core; MIT SDK/UI portions",
+      "repository": "mendableai/firecrawl",
+      "url": "https://github.com/mendableai/firecrawl",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/firecrawl/firecrawl",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 33,
+      "decision": "DEFER",
+      "license_assessment": "Unlicense",
+      "repository": "yt-dlp/yt-dlp",
+      "url": "https://github.com/yt-dlp/yt-dlp",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/yt-dlp/yt-dlp",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Unlicense"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 34,
+      "decision": "DEFER",
+      "license_assessment": "BSD-3-Clause",
+      "repository": "scrapy/scrapy",
+      "url": "https://github.com/scrapy/scrapy",
+      "category": "Web research and browsing (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/scrapy/scrapy",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "BSD-3-Clause"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 35,
+      "decision": "EXPERIMENT",
+      "license_assessment": "MIT driver; FSL Spaces and separate optional packages",
+      "repository": "trycua/cua",
+      "url": "https://github.com/trycua/cua",
+      "category": "Windows computer and OS (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/trycua/cua",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 36,
+      "decision": "EXPERIMENT",
+      "license_assessment": "BSD-3-Clause",
+      "repository": "pywinauto/pywinauto",
+      "url": "https://github.com/pywinauto/pywinauto",
+      "category": "Windows computer and OS (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pywinauto/pywinauto",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "BSD-3-Clause"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 37,
+      "decision": "DEFER",
+      "license_assessment": "CC-BY-4.0 root; detector/caption versions differ",
+      "repository": "microsoft/OmniParser",
+      "url": "https://github.com/microsoft/OmniParser",
+      "category": "Windows computer and OS (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/microsoft/OmniParser",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "CC-BY-4.0",
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 38,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "microsoft/UFO",
+      "url": "https://github.com/microsoft/UFO",
+      "category": "Windows computer and OS (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/microsoft/UFO",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 39,
+      "decision": "DEFER",
+      "license_assessment": "BSD-3-Clause",
+      "repository": "asweigart/pyautogui",
+      "url": "https://github.com/asweigart/pyautogui",
+      "category": "Windows computer and OS (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/asweigart/pyautogui",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "BSD-3-Clause"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 40,
+      "decision": "DEFER",
+      "license_assessment": "GPL-2.0",
+      "repository": "AutoHotkey/AutoHotkey",
+      "url": "https://github.com/AutoHotkey/AutoHotkey",
+      "category": "Windows computer and OS (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/AutoHotkey/AutoHotkey",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "GPL-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 41,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "Apache-2.0 / MIT",
+      "repository": "tauri-apps/global-hotkey",
+      "url": "https://github.com/tauri-apps/global-hotkey",
+      "category": "Windows computer and OS (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/tauri-apps/global-hotkey",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 42,
+      "decision": "REJECT",
+      "license_assessment": "Apache-2.0",
+      "repository": "bytedance/UI-TARS-desktop",
+      "url": "https://github.com/bytedance/UI-TARS-desktop",
+      "category": "Windows computer and OS (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/bytedance/UI-TARS-desktop",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 43,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "microsoft/PowerToys",
+      "url": "https://github.com/microsoft/PowerToys",
+      "category": "Windows computer and OS (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/microsoft/PowerToys",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 44,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "BSD-3-Clause",
+      "repository": "giampaolo/psutil",
+      "url": "https://github.com/giampaolo/psutil",
+      "category": "Windows computer and OS (10)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/giampaolo/psutil",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "BSD-3-Clause"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 45,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "cjpais/handy",
+      "url": "https://github.com/cjpais/handy",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/cjpais/handy",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 46,
+      "decision": "EXPERIMENT",
+      "license_assessment": "Apache-2.0",
+      "repository": "k2-fsa/sherpa-onnx",
+      "url": "https://github.com/k2-fsa/sherpa-onnx",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/k2-fsa/sherpa-onnx",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 47,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "MIT",
+      "repository": "snakers4/silero-vad",
+      "url": "https://github.com/snakers4/silero-vad",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/snakers4/silero-vad",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 48,
+      "decision": "EXPERIMENT",
+      "license_assessment": "MIT",
+      "repository": "ggml-org/whisper.cpp",
+      "url": "https://github.com/ggml-org/whisper.cpp",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/ggml-org/whisper.cpp",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 49,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "MIT",
+      "repository": "SYSTRAN/faster-whisper",
+      "url": "https://github.com/SYSTRAN/faster-whisper",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/SYSTRAN/faster-whisper",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 50,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "Apache-2.0",
+      "repository": "hexgrad/kokoro",
+      "url": "https://github.com/hexgrad/kokoro",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/hexgrad/kokoro",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 51,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "dscripka/openWakeWord",
+      "url": "https://github.com/dscripka/openWakeWord",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/dscripka/openWakeWord",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 52,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "myshell-ai/OpenVoice",
+      "url": "https://github.com/myshell-ai/OpenVoice",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/myshell-ai/OpenVoice",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 53,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "GPL-3.0",
+      "repository": "OHF-Voice/piper1-gpl",
+      "url": "https://github.com/OHF-Voice/piper1-gpl",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/OHF-Voice/piper1-gpl",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "GPL-3.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 54,
+      "decision": "REJECT",
+      "license_assessment": "BSD-2-Clause",
+      "repository": "Pipecat-AI/pipecat",
+      "url": "https://github.com/Pipecat-AI/pipecat",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/Pipecat-AI/pipecat",
+      "cache_age": "3 weeks ago",
+      "license_labels_seen": [
+        "BSD-2-Clause"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 55,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "livekit/agents",
+      "url": "https://github.com/livekit/agents",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/livekit/agents",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 56,
+      "decision": "DEFER",
+      "license_assessment": "LGPL/GPL depends on build",
+      "repository": "FFmpeg/FFmpeg",
+      "url": "https://github.com/FFmpeg/FFmpeg",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/FFmpeg/FFmpeg",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "GPL-2.0",
+        "GPL-3.0",
+        "LGPL-2.1",
+        "LGPL-3.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 57,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "resemble-ai/chatterbox",
+      "url": "https://github.com/resemble-ai/chatterbox",
+      "category": "Speech, voice and sound (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/resemble-ai/chatterbox",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 58,
+      "decision": "EXPERIMENT",
+      "license_assessment": "MIT",
+      "repository": "ollama/ollama",
+      "url": "https://github.com/ollama/ollama",
+      "category": "Models, routing and inference (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/ollama/ollama",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 59,
+      "decision": "EXPERIMENT",
+      "license_assessment": "MIT",
+      "repository": "ggml-org/llama.cpp",
+      "url": "https://github.com/ggml-org/llama.cpp",
+      "category": "Models, routing and inference (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/ggml-org/llama.cpp",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 60,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "Portkey-AI/gateway",
+      "url": "https://github.com/Portkey-AI/gateway",
+      "category": "Models, routing and inference (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/Portkey-AI/gateway",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 61,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "MIT",
+      "repository": "microsoft/onnxruntime",
+      "url": "https://github.com/microsoft/onnxruntime",
+      "category": "Models, routing and inference (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/microsoft/onnxruntime",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 62,
+      "decision": "REJECT",
+      "license_assessment": "Mixed core/commercial; inspect exact release LICENSE",
+      "repository": "BerriAI/litellm",
+      "url": "https://github.com/BerriAI/litellm",
+      "category": "Models, routing and inference (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/BerriAI/litellm",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 63,
+      "decision": "REJECT",
+      "license_assessment": "Apache-2.0",
+      "repository": "vllm-project/vllm",
+      "url": "https://github.com/vllm-project/vllm",
+      "category": "Models, routing and inference (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/vllm-project/vllm",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 64,
+      "decision": "REJECT",
+      "license_assessment": "Apache-2.0",
+      "repository": "sgl-project/sglang",
+      "url": "https://github.com/sgl-project/sglang",
+      "category": "Models, routing and inference (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/sgl-project/sglang",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 65,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "nomic-ai/gpt4all",
+      "url": "https://github.com/nomic-ai/gpt4all",
+      "category": "Models, routing and inference (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/nomic-ai/gpt4all",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 66,
+      "decision": "EXPERIMENT",
+      "license_assessment": "GPL-3.0-or-later app; MIT SolidLSP",
+      "repository": "oraios/serena",
+      "url": "https://github.com/oraios/serena",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/oraios/serena",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 67,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "yamadashy/repomix",
+      "url": "https://github.com/yamadashy/repomix",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/yamadashy/repomix",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 68,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "coderamp-labs/gitingest",
+      "url": "https://github.com/coderamp-labs/gitingest",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/coderamp-labs/gitingest",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 69,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "Aider-AI/aider",
+      "url": "https://github.com/Aider-AI/aider",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/Aider-AI/aider",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 70,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "anomalyco/opencode",
+      "url": "https://github.com/anomalyco/opencode",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/anomalyco/opencode",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 71,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "OpenHands/OpenHands",
+      "url": "https://github.com/OpenHands/OpenHands",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/OpenHands/OpenHands",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 72,
+      "decision": "REJECT",
+      "license_assessment": "Apache-2.0",
+      "repository": "cline/cline",
+      "url": "https://github.com/cline/cline",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/cline/cline",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 73,
+      "decision": "REJECT",
+      "license_assessment": "Apache-2.0",
+      "repository": "block/goose",
+      "url": "https://github.com/block/goose",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/aaif-goose/goose",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 74,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "SWE-agent/SWE-agent",
+      "url": "https://github.com/SWE-agent/SWE-agent",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/SWE-agent/SWE-agent",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 75,
+      "decision": "INTEGRATE",
+      "license_assessment": "MIT",
+      "repository": "microsoft/markitdown",
+      "url": "https://github.com/microsoft/markitdown",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/microsoft/markitdown",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 76,
+      "decision": "DEFER",
+      "license_assessment": "AGPL-3.0 or commercial",
+      "repository": "pymupdf/PyMuPDF",
+      "url": "https://github.com/pymupdf/PyMuPDF",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pymupdf/PyMuPDF",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 77,
+      "decision": "DEFER",
+      "license_assessment": "MPL-2.0",
+      "repository": "ocrmypdf/OCRmyPDF",
+      "url": "https://github.com/ocrmypdf/OCRmyPDF",
+      "category": "Coding and repository intelligence (12)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/ocrmypdf/OCRmyPDF",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MPL-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 78,
+      "decision": "INTEGRATE",
+      "license_assessment": "MIT",
+      "repository": "modelcontextprotocol/python-sdk",
+      "url": "https://github.com/modelcontextprotocol/python-sdk",
+      "category": "MCP, plugins and integrations (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/modelcontextprotocol/python-sdk",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 79,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0 new code; MIT legacy",
+      "repository": "modelcontextprotocol/servers",
+      "url": "https://github.com/modelcontextprotocol/servers",
+      "category": "MCP, plugins and integrations (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/modelcontextprotocol/servers",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 80,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "jlowin/fastmcp",
+      "url": "https://github.com/jlowin/fastmcp",
+      "category": "MCP, plugins and integrations (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/PrefectHQ/fastmcp",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 81,
+      "decision": "INTEGRATE",
+      "license_assessment": "Apache-2.0/MIT code; CC-BY-4.0 docs",
+      "repository": "modelcontextprotocol/inspector",
+      "url": "https://github.com/modelcontextprotocol/inspector",
+      "category": "MCP, plugins and integrations (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/modelcontextprotocol/inspector",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 82,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "activepieces/activepieces",
+      "url": "https://github.com/activepieces/activepieces",
+      "category": "MCP, plugins and integrations (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/activepieces/activepieces",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 83,
+      "decision": "REJECT",
+      "license_assessment": "Sustainable Use / enterprise",
+      "repository": "n8n-io/n8n",
+      "url": "https://github.com/n8n-io/n8n",
+      "category": "MCP, plugins and integrations (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/n8n-io/n8n",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 84,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0; corrected owner home-assistant",
+      "repository": "HomeAssistant/core",
+      "url": "https://github.com/HomeAssistant/core",
+      "category": "MCP, plugins and integrations (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "Original URL 404; corrected home-assistant/core inspected",
+      "canonical_url": "https://github.com/home-assistant/core",
+      "cache_age": null,
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 85,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "punkpeye/awesome-mcp-servers",
+      "url": "https://github.com/punkpeye/awesome-mcp-servers",
+      "category": "MCP, plugins and integrations (8)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/punkpeye/awesome-mcp-servers",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 86,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "Apache-2.0 / MIT",
+      "repository": "tauri-apps/tauri",
+      "url": "https://github.com/tauri-apps/tauri",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/tauri-apps/tauri",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 87,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "MIT",
+      "repository": "pmndrs/react-three-fiber",
+      "url": "https://github.com/pmndrs/react-three-fiber",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pmndrs/react-three-fiber",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 88,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "pmndrs/drei",
+      "url": "https://github.com/pmndrs/drei",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pmndrs/drei",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 89,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "pmndrs/zustand",
+      "url": "https://github.com/pmndrs/zustand",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pmndrs/zustand",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 90,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "xyflow/xyflow",
+      "url": "https://github.com/xyflow/xyflow",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/xyflow/xyflow",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 91,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "shadcn-ui/ui",
+      "url": "https://github.com/shadcn-ui/ui",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/shadcn-ui/ui",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 92,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "pmndrs/react-postprocessing",
+      "url": "https://github.com/pmndrs/react-postprocessing",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pmndrs/react-postprocessing",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 93,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "motiondivision/motion",
+      "url": "https://github.com/motiondivision/motion",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/motiondivision/motion",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 94,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "pixiv/three-vrm",
+      "url": "https://github.com/pixiv/three-vrm",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pixiv/three-vrm",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 95,
+      "decision": "REJECT",
+      "license_assessment": "MIT",
+      "repository": "pmndrs/react-spring",
+      "url": "https://github.com/pmndrs/react-spring",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pmndrs/react-spring",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 96,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "assistant-ui/assistant-ui",
+      "url": "https://github.com/assistant-ui/assistant-ui",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/assistant-ui/assistant-ui",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 97,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "Apache-2.0 / MIT",
+      "repository": "tauri-apps/plugins-workspace",
+      "url": "https://github.com/tauri-apps/plugins-workspace",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/tauri-apps/plugins-workspace",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 98,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "pmndrs/leva",
+      "url": "https://github.com/pmndrs/leva",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pmndrs/leva",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 99,
+      "decision": "EXPERIMENT",
+      "license_assessment": "MIT",
+      "repository": "radix-ui/primitives",
+      "url": "https://github.com/radix-ui/primitives",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/radix-ui/primitives",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 100,
+      "decision": "DEFER",
+      "license_assessment": "ISC",
+      "repository": "lucide-icons/lucide",
+      "url": "https://github.com/lucide-icons/lucide",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/lucide-icons/lucide",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 101,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "recharts/recharts",
+      "url": "https://github.com/recharts/recharts",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/recharts/recharts",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 102,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "tanstack/query",
+      "url": "https://github.com/tanstack/query",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/tanstack/query",
+      "cache_age": "2 days ago",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 103,
+      "decision": "EXPERIMENT",
+      "license_assessment": "MIT",
+      "repository": "tanstack/virtual",
+      "url": "https://github.com/tanstack/virtual",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/tanstack/virtual",
+      "cache_age": "yesterday",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 104,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "mermaid-js/mermaid",
+      "url": "https://github.com/mermaid-js/mermaid",
+      "category": "3D UI and frontend (19)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/mermaid-js/mermaid",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 105,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "nexu-io/open-design",
+      "url": "https://github.com/nexu-io/open-design",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/nexu-io/open-design",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 106,
+      "decision": "REJECT",
+      "license_assessment": "MIT stated; model/service licenses separate",
+      "repository": "Anil-matcha/Open-Generative-AI",
+      "url": "https://github.com/Anil-matcha/Open-Generative-AI",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/Anil-matcha/Open-Generative-AI",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 107,
+      "decision": "DEFER",
+      "license_assessment": "GPL-3.0",
+      "repository": "Comfy-Org/ComfyUI",
+      "url": "https://github.com/Comfy-Org/ComfyUI",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/Comfy-Org/ComfyUI",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "GPL-3.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 108,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "nexu-io/html-video",
+      "url": "https://github.com/nexu-io/html-video",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/nexu-io/html-video",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 109,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "nexu-io/motion-anything",
+      "url": "https://github.com/nexu-io/motion-anything",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/nexu-io/motion-anything",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 110,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "GPL-3.0; per-file exceptions",
+      "repository": "blender/blender",
+      "url": "https://github.com/blender/blender",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/blender/blender",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 111,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "google-ai-edge/mediapipe",
+      "url": "https://github.com/google-ai-edge/mediapipe",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/google-ai-edge/mediapipe",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 112,
+      "decision": "DEFER",
+      "license_assessment": "AGPL-3.0",
+      "repository": "upscayl/upscayl",
+      "url": "https://github.com/upscayl/upscayl",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/upscayl/upscayl",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "AGPL-3.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 113,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "danielgatis/rembg",
+      "url": "https://github.com/danielgatis/rembg",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/danielgatis/rembg",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 114,
+      "decision": "DEFER",
+      "license_assessment": "BSD-3-Clause",
+      "repository": "xinntao/Real-ESRGAN",
+      "url": "https://github.com/xinntao/Real-ESRGAN",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/xinntao/Real-ESRGAN",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "BSD-3-Clause"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 115,
+      "decision": "DEFER",
+      "license_assessment": "Per model; archived collection",
+      "repository": "KhronosGroup/glTF-Sample-Models",
+      "url": "https://github.com/KhronosGroup/glTF-Sample-Models",
+      "category": "Design and multimodal creation (11)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/KhronosGroupArchives/glTF-Sample-Models",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 116,
+      "decision": "INTEGRATE",
+      "license_assessment": "MIT",
+      "repository": "gitleaks/gitleaks",
+      "url": "https://github.com/gitleaks/gitleaks",
+      "category": "Security, permissions and integrity (6)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/gitleaks/gitleaks",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 117,
+      "decision": "INTEGRATE",
+      "license_assessment": "Apache-2.0",
+      "repository": "google/osv-scanner",
+      "url": "https://github.com/google/osv-scanner",
+      "category": "Security, permissions and integrity (6)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/google/osv-scanner",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 118,
+      "decision": "EXPERIMENT",
+      "license_assessment": "LGPL-2.1",
+      "repository": "semgrep/semgrep",
+      "url": "https://github.com/semgrep/semgrep",
+      "category": "Security, permissions and integrity (6)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/semgrep/semgrep",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "LGPL-2.1"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 119,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "aquasecurity/trivy",
+      "url": "https://github.com/aquasecurity/trivy",
+      "category": "Security, permissions and integrity (6)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/aquasecurity/trivy",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 120,
+      "decision": "EXPERIMENT",
+      "license_assessment": "MIT",
+      "repository": "promptfoo/promptfoo",
+      "url": "https://github.com/promptfoo/promptfoo",
+      "category": "Security, permissions and integrity (6)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/promptfoo/promptfoo",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 121,
+      "decision": "DEFER",
+      "license_assessment": "BSD-2-Clause",
+      "repository": "restic/restic",
+      "url": "https://github.com/restic/restic",
+      "category": "Security, permissions and integrity (6)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/restic/restic",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "BSD-2-Clause"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 122,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "Apache-2.0 / MIT",
+      "repository": "astral-sh/uv",
+      "url": "https://github.com/astral-sh/uv",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/astral-sh/uv",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0",
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 123,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "MIT",
+      "repository": "pytest-dev/pytest",
+      "url": "https://github.com/pytest-dev/pytest",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pytest-dev/pytest",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 124,
+      "decision": "DEFER",
+      "license_assessment": "MIT outside enterprise paths; separate EE",
+      "repository": "langfuse/langfuse",
+      "url": "https://github.com/langfuse/langfuse",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/langfuse/langfuse",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 125,
+      "decision": "REJECT",
+      "license_assessment": "ELv2",
+      "repository": "Arize-ai/phoenix",
+      "url": "https://github.com/Arize-ai/phoenix",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/Arize-ai/phoenix",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 126,
+      "decision": "DEFER",
+      "license_assessment": "Apache-2.0",
+      "repository": "open-telemetry/opentelemetry-python",
+      "url": "https://github.com/open-telemetry/opentelemetry-python",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/open-telemetry/opentelemetry-python",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "Apache-2.0"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 127,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "agronholm/apscheduler",
+      "url": "https://github.com/agronholm/apscheduler",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/agronholm/apscheduler",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 128,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "MIT",
+      "repository": "astral-sh/ruff",
+      "url": "https://github.com/astral-sh/ruff",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/astral-sh/ruff",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 129,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "pre-commit/pre-commit",
+      "url": "https://github.com/pre-commit/pre-commit",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/pre-commit/pre-commit",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 130,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "BSD-3-Clause",
+      "repository": "encode/httpx",
+      "url": "https://github.com/encode/httpx",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/encode/httpx",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "BSD-3-Clause"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 131,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "MIT",
+      "repository": "fastapi/fastapi",
+      "url": "https://github.com/fastapi/fastapi",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/fastapi/fastapi",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 132,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "samuelcolvin/watchfiles",
+      "url": "https://github.com/samuelcolvin/watchfiles",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/samuelcolvin/watchfiles",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 133,
+      "decision": "KEEP EXISTING",
+      "license_assessment": "MIT",
+      "repository": "Textualize/rich",
+      "url": "https://github.com/Textualize/rich",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/Textualize/rich",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 134,
+      "decision": "DEFER",
+      "license_assessment": "MIT",
+      "repository": "rclone/rclone",
+      "url": "https://github.com/rclone/rclone",
+      "category": "Observability, testing and utilities (13)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/rclone/rclone",
+      "cache_age": "today",
+      "license_labels_seen": [
+        "MIT"
+      ],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 135,
+      "decision": "DEFER",
+      "license_assessment": "CC-BY-SA-3.0 catalog",
+      "repository": "awesome-selfhosted/awesome-selfhosted",
+      "url": "https://github.com/awesome-selfhosted/awesome-selfhosted",
+      "category": "Discovery collections (4)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/awesome-selfhosted/awesome-selfhosted",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 136,
+      "decision": "EXPERIMENT",
+      "license_assessment": "Per skill LICENSE.txt",
+      "repository": "openai/skills",
+      "url": "https://github.com/openai/skills",
+      "category": "Discovery collections (4)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/openai/skills",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 137,
+      "decision": "EXPERIMENT",
+      "license_assessment": "Apache-2.0 stated; verify each skill",
+      "repository": "anthropics/skills",
+      "url": "https://github.com/anthropics/skills",
+      "category": "Discovery collections (4)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/anthropics/skills",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    },
+    {
+      "id": 138,
+      "decision": "EXPERIMENT",
+      "license_assessment": "MIT (README)",
+      "repository": "vercel-labs/agent-skills",
+      "url": "https://github.com/vercel-labs/agent-skills",
+      "category": "Discovery collections (4)",
+      "checked_on": "2026-11-14",
+      "page_status": "page retrieved",
+      "canonical_url": "https://github.com/vercel-labs/agent-skills",
+      "cache_age": "today",
+      "license_labels_seen": [],
+      "license_scope": "Landing-page/README evidence only; release files and model licenses require separate review",
+      "last_commit_at": null,
+      "maintenance": "Not certified: page availability is not a release-cadence or security assessment"
+    }
+  ]
+}

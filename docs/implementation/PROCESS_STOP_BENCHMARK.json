@@ -1,0 +1,15 @@
+{
+  "scope": "native Windows Job with ready synthetic parent and child, including venv launchers; Stop includes whole-job quiescence; not a UI or SDK latency measurement",
+  "n": 30,
+  "observed_process_counts": [
+    5
+  ],
+  "p50_ms": 1.519,
+  "p95_ms": 1.851,
+  "max_ms": 1.876,
+  "max_peak_job_commit_bytes": 17526784,
+  "cloud_calls": 0,
+  "cloud_tokens": 0,
+  "idle_cpu": null,
+  "idle_ram": null
+}

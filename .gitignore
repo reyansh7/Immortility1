@@ -12,6 +12,10 @@ secrets/
 .venv/
 .venv-tts/
 .venv-infernal/
+.venv-reference-tts/
+.venv-mcp/
+.venv-observer/
+.venv-artifacts/
 immortility's_voice/
 .tools/
 .cache/
@@ -45,6 +49,8 @@ workspace/*
 *.log
 logs/
 artifacts/
+!integrations/artifacts/
+!integrations/artifacts/report_worker.py
 checkpoints/
 models/
 *.safetensors
@@ -56,3 +62,6 @@ models/
 Thumbs.db
 .vscode/settings.json
 .idea/
+
+# Shipped face asset (see docs/visual/FACE_AND_DASHBOARD.md; small and versioned)
+!apps/desktop/public/models/

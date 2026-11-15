@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { api } from "./transport";
 import type { Task } from "./state";
@@ -13,6 +13,8 @@ export type VoiceState =
   | "ERROR";
 export interface VoiceStatus {
   infernal_enabled?: boolean;
+  reference_enabled?: boolean;
+  reference_ready?: boolean;
   infernal_presets?: Record<string, Partial<VoiceOptions>>;
   experimental_qwen_enabled?: boolean;
   state: VoiceState;
@@ -24,6 +26,14 @@ export interface VoiceStatus {
   models_ready: boolean;
   preparing: boolean;
   latency_ms: Record<string, number>;
+  diagnostic?: {
+    operation?: string;
+    stage?: string;
+    device?: string;
+    code?: string;
+    elapsed_ms?: number;
+    exit_code?: number;
+  };
   profile_ready: boolean;
   tts_state: "cold" | "loading" | "ready" | "speaking" | "error";
   tts_error: string | null;
@@ -42,7 +52,7 @@ export interface VoiceOptions {
   output_device: number | null;
   language: string;
   stt_device: "cpu" | "auto";
-  voice: "ljspeech" | "joe" | "friend" | "infernal";
+  voice: "ljspeech" | "joe" | "friend" | "infernal" | "reference";
   infernal_base:
     | "piper_northern"
     | "kokoro_george"
@@ -88,13 +98,25 @@ const defaults: VoiceOptions = {
   voice_output: false,
   clone_consent: false,
 };
+/**
+ * True when two polls differ only in playback level. The level is consumed by
+ * the face through a ref, so these polls (every 80 ms while speaking) no
+ * longer re-render the whole app.
+ */
+export function sameStatus(a: VoiceStatus, b: VoiceStatus): boolean {
+  return (
+    JSON.stringify({ ...a, level: 0 }) === JSON.stringify({ ...b, level: 0 })
+  );
+}
+
 export function useVoice(
   session: string,
   cloudConsent: boolean,
   onTask: (task: Task) => void,
   onTranscript: (text: string) => void,
 ) {
-  const [status, setStatus] = useState<VoiceStatus>({
+  const level = useRef(0);
+  const [status, setRawStatus] = useState<VoiceStatus>({
     state: "IDLE",
     level: 0,
     error: null,
@@ -109,6 +131,18 @@ export function useVoice(
     tts_error: null,
     cloned_voice: false,
   });
+  const setStatus = useCallback(
+    (next: VoiceStatus | ((previous: VoiceStatus) => VoiceStatus)) => {
+      setRawStatus((previous) => {
+        const fresh = typeof next === "function" ? next(previous) : next;
+        // The face reads the level through this ref; idempotent, so safe
+        // under StrictMode's double-invoked updaters.
+        level.current = fresh.level;
+        return sameStatus(previous, fresh) ? previous : fresh;
+      });
+    },
+    [],
+  );
   const [options, setOptions] = useState(defaults),
     [devices, setDevices] = useState<Device[]>([]),
     [micConsent, setMicConsent] = useState(false),
@@ -281,6 +315,8 @@ export function useVoice(
   }
   return {
     status,
+    /** Latest playback/mic level, updated without re-rendering. */
+    level,
     options,
     setOptions: updateOptions,
     preview,

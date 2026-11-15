@@ -1,0 +1,365 @@
+{
+  "classification": "Local fixed SDK only; serial samples; no cloud calls or credentials",
+  "production_deadline_seconds": 10,
+  "cold_definition": "Fresh client/server process pair per sample; first sample separately identified; OS filesystem caches not flushed or controlled",
+  "warm_definition": "100 arithmetic invocations in one transient SDK connection; not process startup",
+  "samples": [
+    {
+      "phases_ms": {
+        "manifest_validated": 35.243,
+        "spawned": 92.086,
+        "request_sent": 92.435,
+        "result_delivered": 3961.367,
+        "worker_exited": 4097.274,
+        "cleanup_started": 4097.299,
+        "cleanup_finished": 4097.393
+      },
+      "worker_ms": {
+        "dependency_metadata": 26.56,
+        "client_import": 1136.718,
+        "client_construct": 0.103,
+        "server_spawn": 37.84,
+        "server_import": 2017.433,
+        "server_construct": 5.461,
+        "handshake": 2204.224,
+        "discovery": 1.694,
+        "first_invocation": 97.598,
+        "stdio_cleanup": 172.895,
+        "client_cleanup": 173.357
+      },
+      "resources": {
+        "cpu_seconds": 3.125,
+        "total_processes": 6,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 111632384
+      },
+      "status": "passed",
+      "sample": 1,
+      "operation": "add",
+      "error_code": null,
+      "broker_cpu_seconds": 0.078125
+    },
+    {
+      "phases_ms": {
+        "manifest_validated": 26.428,
+        "spawned": 90.382,
+        "request_sent": 90.528,
+        "result_delivered": 5686.439,
+        "worker_exited": 5877.887,
+        "cleanup_started": 5877.905,
+        "cleanup_finished": 5877.994
+      },
+      "worker_ms": {
+        "dependency_metadata": 29.374,
+        "client_import": 1114.253,
+        "client_construct": 0.128,
+        "server_spawn": 45.991,
+        "server_import": 3822.173,
+        "server_construct": 5.402,
+        "handshake": 4058.863,
+        "discovery": 1.989,
+        "stdio_cleanup": 165.814,
+        "client_cleanup": 166.227
+      },
+      "resources": {
+        "cpu_seconds": 4.765625,
+        "total_processes": 6,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 109469696
+      },
+      "status": "passed",
+      "sample": 2,
+      "operation": "discover",
+      "error_code": null,
+      "broker_cpu_seconds": 0.09375
+    },
+    {
+      "phases_ms": {
+        "manifest_validated": 28.745,
+        "spawned": 101.043,
+        "request_sent": 101.197,
+        "result_delivered": 6961.52,
+        "worker_exited": 7161.319,
+        "cleanup_started": 7161.336,
+        "cleanup_finished": 7161.413
+      },
+      "worker_ms": {
+        "dependency_metadata": 32.341,
+        "client_import": 2211.199,
+        "client_construct": 0.347,
+        "server_spawn": 158.16,
+        "server_import": 3485.959,
+        "server_construct": 6.356,
+        "handshake": 4002.162,
+        "discovery": 2.867,
+        "first_invocation": 130.502,
+        "stdio_cleanup": 166.137,
+        "client_cleanup": 166.65
+      },
+      "resources": {
+        "cpu_seconds": 5.84375,
+        "total_processes": 6,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 112238592
+      },
+      "status": "passed",
+      "sample": 3,
+      "operation": "add",
+      "error_code": null,
+      "broker_cpu_seconds": 0.109375
+    },
+    {
+      "phases_ms": {
+        "manifest_validated": 29.488,
+        "spawned": 97.527,
+        "request_sent": 97.719,
+        "result_delivered": 4581.613,
+        "worker_exited": 4730.899,
+        "cleanup_started": 4730.912,
+        "cleanup_finished": 4730.974
+      },
+      "worker_ms": {
+        "dependency_metadata": 32.314,
+        "client_import": 1113.476,
+        "client_construct": 0.214,
+        "server_spawn": 46.116,
+        "server_import": 2704.979,
+        "server_construct": 4.845,
+        "handshake": 2934.611,
+        "discovery": 1.775,
+        "stdio_cleanup": 156.817,
+        "client_cleanup": 157.189
+      },
+      "resources": {
+        "cpu_seconds": 3.609375,
+        "total_processes": 6,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 109072384
+      },
+      "status": "passed",
+      "sample": 4,
+      "operation": "discover",
+      "error_code": null,
+      "broker_cpu_seconds": 0.09375
+    },
+    {
+      "phases_ms": {
+        "manifest_validated": 23.803,
+        "spawned": 83.716,
+        "request_sent": 83.853,
+        "result_delivered": 6231.528,
+        "worker_exited": 6447.736,
+        "cleanup_started": 6447.757,
+        "cleanup_finished": 6447.861
+      },
+      "worker_ms": {
+        "dependency_metadata": 30.252,
+        "client_import": 1731.47,
+        "client_construct": 0.216,
+        "server_spawn": 102.562,
+        "server_import": 3266.233,
+        "server_construct": 6.101,
+        "handshake": 3693.023,
+        "discovery": 2.898,
+        "first_invocation": 164.143,
+        "stdio_cleanup": 251.366,
+        "client_cleanup": 252.038
+      },
+      "resources": {
+        "cpu_seconds": 5.09375,
+        "total_processes": 6,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 111927296
+      },
+      "status": "passed",
+      "sample": 5,
+      "operation": "add",
+      "error_code": null,
+      "broker_cpu_seconds": 0.09375
+    },
+    {
+      "phases_ms": {
+        "manifest_validated": 39.319,
+        "spawned": 125.728,
+        "request_sent": 125.976,
+        "result_delivered": 6811.976,
+        "worker_exited": 7077.669,
+        "cleanup_started": 7077.689,
+        "cleanup_finished": 7077.779
+      },
+      "worker_ms": {
+        "dependency_metadata": 84.732,
+        "client_import": 3895.063,
+        "client_construct": 0.231,
+        "server_spawn": 84.298,
+        "server_import": 1310.152,
+        "server_construct": 3.771,
+        "handshake": 1639.72,
+        "discovery": 2.069,
+        "stdio_cleanup": 260.248,
+        "client_cleanup": 260.758
+      },
+      "resources": {
+        "cpu_seconds": 5.71875,
+        "total_processes": 6,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 109490176
+      },
+      "status": "passed",
+      "sample": 6,
+      "operation": "discover",
+      "error_code": null,
+      "broker_cpu_seconds": 0.125
+    },
+    {
+      "phases_ms": {
+        "manifest_validated": 40.312,
+        "spawned": 123.617,
+        "request_sent": 123.763,
+        "cleanup_started": 10133.815,
+        "cleanup_finished": 10142.929,
+        "failure_delivered": 10144.868
+      },
+      "worker_ms": {
+        "dependency_metadata": 59.62,
+        "client_import": 3763.6,
+        "client_construct": 0.582,
+        "server_spawn": 128.525
+      },
+      "resources": {
+        "cpu_seconds": 7.46875,
+        "total_processes": 6,
+        "active_processes": 6,
+        "peak_job_commit_bytes": 103333888
+      },
+      "status": "failed",
+      "sample": 7,
+      "operation": "add",
+      "error_code": "mcp_failed",
+      "broker_cpu_seconds": 0.109375
+    },
+    {
+      "phases_ms": {
+        "manifest_validated": 127.244,
+        "spawned": 524.333,
+        "request_sent": 524.687,
+        "cleanup_started": 10540.187,
+        "cleanup_finished": 10549.053,
+        "failure_delivered": 10550.677
+      },
+      "worker_ms": {
+        "dependency_metadata": 260.164,
+        "client_import": 5140.347,
+        "client_construct": 0.268,
+        "server_spawn": 112.342
+      },
+      "resources": {
+        "cpu_seconds": 7.328125,
+        "total_processes": 6,
+        "active_processes": 6,
+        "peak_job_commit_bytes": 89280512
+      },
+      "status": "failed",
+      "sample": 8,
+      "operation": "discover",
+      "error_code": "mcp_failed",
+      "broker_cpu_seconds": 0.484375
+    },
+    {
+      "phases_ms": {
+        "manifest_validated": 136.59,
+        "spawned": 410.303,
+        "request_sent": 410.653,
+        "cleanup_started": 10419.984,
+        "cleanup_finished": 10426.905,
+        "failure_delivered": 10428.433
+      },
+      "worker_ms": {
+        "dependency_metadata": 174.231,
+        "client_import": 5888.793,
+        "client_construct": 0.702,
+        "server_spawn": 138.281
+      },
+      "resources": {
+        "cpu_seconds": 7.578125,
+        "total_processes": 6,
+        "active_processes": 6,
+        "peak_job_commit_bytes": 96485376
+      },
+      "status": "failed",
+      "sample": 9,
+      "operation": "add",
+      "error_code": "mcp_failed",
+      "broker_cpu_seconds": 0.390625
+    },
+    {
+      "phases_ms": {
+        "manifest_validated": 93.604,
+        "spawned": 291.77,
+        "request_sent": 292.13,
+        "result_delivered": 5233.185,
+        "worker_exited": 5418.155,
+        "cleanup_started": 5418.168,
+        "cleanup_finished": 5418.225
+      },
+      "worker_ms": {
+        "dependency_metadata": 70.794,
+        "client_import": 2637.603,
+        "client_construct": 0.171,
+        "server_spawn": 56.449,
+        "server_import": 1176.427,
+        "server_construct": 3.854,
+        "handshake": 1414.771,
+        "discovery": 1.62,
+        "stdio_cleanup": 170.906,
+        "client_cleanup": 171.258
+      },
+      "resources": {
+        "cpu_seconds": 4.078125,
+        "total_processes": 6,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 110604288
+      },
+      "status": "passed",
+      "sample": 10,
+      "operation": "discover",
+      "error_code": null,
+      "broker_cpu_seconds": 0.296875
+    }
+  ],
+  "fresh_pair_total": {
+    "n": 10,
+    "p50_ms": 6762.82,
+    "p95_nearest_rank_ms": 10549.053,
+    "max_ms": 10549.053,
+    "p95_note": "Descriptive nearest-rank statistic; small sample, not a service guarantee."
+  },
+  "successes": 7,
+  "warm": {
+    "mode": "real local SDK stdio, no model",
+    "sdk_version": "2.2.0",
+    "n": 100,
+    "success": 100,
+    "initialize_and_list_ms": 1324.52,
+    "warm_p50_ms": 1.43,
+    "warm_p95_ms": 2.13,
+    "model_calls": 0,
+    "cloud_tokens": 0,
+    "additional_ram_mib": null,
+    "additional_vram_mib": null,
+    "owned_job": {
+      "cpu_seconds": 2.59375,
+      "total_processes": 6,
+      "active_processes": 1,
+      "peak_job_commit_bytes": 111988736
+    },
+    "whole_worker_ms": 3344.813
+  },
+  "resource_units": {
+    "cpu_seconds": "Cumulative Windows owned-job CPU, includes exited children",
+    "peak_job_commit_bytes": "Peak private committed job memory; not RSS or VRAM"
+  },
+  "persistent_worker_enabled": false,
+  "metadata_cache_enabled": false,
+  "cloud_calls": 0
+}

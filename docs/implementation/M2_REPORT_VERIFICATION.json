@@ -1,0 +1,105 @@
+{
+  "checkpoint_date": "2026-11-15 Asia/Calcutta",
+  "milestone_status": "M2 report slice locally verified; live research report blocked; DOCX publication disabled",
+  "checks": {
+    "scripts/check.ps1": {
+      "status": "passed",
+      "python_tests": 285,
+      "python_seconds": 88.11,
+      "frontend_tests": 57,
+      "frontend_seconds": 3.96,
+      "mypy_sources": 44,
+      "contracts_lint_format_types": "passed",
+      "frontend_build_seconds": 2.72
+    },
+    "cargo_test_offline": {
+      "status": "passed",
+      "tests": 8
+    },
+    "native_build_offline": "passed",
+    "configured_key_source_bundle_docs_config_scan": "passed",
+    "git_diff_check": "passed",
+    "smoke_script_syntax": "passed after formatting and automatic safe failure-evidence recording"
+  },
+  "acceptance": {
+    "public_source_native_workflow": {
+      "status": "passed",
+      "seconds": 11.212,
+      "provider_selection_and_draft": "synthetic",
+      "cloud_calls": 0,
+      "evidence": "M2_REPORT_PUBLIC_SOURCE_SMOKE.json"
+    },
+    "real_model_report": {
+      "status": "blocked",
+      "calls": 1,
+      "reported_tokens": 1180,
+      "tool_dispatches": 0,
+      "artifact_files": 0,
+      "retry_or_fallback": false,
+      "evidence": "M2_REPORT_LIVE_SMOKE.json"
+    },
+    "dashboard_stored_report_and_export_copies": "verified",
+    "external_viewer_render_acceptance": "pending",
+    "docx_publication": "disabled"
+  },
+  "limits": {
+    "report_task_tokens": 8000,
+    "report_external_calls": 2,
+    "worker_deadline_seconds": 25,
+    "gateway_deadline_seconds": 30,
+    "worker_memory_limit_bytes": 536870912,
+    "pinned_runtime_file_bytes": 40518610,
+    "peak_worker_ram": "unmeasured",
+    "source_cache_max_body_bytes": 768000
+  },
+  "known_warnings": [
+    "Starlette/AnyIO deprecation",
+    "Existing large avatar bundle chunk"
+  ],
+  "unresolved": [
+    "Exact rejected live proposal field was not retained; new safe categories added without relaxing validation.",
+    "DOCX renderer approval/authenticity/isolation/render acceptance",
+    "External viewer computer-use binding failed",
+    "Full autonomous research restart and later artifact formats",
+    "Existing shared Hermes dependency advisories and loaded MCP contention"
+  ],
+  "source_hashes": {
+    ".gitignore": "d59fea0bf72c31f737623b1d7d01b1af99cf8cb2928896defe980cf7d912e7f5",
+    "services/broker/src/immortility_broker/artifacts.py": "ec16ee8226a2f2f1d879c3f7f1122b09fb2a2cdbb67754e6b6ab630bb6d5fafa",
+    "services/broker/src/immortility_broker/research.py": "5804c905ccfeb05eb152bd7595cd38b337a1c52e21d724c73a5c2b1a43661041",
+    "services/broker/src/immortility_broker/app.py": "285fa44081f3d001895ae66503264cd82bc2a4e10ace8df4966f61e665f9cce1",
+    "services/broker/src/immortility_broker/agent_bridge.py": "db2ed921a30a316c467723621a173a63a077cd41431217d62953ec6cf5fb10c1",
+    "services/broker/src/immortility_broker/hermes.py": "737794587fba99db3171499470c2d361f8d8928e9cd43d42a138d93fe44b7dd0",
+    "services/broker/src/immortility_broker/policy.py": "4fe5d46ef3c2cf3a05395dc54072dbc59c221b2f416e6970a14303f168f06dbf",
+    "services/broker/src/immortility_broker/contracts.py": "a1bbe3d458d12deb27934fa4ca773ed1bfa262a92bbd909ffb50e668c1d45fdd",
+    "services/broker/src/immortility_broker/store.py": "8c2c24f5c1ab34fb86e3071905d2764dc69ac9523f9c73c4f81e4a31ad24fc16",
+    "services/broker/src/immortility_broker/traces.py": "f20c4cd6ce222eeaac75311ebe0fee6f532a5bb1c8c4cc61fb40559a4ef9974e",
+    "services/broker/src/immortility_broker/config.py": "d498f86e3a06840059e2fbabc44915ab33684b29e2c0d334c0e3c04fe41c8aa8",
+    "services/broker/src/immortility_broker/capabilities.py": "20815f2760b9bc982a210a1aa7fc0c996733356087794f85bca17bf87ef4bfb7",
+    "services/broker/src/immortility_broker/standard_mcp.py": "837107470d2c1aa766c5f69b06f19c798eb036d7848a89f52c2f08481bdeb879",
+    "services/broker/src/immortility_broker/public_fetch.py": "132b9ae412bd5011fef57dd972fef7a540aab767cda6bb776fdf92abfe0549f0",
+    "integrations/artifacts/report_worker.py": "6ae06eb5f5b0c50a74653f33252d29a490bca6684075a48fbf8451c38d419e5f",
+    "integrations/mcp-standard/agent_bridge.py": "7ccd6da1beaadfb193b7896273ac99f6a5e4ae47cd59c3eafd2ce74ae7f90acd",
+    "packages/contracts/schemas/task-request.schema.json": "a1a5b4ed264c5cb9e6a8476011d86ddd7226e34ef53d3da63df1a7eb0769b2bf",
+    "packages/contracts/schemas/execution-trace.schema.json": "2d6d8d9175a60cc5720944ddadbae80fc40ba1dee099ef42547879642065311f",
+    "apps/desktop/src/main.tsx": "c62b5834ed66c7b0ecd2ef7a1b94851bd00a343f57ecb3a99d46903be027e057",
+    "apps/desktop/src/Conversation.tsx": "86b532f4c8e6ace2bc2c6eceeee91fc107823aec9742b204d520abb879bfbc2e",
+    "apps/desktop/src/SettingsPanel.tsx": "52df4758203c4aa5486bcdda0cec27bbdf7391a6772161c938bd51f5cbaee5f1",
+    "apps/desktop/src/state.ts": "3a213ce3e78d97c32ad2dda4e5cde3aeb592c79e7012e4def646141e51b51652",
+    "apps/desktop/src/transport.ts": "13aac28cd366dbf56b701ed59434c6d6af316e7e5cbccbf5b2f793b8abccc23e",
+    "apps/desktop/src/Conversation.test.tsx": "c23585ccf3c8039cd51b2113934db3042416ba49920165c01b4137e99383fe90",
+    "apps/desktop/src-tauri/Cargo.toml": "0caa98ec04c852c4f12dd14ce5767a6d750a97712aa742dd531ccb43fe141770",
+    "apps/desktop/src-tauri/Cargo.lock": "a80cde57ff8681fe8a954a0ef5fc3c861230996fe82f5a4a50b0cc1e47c8530d",
+    "apps/desktop/src-tauri/src/main.rs": "f6f41a343f8ff83e048b474f893204693ddeea5318243fe5b21f5fe685a4c7c2",
+    "services/broker/tests/test_reports.py": "f0eea8ca99296c3cc2cd4560635730ac1ff89e61a81390d2b54f5e5fe8b3ca7c",
+    "services/broker/tests/test_agent_bridge.py": "7f3a826c506efa7478e969e4c36f9abcb71d6d0d72ff1e35dde3ac521e2db7a8",
+    "config/artifact-requirements.in": "d38c85cc7581c1f462688dde256bb18957680fecea23970766bd43e0be9242de",
+    "config/artifact-requirements.lock": "68a51be01a1ccf30b910198a0fba4b096f3767f289234cb55f7db7eb6c4d74b0",
+    "config/artifact-runtime.json": "5862918248d8590f45d27f29953060d4ddcf4754ba47a6f9e831411adb9fb7dc",
+    "scripts/prepare-artifact-runtime.py": "be3c4593ba96c58d07484ae0878e931fae32514786d0bcb465127c8e595f0eb3",
+    "scripts/smoke-artifacts.py": "4555ce2e6213a92dd69425711a71ff98b9af401302f918a154a7b8ad7263f7cb",
+    "scripts/smoke-research-report.py": "ec97af87c26dad09d8749dbf8d35c417a624c6385f67950199d15d62820caebd",
+    "scripts/smoke-report-dashboard.py": "b0e015b66cfd8908ecad09935f99667884bc98a99c77919175cfa4bf2b37daa8"
+  },
+  "note": "Report-slice checkpoint includes the interrupted foundation. Unrelated dirty files are preserved and are not attributed to this continuation."
+}

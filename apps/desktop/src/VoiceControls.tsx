@@ -26,6 +26,17 @@ export function VoiceControls({
           {voice.error || status.error || status.tts_error}
         </p>
       )}
+      {settings && status.diagnostic?.stage && (
+        <p className="hint" role="status">
+          Last audio stage: {status.diagnostic.stage.replaceAll("_", " ")}
+          {status.diagnostic.device
+            ? ` · ${status.diagnostic.device.toUpperCase()}`
+            : ""}
+          {status.diagnostic.elapsed_ms !== undefined
+            ? ` · ${Math.round(status.diagnostic.elapsed_ms)} ms`
+            : ""}
+        </p>
+      )}
       {settings && (
         <>
           {!status.experimental_qwen_enabled && (
@@ -140,6 +151,7 @@ export function VoiceControls({
           <label>
             Voice
             <select
+              disabled={active}
               value={options.voice}
               onChange={(e) => {
                 const friend = e.target.value === "friend";
@@ -152,6 +164,9 @@ export function VoiceControls({
             >
               <option value="ljspeech">LJ · Piper</option>
               <option value="joe">Joe · Piper male</option>
+              <option value="reference" disabled={!status.reference_enabled}>
+                IMMORTILITY · Mechanical reference
+              </option>
               <option value="infernal" disabled={!status.infernal_enabled}>
                 IMMORTILITY — INFERNAL · optional
               </option>
@@ -280,6 +295,17 @@ export function VoiceControls({
                 current settings; stop before retuning.
               </p>
             </fieldset>
+          )}
+          {options.voice === "reference" && (
+            <p className="hint">
+              Approved mechanical reference voice · English · local RTX
+              inference.
+              {status.reference_ready
+                ? " Engine warm and ready."
+                : " First preparation can take 15–45 seconds."}{" "}
+              Keep Speak assistant replies enabled to retain the warm engine.
+              Model and output license: non-commercial use.
+            </p>
           )}
           {options.voice === "friend" && (
             <p className="hint">

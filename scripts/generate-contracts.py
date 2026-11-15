@@ -15,6 +15,35 @@ content += "export type Status = (typeof statuses)[number];\n"
 avatar=json.loads((root/'packages/contracts/schemas/avatar-state.schema.json').read_text())
 content += "export const avatarStates = " + array(avatar['properties']['state']['enum']) + " as const;\n"
 content += "export type AvatarState = (typeof avatarStates)[number];\n"
+events=json.loads((root/'packages/contracts/schemas/event.schema.json').read_text())
+content += "export const eventTypes = " + array(events['properties']['type']['enum']) + " as const;\n"
+content += "export type EventType = (typeof eventTypes)[number];\n"
+
+def ts_type(schema):
+    if "$ref" in schema:
+        return schema["$ref"].rsplit("/",1)[1]
+    if "const" in schema:
+        return json.dumps(schema["const"])
+    if "enum" in schema:
+        return " | ".join(json.dumps(value) for value in schema["enum"])
+    if "anyOf" in schema:
+        return " | ".join(ts_type(part) for part in schema["anyOf"])
+    kind=schema.get("type")
+    if isinstance(kind,list):
+        return " | ".join(ts_type(schema|{"type":part}) for part in kind)
+    if kind=="array":
+        return "Array<"+ts_type(schema["items"])+">"
+    if kind=="object":
+        required=schema.get("required",[])
+        return "{\n"+"".join("  "+json.dumps(name)+(":" if name in required else "?:")+" "+ts_type(value)+";\n" for name,value in schema.get("properties",{}).items())+"}"
+    return {"string":"string","integer":"number","number":"number","boolean":"boolean","null":"null"}.get(kind,"unknown")
+
+snapshot=json.loads((root/'packages/contracts/schemas/window-snapshot.schema.json').read_text())
+for name,schema in snapshot.get("$defs",{}).items():
+    content += "export type "+name+" = "+ts_type(schema)+";\n"
+content += "export type WindowSnapshot = "+ts_type(snapshot)+";\n"
+model_selection=json.loads((root/'packages/contracts/schemas/model-selection.schema.json').read_text())
+content += "export type ModelSelection = "+ts_type(model_selection)+";\n"
 target = root / "apps/desktop/src/contracts.generated.ts"
 parser = argparse.ArgumentParser()
 parser.add_argument("--check", action="store_true")

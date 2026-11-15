@@ -39,6 +39,12 @@ async def main(offline: bool, use_hermes_key: bool, adversarial: bool, cancel: b
         body = json.loads(request.content)
         calls.append(body)
         assert body["model"] == MODEL and not body.get("tools")
+        system = "\n".join(m.get("content", "") for m in body["messages"] if m.get("role") == "system")
+        assert "You are Immortility" in system
+        assert "Broker configuration at turn start:" in system
+        assert "not tools you can call directly" in system
+        assert "local clock=disabled" in system
+        assert "Wikipedia lookup=disabled" in system
         delta = {"tool_calls": [{"index": 0, "id": "unsafe", "type": "function", "function": {"name": "terminal", "arguments": '{"command":"whoami"}'}}]} if adversarial else {"content": "OFFLINE PROVIDER — real Hermes protocol test."}
         chunk = {"id": "test", "object": "chat.completion.chunk", "model": MODEL,
                  "choices": [{"index": 0, "delta": delta, "finish_reason": None}]}
@@ -93,6 +99,8 @@ async def main(offline: bool, use_hermes_key: bool, adversarial: bool, cancel: b
                 print("Task:", result["status"], "| streamed chunks:", deltas, "| paid route: disabled")
                 if offline:
                     print("Guarded provider requests:", len(calls))
+                    if calls:
+                        print("Identity and disabled-capability instructions: verified in actual Hermes request")
                 expected = "cancelled" if cancel else "blocked" if adversarial else "succeeded"
                 if result["status"] != expected:
                     raise SystemExit(1)

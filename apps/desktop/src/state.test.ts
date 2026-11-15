@@ -1,6 +1,38 @@
 import { describe, it, expect } from "vitest";
 import { reduceEvent, orbState, type Transcript } from "./state";
 describe("durable event presentation", () => {
+  it("isolates task streams and rejects invalid state or sequence updates", () => {
+    const initial: Transcript = {
+      task_id: "task-a",
+      text: "local",
+      sequence: 2,
+      status: "running",
+      events: [],
+    };
+    for (const event of [
+      {
+        task_id: "task-b",
+        sequence: 99,
+        type: "task.state",
+        data: { status: "succeeded" },
+      },
+      {
+        task_id: "task-a",
+        sequence: NaN,
+        type: "task.state",
+        data: { status: "succeeded" },
+      },
+      {
+        task_id: "task-a",
+        sequence: 3,
+        type: "task.state",
+        data: { status: "invented" },
+      },
+    ])
+      expect(reduceEvent(initial, { schema_version: "1.0", ...event })).toBe(
+        initial,
+      );
+  });
   it("does not duplicate replayed deltas", () => {
     const initial: Transcript = {
       text: "",

@@ -7,6 +7,7 @@ export const terminal = new Set([
   "disconnected",
 ]);
 import type { Status, AvatarState } from "./contracts.generated";
+import { statuses } from "./contracts.generated";
 export type { Status } from "./contracts.generated";
 export type OrbState = AvatarState;
 export interface Task {
@@ -14,8 +15,18 @@ export interface Task {
   session_id: string;
   request_id: string;
   status: Status;
-  input: { content: string };
-  result?: { text: string; provider: string; model: string };
+  input: { content: string; no_cloud?: boolean; type?: string };
+  result?: {
+    text: string;
+    provider: string;
+    model: string;
+    artifacts?: {
+      artifact_id: "report.pdf" | "report.md";
+      size: number;
+      sha256: string;
+      verification: string;
+    }[];
+  };
   error?: { code: string; message: string };
 }
 export interface TaskEvent {
@@ -52,6 +63,10 @@ const visibleKeys = [
   "model",
   "delegation",
   "tools_enabled",
+  "privacy",
+  "nodes",
+  "truncated",
+  "capture_mode",
 ] as const;
 const secretLike = /(sk-[A-Za-z0-9_-]{8,}|bearer\s+\S+|api[_-]?key\S*)/gi;
 export function redact(
@@ -68,6 +83,7 @@ export function redact(
   return kept;
 }
 export interface Transcript {
+  task_id?: string;
   text: string;
   sequence: number;
   status: Status;
@@ -85,8 +101,16 @@ export interface Transcript {
   };
 }
 export function reduceEvent(state: Transcript, event: TaskEvent): Transcript {
+  if (state.task_id && state.task_id !== event.task_id) return state;
+  if (event.schema_version !== "1.0" || !Number.isSafeInteger(event.sequence))
+    return state;
   if (event.sequence <= state.sequence) return state;
-  const next = { ...state, sequence: event.sequence };
+  if (
+    event.type === "task.state" &&
+    !statuses.includes(event.data.status as Status)
+  )
+    return state;
+  const next = { ...state, task_id: event.task_id, sequence: event.sequence };
   if (event.type === "message.delta" && typeof event.data.text === "string")
     next.text += event.data.text;
   if (event.type === "task.state") next.status = event.data.status as Status;

@@ -26,3 +26,52 @@ export const avatarStates = [
   "disconnected",
 ] as const;
 export type AvatarState = (typeof avatarStates)[number];
+export const eventTypes = [
+  "message.delta",
+  "task.state",
+  "tool.started",
+  "tool.progress",
+  "tool.completed",
+  "approval.requested",
+  "approval.resolved",
+  "artifact.created",
+  "audit.notice",
+  "task.error",
+  "agent.started",
+  "agent.completed",
+  "observation.authorized",
+  "observation.completed",
+  "observation.revoked",
+] as const;
+export type EventType = (typeof eventTypes)[number];
+export type WindowNode = {
+  "id": number;
+  "depth": number;
+  "protected": boolean;
+  "text": string;
+  "control_type"?: string | null;
+  "rect"?: Array<number> | null;
+};
+export type WindowSnapshot = {
+  "schema_version": "1.0";
+  "kind": "untrusted_ui_data";
+  "task_id": string;
+  "lease_id": string;
+  "hwnd": number;
+  "pid": number;
+  "created": number;
+  "observed_at": number;
+  "valid_until": number;
+  "window_rect": Array<number>;
+  "dpi": number;
+  "foreground": boolean;
+  "nodes": Array<WindowNode>;
+  "truncated": boolean;
+  "cloud_allowed": false;
+  "screenshots": 0;
+  "input_actions": 0;
+};
+export type ModelSelection = {
+  "mode"?: "auto_cloud" | "manual_cloud" | "local_qwen" | "local_heretic";
+  "route_id"?: string | null;
+};

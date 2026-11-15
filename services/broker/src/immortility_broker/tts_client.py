@@ -11,6 +11,7 @@ from typing import Any
 
 from .config import ROOT
 from .contracts import BrokerError, uid
+from .process_owner import ProcessOwner, reap, spawn_owned
 from .voice_store import metadata_path, playback_dir, profile_path, voice_root
 
 ERRORS = {
@@ -46,12 +47,22 @@ class QwenWorker:
         self.lifecycle = asyncio.Lock()
         self.stop = asyncio.Event()
         self.metrics: dict[str, float] = {}
+        self.owner: ProcessOwner | None = None
 
     async def start(self) -> None:
         if not self.enabled:
             raise BrokerError("experimental_qwen_disabled", ERRORS["experimental_qwen_disabled"])
         async with self.lifecycle:
             await self._start()
+            if self.process is not None and self.owner is None:
+                try:
+                    self.owner = ProcessOwner(self.process.pid)
+                except OSError:
+                    await reap(self.process, None)
+                    self.process = None
+                    raise BrokerError(
+                        "tts_failed", "Cannot establish audio worker ownership."
+                    ) from None
 
     async def _start(self) -> None:
         if self.process and self.process.returncode is None:
@@ -95,7 +106,7 @@ class QwenWorker:
             TQDM_DISABLE="1",
             TOKENIZERS_PARALLELISM="false",
         )
-        self.process = await asyncio.create_subprocess_exec(
+        self.process, self.owner = await spawn_owned(
             str(python),
             "-m",
             "immortility_tts.worker",
@@ -270,45 +281,9 @@ class QwenWorker:
 
     async def _kill_owned(self) -> None:
         process = self.process
-        # Idle workers can exit on EOF without a platform taskkill/WMI round trip.
-        if process and process.returncode is None and process.stdin:
-            process.stdin.close()
-            try:
-                await asyncio.wait_for(process.wait(), 0.2)
-            except TimeoutError:
-                pass
-        if process and process.returncode is None:
-            if os.name == "nt":
-                killer = await asyncio.create_subprocess_exec(
-                    "taskkill.exe",
-                    "/PID",
-                    str(process.pid),
-                    "/T",
-                    "/F",
-                    stdout=asyncio.subprocess.DEVNULL,
-                    stderr=asyncio.subprocess.DEVNULL,
-                    creationflags=subprocess.CREATE_NO_WINDOW,
-                    env={
-                        key: value
-                        for key, value in os.environ.items()
-                        if key.upper() in {"SYSTEMROOT", "WINDIR", "PATH"}
-                    },
-                )
-                try:
-                    await asyncio.wait_for(killer.wait(), 3)
-                except TimeoutError:
-                    killer.kill()
-                    await asyncio.wait_for(killer.wait(), 3)
-                    if process.returncode is None:
-                        process.kill()
-                        await asyncio.wait_for(process.wait(), 3)
-                    raise BrokerError(
-                        "tts_failed",
-                        "Audio tree cleanup could not be confirmed. Quit the app to close its owned process tree.",
-                    ) from None
-            else:
-                process.kill()
-            await asyncio.wait_for(process.wait(), 3)
+        if process:
+            await reap(process, self.owner)
+        self.owner = None
         if self.reader and self.reader is not asyncio.current_task():
             self.reader.cancel()
             with contextlib.suppress(asyncio.CancelledError):

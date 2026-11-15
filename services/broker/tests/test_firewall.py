@@ -7,6 +7,20 @@ from fastapi.testclient import TestClient
 from immortility_broker.app import create_app
 from immortility_broker.config import Settings
 from immortility_broker.policy import MODEL
+from immortility_broker.contracts import TaskRequest
+from pydantic import SecretStr
+
+
+def grant(app):
+    if not app.state.engine.settings.openrouter_api_key.get_secret_value():
+        app.state.engine.settings.openrouter_api_key = SecretStr("synthetic-offline-credential")
+    store = app.state.store
+    session = store.session()["id"]
+    task, _ = store.create(
+        TaskRequest(session_id=session, request_id="fixture", content="test", cloud_consent=True)
+    )
+    app.state.engine.open_grant(task["task_id"], "fast", 90)
+    return app.state.engine.inference_key
 
 
 @pytest.mark.parametrize("provider_status", [429, 402, 503])
@@ -26,8 +40,7 @@ def test_real_http_policy_no_paid_fallback_or_upstream_error_leak(tmp_path, prov
         settings, "x" * 40, client=httpx.AsyncClient(transport=httpx.MockTransport(upstream))
     )
     with TestClient(app) as client:
-        app.state.engine.inference_allowed = True
-        token = app.state.inference_token
+        token = grant(app)
         response = client.post(
             "/inference/v1/chat/completions",
             headers={"Authorization": f"Bearer {token}"},
@@ -64,10 +77,10 @@ def test_nonzero_catalog_prevents_any_completion(tmp_path):
         client=httpx.AsyncClient(transport=httpx.MockTransport(upstream)),
     )
     with TestClient(app) as client:
-        app.state.engine.inference_allowed = True
+        token = grant(app)
         response = client.post(
             "/inference/v1/chat/completions",
-            headers={"Authorization": "Bearer " + app.state.inference_token},
+            headers={"Authorization": "Bearer " + token},
             json={"model": MODEL, "messages": []},
         )
         assert response.status_code == 409
@@ -76,7 +89,7 @@ def test_nonzero_catalog_prevents_any_completion(tmp_path):
         assert (
             client.post(
                 "/inference/v1/chat/completions",
-                headers={"Authorization": "Bearer " + app.state.inference_token},
+                headers={"Authorization": "Bearer " + token},
                 json={},
             ).status_code
             == 403

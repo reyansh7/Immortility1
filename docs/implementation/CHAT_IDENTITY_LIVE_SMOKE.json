@@ -1,0 +1,39 @@
+{
+  "scope": "two authorized public-only prompts; real Hermes and live free router; UI display is separate acceptance",
+  "route": "openrouter/free",
+  "provider_calls": 2,
+  "call_cap_per_task": 1,
+  "token_cap_per_task": 4000,
+  "private_content_sent": false,
+  "paid_fallback": false,
+  "turns": [
+    {
+      "prompt": "Who are you?",
+      "status": "succeeded",
+      "response": "I'm Immortility, your Windows assistant running through Hermes. The underlying model isn't verified \u2014 it's routed via OpenRouter's free tier.",
+      "error": null,
+      "seconds": 16.005,
+      "usage": {
+        "calls": 1,
+        "charged_tokens": 737,
+        "unknown_calls": 0,
+        "prompt_tokens": 677,
+        "completion_tokens": 60
+      }
+    },
+    {
+      "prompt": "What can you actually do right now?",
+      "status": "succeeded",
+      "response": "Honestly, in this session: very little beyond conversation. I can't inspect your windows, run commands, edit files, or see your screen right now \u2014 those broker workflows are all disabled and I have no direct tools.\n\nWhat's available: talking through a problem, answering from what I know, drafting or explaining code, and reasoning through something with you. Voice needs its own controls, and any window text read would require you to select a window and approve it in Settings.\n\nWhat would you like to do with that?",
+      "error": null,
+      "seconds": 7.62,
+      "usage": {
+        "calls": 1,
+        "charged_tokens": 772,
+        "unknown_calls": 0,
+        "prompt_tokens": 666,
+        "completion_tokens": 106
+      }
+    }
+  ]
+}

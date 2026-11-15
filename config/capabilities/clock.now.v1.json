@@ -1,0 +1,46 @@
+{
+  "manifest": {
+    "schema_version": "1.0",
+    "name": "clock.now.v1",
+    "provider": "local-python",
+    "classification": "deterministic-read",
+    "network": false,
+    "irreversible": false,
+    "max_payload_bytes": 1024,
+    "max_output_bytes": 1024,
+    "deadline_ms": 10000,
+    "concurrency": 1,
+    "approval": "task-scoped-local-opt-in"
+  },
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {},
+    "title": "EmptyInput",
+    "type": "object"
+  },
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "timestamp": {
+        "maxLength": 40,
+        "minLength": 20,
+        "title": "Timestamp",
+        "type": "string"
+      }
+    },
+    "required": [
+      "timestamp"
+    ],
+    "title": "ClockOutput",
+    "type": "object"
+  },
+  "status": "experimental-default-off",
+  "execution": "existing local Python clock through broker registry",
+  "permissions": [
+    "current running task",
+    "matching session and ledger attempt",
+    "exact empty arguments",
+    "bounded expiring grant"
+  ],
+  "grants_no_external_tools": true
+}

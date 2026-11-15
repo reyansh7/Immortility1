@@ -1,0 +1,3 @@
+# Separate Windows/Python 3.13 tool runtime. Never upgrade Hermes in place.
+# Official MIT release 9972c21aa42054fb1450c5fc614761ed11847ec6.
+mcp==2.2.0

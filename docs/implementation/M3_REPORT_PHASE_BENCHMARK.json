@@ -1,0 +1,566 @@
+{
+  "classification": "Serial native Hermes/MCP/broker/report integration; synthetic sources and drafting",
+  "samples": [
+    {
+      "status": "passed",
+      "total_ms": 15779.417,
+      "legacy_smoke_seconds": 15.281,
+      "broker_cpu_seconds": 1.125,
+      "phases": [
+        {
+          "phase": "broker_initialization_begin",
+          "elapsed_ms": 2.483
+        },
+        {
+          "phase": "broker_initialization_end",
+          "elapsed_ms": 268.193
+        },
+        {
+          "phase": "session.create",
+          "elapsed_ms": 987.977
+        },
+        {
+          "phase": "hermes_and_MCP_ready",
+          "elapsed_ms": 9875.2
+        },
+        {
+          "phase": "prompt.submit",
+          "elapsed_ms": 9875.226
+        },
+        {
+          "phase": "fixture_GET_begin",
+          "elapsed_ms": 11176.176
+        },
+        {
+          "phase": "fixture_GET_end",
+          "elapsed_ms": 11176.309
+        },
+        {
+          "phase": "fixture_POST_begin",
+          "elapsed_ms": 11178.321
+        },
+        {
+          "phase": "fixture_POST_end",
+          "elapsed_ms": 11182.589
+        },
+        {
+          "phase": "public.research.v1_begin",
+          "elapsed_ms": 11304.134
+        },
+        {
+          "phase": "public.research.v1_end",
+          "elapsed_ms": 11307.632
+        },
+        {
+          "phase": "fixture_GET_begin",
+          "elapsed_ms": 11678.836
+        },
+        {
+          "phase": "fixture_GET_end",
+          "elapsed_ms": 11678.912
+        },
+        {
+          "phase": "fixture_POST_begin",
+          "elapsed_ms": 11679.262
+        },
+        {
+          "phase": "fixture_POST_end",
+          "elapsed_ms": 11679.522
+        },
+        {
+          "phase": "report.create.v1_begin",
+          "elapsed_ms": 11764.54
+        },
+        {
+          "phase": "report.create.v1_end",
+          "elapsed_ms": 14300.783
+        },
+        {
+          "phase": "hermes_cleanup_begin",
+          "elapsed_ms": 15337.0
+        },
+        {
+          "phase": "hermes_cleanup_end",
+          "elapsed_ms": 15337.103
+        },
+        {
+          "phase": "completion_verified",
+          "elapsed_ms": 15779.409
+        }
+      ],
+      "hermes_job_resources": [
+        {
+          "cpu_seconds": 10.9375,
+          "total_processes": 46,
+          "active_processes": 1,
+          "peak_job_commit_bytes": 300003328
+        }
+      ],
+      "report_worker_phases_ms": {
+        "dependency_import": 1313.37,
+        "construction": 41.798,
+        "readback": 42.016,
+        "rendering": 72.599,
+        "hashing": 9.803
+      },
+      "report_worker_resources": {
+        "cpu_seconds": 1.78125,
+        "total_processes": 3,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 88305664
+      },
+      "cloud_calls": 0
+    },
+    {
+      "status": "passed",
+      "total_ms": 13112.829,
+      "legacy_smoke_seconds": 12.705,
+      "broker_cpu_seconds": 0.984375,
+      "phases": [
+        {
+          "phase": "broker_initialization_begin",
+          "elapsed_ms": 2.819
+        },
+        {
+          "phase": "broker_initialization_end",
+          "elapsed_ms": 263.552
+        },
+        {
+          "phase": "session.create",
+          "elapsed_ms": 726.069
+        },
+        {
+          "phase": "hermes_and_MCP_ready",
+          "elapsed_ms": 8636.278
+        },
+        {
+          "phase": "prompt.submit",
+          "elapsed_ms": 8636.317
+        },
+        {
+          "phase": "fixture_GET_begin",
+          "elapsed_ms": 9591.505
+        },
+        {
+          "phase": "fixture_GET_end",
+          "elapsed_ms": 9591.593
+        },
+        {
+          "phase": "fixture_POST_begin",
+          "elapsed_ms": 9592.024
+        },
+        {
+          "phase": "fixture_POST_end",
+          "elapsed_ms": 9593.115
+        },
+        {
+          "phase": "public.research.v1_begin",
+          "elapsed_ms": 9715.733
+        },
+        {
+          "phase": "public.research.v1_end",
+          "elapsed_ms": 9718.143
+        },
+        {
+          "phase": "fixture_GET_begin",
+          "elapsed_ms": 9837.492
+        },
+        {
+          "phase": "fixture_GET_end",
+          "elapsed_ms": 9837.592
+        },
+        {
+          "phase": "fixture_POST_begin",
+          "elapsed_ms": 9838.068
+        },
+        {
+          "phase": "fixture_POST_end",
+          "elapsed_ms": 9838.433
+        },
+        {
+          "phase": "report.create.v1_begin",
+          "elapsed_ms": 9951.669
+        },
+        {
+          "phase": "report.create.v1_end",
+          "elapsed_ms": 12088.785
+        },
+        {
+          "phase": "hermes_cleanup_begin",
+          "elapsed_ms": 12805.291
+        },
+        {
+          "phase": "hermes_cleanup_end",
+          "elapsed_ms": 12805.366
+        },
+        {
+          "phase": "completion_verified",
+          "elapsed_ms": 13112.821
+        }
+      ],
+      "hermes_job_resources": [
+        {
+          "cpu_seconds": 9.453125,
+          "total_processes": 46,
+          "active_processes": 1,
+          "peak_job_commit_bytes": 301494272
+        }
+      ],
+      "report_worker_phases_ms": {
+        "dependency_import": 1257.358,
+        "construction": 39.171,
+        "readback": 37.679,
+        "rendering": 55.21,
+        "hashing": 10.063
+      },
+      "report_worker_resources": {
+        "cpu_seconds": 1.765625,
+        "total_processes": 3,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 88518656
+      },
+      "cloud_calls": 0
+    },
+    {
+      "status": "passed",
+      "total_ms": 11692.081,
+      "legacy_smoke_seconds": 11.329,
+      "broker_cpu_seconds": 1.046875,
+      "phases": [
+        {
+          "phase": "broker_initialization_begin",
+          "elapsed_ms": 1.275
+        },
+        {
+          "phase": "broker_initialization_end",
+          "elapsed_ms": 189.233
+        },
+        {
+          "phase": "session.create",
+          "elapsed_ms": 632.562
+        },
+        {
+          "phase": "hermes_and_MCP_ready",
+          "elapsed_ms": 7327.065
+        },
+        {
+          "phase": "prompt.submit",
+          "elapsed_ms": 7327.088
+        },
+        {
+          "phase": "fixture_GET_begin",
+          "elapsed_ms": 8257.864
+        },
+        {
+          "phase": "fixture_GET_end",
+          "elapsed_ms": 8257.95
+        },
+        {
+          "phase": "fixture_POST_begin",
+          "elapsed_ms": 8258.402
+        },
+        {
+          "phase": "fixture_POST_end",
+          "elapsed_ms": 8259.362
+        },
+        {
+          "phase": "public.research.v1_begin",
+          "elapsed_ms": 8364.231
+        },
+        {
+          "phase": "public.research.v1_end",
+          "elapsed_ms": 8366.334
+        },
+        {
+          "phase": "fixture_GET_begin",
+          "elapsed_ms": 8452.91
+        },
+        {
+          "phase": "fixture_GET_end",
+          "elapsed_ms": 8452.964
+        },
+        {
+          "phase": "fixture_POST_begin",
+          "elapsed_ms": 8453.237
+        },
+        {
+          "phase": "fixture_POST_end",
+          "elapsed_ms": 8453.461
+        },
+        {
+          "phase": "report.create.v1_begin",
+          "elapsed_ms": 8528.872
+        },
+        {
+          "phase": "report.create.v1_end",
+          "elapsed_ms": 10461.384
+        },
+        {
+          "phase": "hermes_cleanup_begin",
+          "elapsed_ms": 11393.981
+        },
+        {
+          "phase": "hermes_cleanup_end",
+          "elapsed_ms": 11394.073
+        },
+        {
+          "phase": "completion_verified",
+          "elapsed_ms": 11692.065
+        }
+      ],
+      "hermes_job_resources": [
+        {
+          "cpu_seconds": 8.75,
+          "total_processes": 46,
+          "active_processes": 1,
+          "peak_job_commit_bytes": 302419968
+        }
+      ],
+      "report_worker_phases_ms": {
+        "dependency_import": 1114.148,
+        "construction": 44.699,
+        "readback": 56.829,
+        "rendering": 66.107,
+        "hashing": 9.433
+      },
+      "report_worker_resources": {
+        "cpu_seconds": 1.609375,
+        "total_processes": 3,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 88715264
+      },
+      "cloud_calls": 0
+    },
+    {
+      "status": "passed",
+      "total_ms": 13828.506,
+      "legacy_smoke_seconds": 13.385,
+      "broker_cpu_seconds": 1.328125,
+      "phases": [
+        {
+          "phase": "broker_initialization_begin",
+          "elapsed_ms": 1.8
+        },
+        {
+          "phase": "broker_initialization_end",
+          "elapsed_ms": 234.201
+        },
+        {
+          "phase": "session.create",
+          "elapsed_ms": 725.86
+        },
+        {
+          "phase": "hermes_and_MCP_ready",
+          "elapsed_ms": 9236.408
+        },
+        {
+          "phase": "prompt.submit",
+          "elapsed_ms": 9236.43
+        },
+        {
+          "phase": "fixture_GET_begin",
+          "elapsed_ms": 10161.355
+        },
+        {
+          "phase": "fixture_GET_end",
+          "elapsed_ms": 10161.435
+        },
+        {
+          "phase": "fixture_POST_begin",
+          "elapsed_ms": 10161.89
+        },
+        {
+          "phase": "fixture_POST_end",
+          "elapsed_ms": 10162.919
+        },
+        {
+          "phase": "public.research.v1_begin",
+          "elapsed_ms": 10262.982
+        },
+        {
+          "phase": "public.research.v1_end",
+          "elapsed_ms": 10265.234
+        },
+        {
+          "phase": "fixture_GET_begin",
+          "elapsed_ms": 10363.289
+        },
+        {
+          "phase": "fixture_GET_end",
+          "elapsed_ms": 10363.38
+        },
+        {
+          "phase": "fixture_POST_begin",
+          "elapsed_ms": 10363.83
+        },
+        {
+          "phase": "fixture_POST_end",
+          "elapsed_ms": 10364.154
+        },
+        {
+          "phase": "report.create.v1_begin",
+          "elapsed_ms": 10438.328
+        },
+        {
+          "phase": "report.create.v1_end",
+          "elapsed_ms": 12544.936
+        },
+        {
+          "phase": "hermes_cleanup_begin",
+          "elapsed_ms": 13427.208
+        },
+        {
+          "phase": "hermes_cleanup_end",
+          "elapsed_ms": 13427.346
+        },
+        {
+          "phase": "completion_verified",
+          "elapsed_ms": 13828.497
+        }
+      ],
+      "hermes_job_resources": [
+        {
+          "cpu_seconds": 10.609375,
+          "total_processes": 46,
+          "active_processes": 1,
+          "peak_job_commit_bytes": 300957696
+        }
+      ],
+      "report_worker_phases_ms": {
+        "dependency_import": 1246.445,
+        "construction": 42.56,
+        "readback": 33.153,
+        "rendering": 56.721,
+        "hashing": 9.873
+      },
+      "report_worker_resources": {
+        "cpu_seconds": 1.796875,
+        "total_processes": 3,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 88301568
+      },
+      "cloud_calls": 0
+    },
+    {
+      "status": "passed",
+      "total_ms": 12772.778,
+      "legacy_smoke_seconds": 12.337,
+      "broker_cpu_seconds": 0.84375,
+      "phases": [
+        {
+          "phase": "broker_initialization_begin",
+          "elapsed_ms": 1.99
+        },
+        {
+          "phase": "broker_initialization_end",
+          "elapsed_ms": 243.022
+        },
+        {
+          "phase": "session.create",
+          "elapsed_ms": 630.054
+        },
+        {
+          "phase": "hermes_and_MCP_ready",
+          "elapsed_ms": 8373.581
+        },
+        {
+          "phase": "prompt.submit",
+          "elapsed_ms": 8373.603
+        },
+        {
+          "phase": "fixture_GET_begin",
+          "elapsed_ms": 9124.724
+        },
+        {
+          "phase": "fixture_GET_end",
+          "elapsed_ms": 9124.815
+        },
+        {
+          "phase": "fixture_POST_begin",
+          "elapsed_ms": 9125.27
+        },
+        {
+          "phase": "fixture_POST_end",
+          "elapsed_ms": 9126.271
+        },
+        {
+          "phase": "public.research.v1_begin",
+          "elapsed_ms": 9253.031
+        },
+        {
+          "phase": "public.research.v1_end",
+          "elapsed_ms": 9255.764
+        },
+        {
+          "phase": "fixture_GET_begin",
+          "elapsed_ms": 9348.43
+        },
+        {
+          "phase": "fixture_GET_end",
+          "elapsed_ms": 9348.511
+        },
+        {
+          "phase": "fixture_POST_begin",
+          "elapsed_ms": 9348.919
+        },
+        {
+          "phase": "fixture_POST_end",
+          "elapsed_ms": 9349.228
+        },
+        {
+          "phase": "report.create.v1_begin",
+          "elapsed_ms": 9416.301
+        },
+        {
+          "phase": "report.create.v1_end",
+          "elapsed_ms": 11465.57
+        },
+        {
+          "phase": "hermes_cleanup_begin",
+          "elapsed_ms": 12383.882
+        },
+        {
+          "phase": "hermes_cleanup_end",
+          "elapsed_ms": 12383.986
+        },
+        {
+          "phase": "completion_verified",
+          "elapsed_ms": 12772.771
+        }
+      ],
+      "hermes_job_resources": [
+        {
+          "cpu_seconds": 9.703125,
+          "total_processes": 46,
+          "active_processes": 1,
+          "peak_job_commit_bytes": 302235648
+        }
+      ],
+      "report_worker_phases_ms": {
+        "dependency_import": 1248.725,
+        "construction": 38.05,
+        "readback": 35.835,
+        "rendering": 55.551,
+        "hashing": 9.012
+      },
+      "report_worker_resources": {
+        "cpu_seconds": 1.6875,
+        "total_processes": 3,
+        "active_processes": 1,
+        "peak_job_commit_bytes": 87896064
+      },
+      "cloud_calls": 0
+    }
+  ],
+  "n": 5,
+  "p50_ms": 13112.829,
+  "p95_nearest_rank_ms": 15779.417,
+  "percentile_limit": "n=5..10; descriptive sample statistic, not a population latency guarantee",
+  "cold_warm": "Fresh Hermes/MCP/report workers per task; shared warm broker imports after first sample; OS caches uncontrolled",
+  "resource_units": "Owned Windows job CPU seconds and peak private commit bytes, not physical RSS/VRAM",
+  "cloud_calls": 0,
+  "source_sha256": {
+    "scripts/smoke-research-report.py": "9a594f36f075b9cd62c7aaf72a89e9c835c7006ec313027049d69982ec640f3c",
+    "integrations/artifacts/report_worker.py": "1e34bf7d0208ecedef9b876e087d813b356624b2f57ccb281c06b248f6a22165"
+  }
+}

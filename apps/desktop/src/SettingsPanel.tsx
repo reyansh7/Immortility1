@@ -1,9 +1,11 @@
-import { useState, type FormEvent } from "react";
+import { useState, type ReactNode } from "react";
 import type { OverlayPolicy } from "./face/faceState";
-import type { Quality } from "./face/HeadScene";
+import type { Quality } from "./face/FlatFace";
 import { api, windowAction } from "./transport";
 import type { VoiceController } from "./useVoice";
 import { VoiceControls } from "./VoiceControls";
+import { invoke } from "@tauri-apps/api/core";
+import { ModelHub, type ActiveModel } from "./ModelHub";
 
 export interface Health {
   credential_source?: string;
@@ -18,6 +20,11 @@ export interface Health {
   web_research_enabled?: boolean;
   mcp_enabled?: boolean;
   code_execution_enabled?: boolean;
+  observation_available?: boolean;
+  runtime_mode?: "desktop" | "local-background";
+  standard_mcp_enabled?: boolean;
+  artifact_tools_enabled?: boolean;
+  active_model?: ActiveModel | null;
 }
 
 const providers = [
@@ -37,19 +44,15 @@ function ProviderKeys({
   health: Health | undefined;
   onSaved: () => void;
 }) {
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
-  async function save(event: FormEvent, provider: string) {
-    event.preventDefault();
+  async function save(provider: string) {
     try {
-      await api("/v1/settings/provider-key", {
-        provider,
-        api_key: drafts[provider] ?? "",
-      });
-      setDrafts((current) => ({ ...current, [provider]: "" }));
+      const saved = await invoke<boolean>("configure_provider", { provider });
       setNotes((current) => ({
         ...current,
-        [provider]: "Saved in Windows Credential Manager.",
+        [provider]: saved
+          ? "Saved in Windows Credential Manager."
+          : "Key entry canceled.",
       }));
       onSaved();
     } catch (issue) {
@@ -63,41 +66,19 @@ function ProviderKeys({
     <>
       <p className="hint">
         Keys stay in Windows Credential Manager on this PC and never reach this
-        window. Chat uses only the free OpenRouter route.
+        window. Chat uses only routes that pass broker price and permission
+        checks.
       </p>
       {providers.map(([provider, label]) => (
-        <form
-          className="key-form"
-          key={provider}
-          onSubmit={(event) => void save(event, provider)}
-        >
+        <div className="key-form" key={provider}>
           <p>
             <b>{label}</b> · {health?.providers?.[provider] ?? "missing key"}
           </p>
-          <label>
-            {label} API key
-            <input
-              type="password"
-              name={`${provider}-api-key`}
-              autoComplete="off"
-              spellCheck={false}
-              value={drafts[provider] ?? ""}
-              onChange={(event) =>
-                setDrafts((current) => ({
-                  ...current,
-                  [provider]: event.target.value,
-                }))
-              }
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={(drafts[provider] ?? "").trim().length < 16}
-          >
-            Save {label} key
+          <button type="button" onClick={() => void save(provider)}>
+            Enter {label} key in Windows
           </button>
           {notes[provider] && <p className="hint">{notes[provider]}</p>}
-        </form>
+        </div>
       ))}
     </>
   );
@@ -274,6 +255,8 @@ export function SettingsPanel({
   onRefresh,
   onError,
   onPreviewOverlay,
+  localCapabilities,
+  onModelChange,
 }: {
   health: Health | undefined;
   session: string;
@@ -283,11 +266,15 @@ export function SettingsPanel({
   onRefresh: () => void;
   onError: (message: string) => void;
   onPreviewOverlay: () => void;
+  localCapabilities?: ReactNode;
+  onModelChange?: () => void;
 }) {
+  const localOnly = health?.runtime_mode === "local-background";
   const toggle = (path: string, label: string, key: keyof Health) => (
     <label>
       <input
         type="checkbox"
+        disabled={localOnly}
         checked={health?.[key] === true}
         onChange={(event) =>
           void api(path, { enabled: event.target.checked })
@@ -314,9 +301,14 @@ export function SettingsPanel({
           <option value="high">High</option>
           <option value="balanced">Balanced</option>
           <option value="performance">Performance</option>
-          <option value="2d">2D fallback (no WebGL)</option>
+          <option value="2d">Minimal (2D, no WebGL)</option>
         </select>
       </label>
+      <p className="hint">
+        The launch command chooses the graphics chip for this run. Battery
+        lowers the frame rate and resolution before it changes materials.
+        Performance keeps the higher frame rate while the face is active.
+      </p>
       <label>
         <input
           type="checkbox"
@@ -358,11 +350,18 @@ export function SettingsPanel({
         Preview work overlay — no screen access
       </button>
       <h3>Runtime</h3>
-      <p>
-        Hermes {health?.hermes.version ?? ""} ·{" "}
-        {health?.hermes.status ?? "unavailable"}
-        {health?.hermes.message ? ` · ${health.hermes.message}` : ""}
-      </p>
+      {localOnly ? (
+        <p>
+          Local background runtime attached. Tasks continue when this dashboard
+          closes.
+        </p>
+      ) : (
+        <p>
+          Hermes {health?.hermes.version ?? ""} ·{" "}
+          {health?.hermes.status ?? "unavailable"}
+          {health?.hermes.message ? ` · ${health.hermes.message}` : ""}
+        </p>
+      )}
       <p>
         Paid inference: blocked · Code execution: disabled · Active task:{" "}
         {health?.active_task ?? "none"}
@@ -371,6 +370,7 @@ export function SettingsPanel({
         Check connection
       </button>
       <h3>Capabilities</h3>
+      {localCapabilities}
       {toggle(
         "/v1/settings/delegation",
         "Specialist agents (research, coding, review). No tools.",
@@ -383,7 +383,7 @@ export function SettingsPanel({
       )}
       {toggle(
         "/v1/settings/web-research",
-        "Public Wikipedia research. Pages are untrusted data.",
+        "Public Wikipedia context and task-approved MCP security source retrieval. Pages are untrusted data; general web search is unavailable.",
         "web_research_enabled",
       )}
       {toggle(
@@ -391,35 +391,73 @@ export function SettingsPanel({
         "Local arithmetic MCP server. External servers stay off.",
         "mcp_enabled",
       )}
-      <WorkspaceFolder
-        enabled={health?.workspace_tools_enabled === true}
-        onSaved={onRefresh}
-      />
-      <LocalTools
-        session={session}
-        mcp={health?.mcp_enabled === true}
-        clock={health?.local_tools_enabled === true}
-        onError={onError}
-      />
+      {toggle(
+        "/v1/settings/standard-mcp",
+        "Reviewed SDK arithmetic. Hermes needs separate permission for each task.",
+        "standard_mcp_enabled",
+      )}
+      {toggle(
+        "/v1/settings/artifacts",
+        "Report files (Markdown and PDF). Each task needs separate creation permission.",
+        "artifact_tools_enabled",
+      )}
+      {!localOnly && (
+        <>
+          <WorkspaceFolder
+            enabled={health?.workspace_tools_enabled === true}
+            onSaved={onRefresh}
+          />
+          <LocalTools
+            session={session}
+            mcp={health?.mcp_enabled === true}
+            clock={health?.local_tools_enabled === true}
+            onError={onError}
+          />
+        </>
+      )}
       <h3>Voice</h3>
-      <VoiceControls voice={voice} settings />
-      <h3>Providers</h3>
-      <p>
-        Credential storage: {health?.credential_source ?? "local environment"}
-      </p>
-      <button
-        type="button"
-        onClick={() =>
-          void api("/v1/settings/migrate-credentials", {})
-            .then(onRefresh)
-            .catch((issue: unknown) =>
-              onError(message(issue, "Migration failed.")),
-            )
-        }
-      >
-        Move .env keys to Windows Credential Manager
-      </button>
-      <ProviderKeys health={health} onSaved={onRefresh} />
+      {localOnly ? (
+        <p className="hint">
+          Voice and model chat are unavailable in this local-only runtime.
+        </p>
+      ) : (
+        <VoiceControls voice={voice} settings />
+      )}
+      {!localOnly && (
+        <>
+          <h3>Providers</h3>
+          <ModelHub
+            activeModel={health?.active_model}
+            active={
+              health?.active_task != null ||
+              !["IDLE", "ERROR", "CANCELLED"].includes(voice.status.state)
+            }
+            localOnly={localOnly}
+            onError={onError}
+            onChanged={() => {
+              onModelChange?.();
+              onRefresh();
+            }}
+          />
+          <p>
+            Credential storage:{" "}
+            {health?.credential_source ?? "local environment"}
+          </p>
+          <button
+            type="button"
+            onClick={() =>
+              void api("/v1/settings/migrate-credentials", {})
+                .then(onRefresh)
+                .catch((issue: unknown) =>
+                  onError(message(issue, "Migration failed.")),
+                )
+            }
+          >
+            Move .env keys to Windows Credential Manager
+          </button>
+          <ProviderKeys health={health} onSaved={onRefresh} />
+        </>
+      )}
       <p className="hint">
         Ctrl+Shift+Space opens chat. Ctrl+Shift+Escape stops the active task.
       </p>

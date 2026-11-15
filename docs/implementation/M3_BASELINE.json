@@ -1,0 +1,6 @@
+{
+  "m2_checked_sources": 36,
+  "m2_mismatches_before_edits": [],
+  "note": "36 M2 source hashes matched before this slice. The bridge/app snapshot was captured just after the initial normalization edit; use M2 hashes for their exact prior versions.",
+  "git_reset_or_commit": false
+}

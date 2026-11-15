@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0",
+  "sdk_runtime_manifest": "mcp-standard-runtime.json",
+  "script_sha256": "7ccd6da1beaadfb193b7896273ac99f6a5e4ae47cd59c3eafd2ce74ae7f90acd",
+  "enabled_by_default": false,
+  "scope": "One reviewed MCP execute tool; task-approved broker reads only"
+}

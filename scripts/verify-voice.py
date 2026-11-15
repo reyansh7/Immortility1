@@ -35,8 +35,8 @@ async def main(play: bool) -> None:
         cleanup.callback(store.db.close)
         voice = VoiceService(settings, store, forbidden, forbidden)
         voice.models = models
-        fixture = ROOT / "tests/fixtures/voice-english.wav"
-        fixture.parent.mkdir(parents=True, exist_ok=True)
+        # Synthetic QA must not overwrite an existing user/repository recording.
+        fixture = Path(directory) / "voice-english.wav"
         started = time.monotonic()
         await voice.worker("render", text=PHRASE, voice="ljspeech", path=str(fixture))
         report["fixture_render_ms"] = round((time.monotonic() - started) * 1000, 1)

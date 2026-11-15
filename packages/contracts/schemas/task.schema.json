@@ -17,6 +17,10 @@
     "budget"
   ],
   "properties": {
+    "recall_excluded": {
+      "type": "boolean",
+      "default": false
+    },
     "schema_version": {
       "type": "string",
       "const": "1.0"
@@ -117,7 +121,12 @@
         },
         "max_tokens": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 0
+        },
+        "max_calls": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
         }
       }
     },

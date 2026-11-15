@@ -1,0 +1,63 @@
+{
+  "captured_at": "2026-11-15T07:29:26.689158+00:00",
+  "prior_checkpoint_files": 28,
+  "prior_checkpoint_mismatches": [],
+  "hashes": {
+    "apps/desktop/src-tauri/src/main.rs": "d8c2dc6dc10f40179a2219d5af9daf8273727e03afe540e81dbe13d5ff41ae7c",
+    "apps/desktop/src/ModelHub.test.tsx": "bcd17558de5ed5e440f4efe0f0925baf2d5b654ca44ed11955a6500a3ac95c77",
+    "apps/desktop/src/ModelHub.tsx": "3f6407aae7078d173088a915b38bb3c8bee4ee23b2ec259b4b53ec6a7458b32b",
+    "apps/desktop/src/SettingsPanel.tsx": "5273e79aebda87ad7acaced7ecf39a9b5d5ce95b8ad3068a48ecb5aad6d6f1d1",
+    "apps/desktop/src/contracts.generated.ts": "366619856001e19cb3fa0d86fb2fdb6e9f7e8bb0e42efc7fce8290039b165bb5",
+    "apps/desktop/src/main.tsx": "63256799e1bc5e588ec40310b5310417820367e223ee7d16a96410cc7788843a",
+    "apps/desktop/src/transport.test.ts": "6cc448e1dac11c52ae4cc8b149e9c4ad565c7e74086a783b8ece103d3d6c31f1",
+    "apps/desktop/src/transport.ts": "51b799fa787247ca890001113cc1da971013cb07093af254f7dbac87eaadef95",
+    "config/mcp-standard-runtime.json": "04e0ebe7798b7265bc23f4b0d7025537c65b293beaf2364411c3443628e03081",
+    "integrations/mcp-standard/arithmetic.py": "73c711783f9b23886014f459b44405e977a4935f5a4ad0cd240b042cbabaaf8f",
+    "integrations/mcp-standard/benchmark.py": "1d729b23440ed86f709f5864188519f0ce37e1f8acb9f1ed8a037ecf9bff6a33",
+    "integrations/mcp-standard/sdk_client.py": "ef33f087da3277f4b0c626f5bc0e217367e9c06adb3f793b76e6318a41fe355a",
+    "packages/contracts/schemas/execution-trace.schema.json": "94446d3f847d571694f5bf2998ad3f15ddf626d95f41234c22a0411a1add7daf",
+    "packages/contracts/schemas/model-selection.schema.json": "0cae17faad989d00377355bfde52b386af466d27ffd405ff0ab41b21c80ec533",
+    "scripts/benchmark-model-router.py": "1066310890c59578f234abf6393aa6b5d03a4adc714baf6c5e923372fdb0c2a7",
+    "scripts/generate-contracts.py": "9cc241dbea1b970bc5b301e84201459ad0b42080d3a3f01886ce527613f8478c",
+    "scripts/smoke-research-report.py": "ec97af87c26dad09d8749dbf8d35c417a624c6385f67950199d15d62820caebd",
+    "services/broker/src/immortility_broker/agent_bridge.py": "d71b731bc0a6b6194688bc82a1bb4bb02572a776af84eab1d86e89e031756cf5",
+    "services/broker/src/immortility_broker/app.py": "6633b8050b4b356caa7925261b545fc7a58ecd056542418e46136ef11f553f9f",
+    "services/broker/src/immortility_broker/ledger.py": "9143eafe876b2729b889aecdcd97dbda8f1fee9603c62eafef5e8a78a0d233d6",
+    "services/broker/src/immortility_broker/process_owner.py": "ed8bc78bb25a84a37b23db46d3522aa4b242a2fe539601b6dbc963e21640740e",
+    "services/broker/src/immortility_broker/provider_stream.py": "6bfc0aa67539e68959f754c8c458f197a30a32c57f9b16938e9dc2c1d0bf9bb5",
+    "services/broker/src/immortility_broker/providers.py": "4f05771fbe22c405ac543000f2ff9e864060515c235b4c9b37299a46ced2bc60",
+    "services/broker/src/immortility_broker/standard_mcp.py": "837107470d2c1aa766c5f69b06f19c798eb036d7848a89f52c2f08481bdeb879",
+    "services/broker/src/immortility_broker/store.py": "8ded43ee7e6e6ea01b5c2ac26fcd119887c7801f06be44983e75ca11f38a8493",
+    "services/broker/src/immortility_broker/traces.py": "5190876ddac4e0488fcf6ae059a98c30d1cfce56ea7d145546650bdeac6db4dc",
+    "services/broker/tests/test_broker.py": "cdbddaac42ffb80f1379b8c1158df56be9781fbfdd0c12ce04db86125b0d11b9",
+    "services/broker/tests/test_firewall.py": "4185de65198a0846ffc3c7be91ff92284b8439d1abacd4f370b45305738124d7",
+    "services/broker/tests/test_inference_grants.py": "5b829c35d5bffe260a34fad58147fd93ad80e57fff8167e22b8abfdea489be8d",
+    "services/broker/tests/test_m0_repairs.py": "c0925e104a26d7b2f845f7c8e2047297b97c264ccc95cb6e3d116ece108d8427",
+    "services/broker/tests/test_provider_stream.py": "b2d346bb4ae46ed266fe1f209a68ff5c17d01868d983b390a7dbcb091ee34fc3",
+    "services/broker/tests/test_providers.py": "5a52fe5826246d4d4e4e705088f2ca1157e5516e572ce44dd7b807990e14c229",
+    "services/broker/tests/test_reports.py": "49b61853fab07d400775419d81014cf777b3f5b720ffbb92572303aad887a81d",
+    "services/broker/tests/test_tool_streams.py": "4686355dab658a6000628b85495cf7ea4445190d0dbde8b16306af3124ae8966",
+    "services/broker/tests/test_usage_ledger.py": "e92f96b9679663236665caf6d14c9747e0f4e59c32baa01b0cd46aebadeadf70",
+    "services/broker/tests/test_workflows.py": "7803179557303aa833479fd366d090b9dcd6222e1dc6fb63270312d955bd4b89"
+  },
+  "pre_edit_reproduction": {
+    "tests": 4,
+    "passed": 4,
+    "seconds": 27.03,
+    "source_changes_before_run": false,
+    "note": "Intermittent prior failures not reproduced in this run; not a reliability claim."
+  },
+  "plan": [
+    "Measure fixed SDK/import/handshake/invoke/cleanup and preserve original limits",
+    "Implement only evidence-backed repairs; test retry/expiry/cancellation independently",
+    "Measure synthetic report phases and resources serially",
+    "Verify native Model Hub in scratch scope",
+    "Complete fail-closed provider eligibility, stream/accounting and regression gates"
+  ],
+  "risks": [
+    "Host scheduling and cold imports can exhaust the original deadline",
+    "Shared dirty checkout and active user data must remain untouched",
+    "Price/entitlement cannot be inferred from stored keys",
+    "No live-provider authorization remains"
+  ]
+}

@@ -1,0 +1,1250 @@
+{
+  "research_date": "2026-11-14",
+  "project": "Immortility",
+  "disclaimer": "Discovery catalog, not a full code/security audit",
+  "count": 138,
+  "repositories": [
+    {
+      "category": "Agent core and Hermes",
+      "priority": "Core",
+      "repository": "NousResearch/hermes-agent",
+      "url": "https://github.com/NousResearch/hermes-agent",
+      "role": "Primary assistant and skills ecosystem",
+      "adoption_note": "Keep one reasoning and tool-execution authority; audit installed Hermes features before new dependencies",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Agent core and Hermes",
+      "priority": "Core",
+      "repository": "NousResearch/hermes-official-plugins",
+      "url": "https://github.com/NousResearch/hermes-official-plugins",
+      "role": "Official reviewed Hermes extensions",
+      "adoption_note": "Install only useful plugins; check profile/version compatibility and avoid cloning the whole catalog",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Agent core and Hermes",
+      "priority": "Evaluate",
+      "repository": "OpenMausBot/OpenMausBot",
+      "url": "https://github.com/OpenMausBot/OpenMausBot",
+      "role": "Specialist crews and integrations",
+      "adoption_note": "No documented native Hermes driver or general Windows host control guarantee; prove interop behind broker first",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Agent core and Hermes",
+      "priority": "Evaluate",
+      "repository": "JPeetz/Hermes-Studio",
+      "url": "https://github.com/JPeetz/Hermes-Studio",
+      "role": "Hermes multi-agent admin studio",
+      "adoption_note": "Reference for dashboard UX or temporary admin surface, not second permanent control center",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Agent core and Hermes",
+      "priority": "Evaluate",
+      "repository": "langchain-ai/langgraph",
+      "url": "https://github.com/langchain-ai/langgraph",
+      "role": "Checkpointed graph workflows",
+      "adoption_note": "Only if native Hermes workflows cannot meet durable task-state needs; avoid a second agent brain",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Agent core and Hermes",
+      "priority": "Optional",
+      "repository": "pydantic/pydantic-ai",
+      "url": "https://github.com/pydantic/pydantic-ai",
+      "role": "Typed agent workflows",
+      "adoption_note": "Use selected structured worker flows, not universal orchestration replacement",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Agent core and Hermes",
+      "priority": "Optional",
+      "repository": "huggingface/smolagents",
+      "url": "https://github.com/huggingface/smolagents",
+      "role": "Small agent examples and tool patterns",
+      "adoption_note": "Research reference rather than production runtime",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Agent core and Hermes",
+      "priority": "Defer",
+      "repository": "crewAIInc/crewAI",
+      "url": "https://github.com/crewAIInc/crewAI",
+      "role": "Multi-agent crew framework",
+      "adoption_note": "Overlaps Hermes and OpenMausBot; significant extra control surface",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Agent core and Hermes",
+      "priority": "Optional",
+      "repository": "openinterpreter/openinterpreter",
+      "url": "https://github.com/openinterpreter/openinterpreter",
+      "role": "Coding-agent harness for low-cost models",
+      "adoption_note": "New project direction is coding-agent-focused; evaluate only as a specialist executor rather than core",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Agent core and Hermes",
+      "priority": "Defer",
+      "repository": "microsoft/agent-framework",
+      "url": "https://github.com/microsoft/agent-framework",
+      "role": "Enterprise multi-agent coordination",
+      "adoption_note": "Likely unnecessary for local desktop assistant; compare only after basic architecture is stable",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Evaluate",
+      "repository": "garrytan/gbrain",
+      "url": "https://github.com/garrytan/gbrain",
+      "role": "Facts, provenance and correctable long-term memory",
+      "adoption_note": "Benchmark versus Hermes memory; local PGLite writer concurrency requires care",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Evaluate",
+      "repository": "veltri-23/hermes-gbrain-memory",
+      "url": "https://github.com/veltri-23/hermes-gbrain-memory",
+      "role": "GBrain Hermes adapter",
+      "adoption_note": "Check native memory-provider support/version before promising drop-in integration",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Optional",
+      "repository": "BrightCollage/hermes-gbrain-memory-plugin",
+      "url": "https://github.com/BrightCollage/hermes-gbrain-memory-plugin",
+      "role": "Alternative GBrain MCP bridge",
+      "adoption_note": "Compare with preceding adapter; do not install both",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Evaluate",
+      "repository": "asg017/sqlite-vec",
+      "url": "https://github.com/asg017/sqlite-vec",
+      "role": "SQLite-backed vector similarity search",
+      "adoption_note": "Excellent light single-process search path; pre-v1 API can change",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Evaluate",
+      "repository": "UKPLab/sentence-transformers",
+      "url": "https://github.com/UKPLab/sentence-transformers",
+      "role": "Local text embeddings",
+      "adoption_note": "Run small CPU encoder; avoid cloud embed calls and unnecessarily large models",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Evaluate",
+      "repository": "qdrant/fastembed",
+      "url": "https://github.com/qdrant/fastembed",
+      "role": "Lightweight embeddings and reranking",
+      "adoption_note": "Check on-device size and batch throughput",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Optional",
+      "repository": "mem0ai/mem0",
+      "url": "https://github.com/mem0ai/mem0",
+      "role": "Agentic semantic long-term memory",
+      "adoption_note": "Alternative to GBrain or Hermes native memory, not additional default memory owner",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Optional",
+      "repository": "getzep/graphiti",
+      "url": "https://github.com/getzep/graphiti",
+      "role": "Temporal knowledge graph",
+      "adoption_note": "Neo4j/FalkorDB and embeddings add infrastructure; use only if real temporal-graph queries justify it",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Defer",
+      "repository": "qdrant/qdrant",
+      "url": "https://github.com/qdrant/qdrant",
+      "role": "Dedicated vector database",
+      "adoption_note": "Usually unnecessary for a single-user Windows assistant with modest memory corpus",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Defer",
+      "repository": "chroma-core/chroma",
+      "url": "https://github.com/chroma-core/chroma",
+      "role": "Embedding database",
+      "adoption_note": "Choose only if sqlite-vec is insufficient; avoid two indexes for same facts",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Optional",
+      "repository": "screenpipe/screenpipe",
+      "url": "https://github.com/screenpipe/screenpipe",
+      "role": "Local screen/audio activity recall",
+      "adoption_note": "Very sensitive continuous capture, source-available license, plan limits and large storage; opt-in only",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Memory and retrieval",
+      "priority": "Defer",
+      "repository": "letta-ai/letta-code",
+      "url": "https://github.com/letta-ai/letta-code",
+      "role": "Memory-centric coding agent",
+      "adoption_note": "Full alternate agent runtime, not a drop-in Hermes memory store",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Core",
+      "repository": "microsoft/playwright",
+      "url": "https://github.com/microsoft/playwright",
+      "role": "Reliable browser interaction and tests",
+      "adoption_note": "Use for complex websites, auth workflows, and fallback when lightweight engines fail",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Evaluate",
+      "repository": "microsoft/playwright-mcp",
+      "url": "https://github.com/microsoft/playwright-mcp",
+      "role": "MCP exposure for Playwright browser",
+      "adoption_note": "Use one browser controller per task through broker",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Evaluate",
+      "repository": "h4ckf0r0day/obscura",
+      "url": "https://github.com/h4ckf0r0day/obscura",
+      "role": "Rust browser with MCP/CDP",
+      "adoption_note": "Benchmark speed/compatibility; own documentation notes incomplete Chromium parity",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Evaluate",
+      "repository": "SGavrl/hermes-plugin-obscura",
+      "url": "https://github.com/SGavrl/hermes-plugin-obscura",
+      "role": "Hermes Obscura integration",
+      "adoption_note": "Test with target Hermes version; feature flag and fallback to Playwright",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Evaluate",
+      "repository": "unclecode/crawl4ai",
+      "url": "https://github.com/unclecode/crawl4ai",
+      "role": "Web pages to structured markdown",
+      "adoption_note": "Extract only relevant page sections before cloud reasoning",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Evaluate",
+      "repository": "adbar/trafilatura",
+      "url": "https://github.com/adbar/trafilatura",
+      "role": "Local clean text extraction",
+      "adoption_note": "Very cheap preprocessing for news, articles and documentation",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Evaluate",
+      "repository": "Panniantong/Agent-Reach",
+      "url": "https://github.com/Panniantong/Agent-Reach",
+      "role": "Social, video and platform discovery",
+      "adoption_note": "Platform cookies, login and restrictions require scoped access",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Optional",
+      "repository": "thanhtantran/agent-reach-hermes",
+      "url": "https://github.com/thanhtantran/agent-reach-hermes",
+      "role": "Hermes skill wrapper for Agent Reach",
+      "adoption_note": "Use only if native tool integration is insufficient",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Optional",
+      "repository": "browser-use/browser-use",
+      "url": "https://github.com/browser-use/browser-use",
+      "role": "LLM-driven browser automation",
+      "adoption_note": "Useful for visual web tasks but can burn tokens; use deterministic browser actions first",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Optional",
+      "repository": "mendableai/firecrawl",
+      "url": "https://github.com/mendableai/firecrawl",
+      "role": "Web crawling and extraction",
+      "adoption_note": "Self-host dependencies and optional services, deploy only if Crawl4AI insufficient",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Optional",
+      "repository": "yt-dlp/yt-dlp",
+      "url": "https://github.com/yt-dlp/yt-dlp",
+      "role": "Extract public video metadata/media",
+      "adoption_note": "Observe copyrights, site policies and authentication boundaries",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Web research and browsing",
+      "priority": "Optional",
+      "repository": "scrapy/scrapy",
+      "url": "https://github.com/scrapy/scrapy",
+      "role": "Batch web crawls",
+      "adoption_note": "Only for dedicated larger crawling jobs",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Windows computer and OS",
+      "priority": "Core",
+      "repository": "trycua/cua",
+      "url": "https://github.com/trycua/cua",
+      "role": "Windows UI control, screenshots, accessibility and MCP",
+      "adoption_note": "Run in interactive Windows session; broker approval for every sensitive action",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Windows computer and OS",
+      "priority": "Evaluate",
+      "repository": "pywinauto/pywinauto",
+      "url": "https://github.com/pywinauto/pywinauto",
+      "role": "Deterministic Windows Win32/UIA automation",
+      "adoption_note": "Prefer accessible controls over coordinate clicking",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Windows computer and OS",
+      "priority": "Evaluate",
+      "repository": "microsoft/OmniParser",
+      "url": "https://github.com/microsoft/OmniParser",
+      "role": "Screenshot UI perception",
+      "adoption_note": "Check model-license terms; only necessary for interfaces lacking accessibility APIs",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Windows computer and OS",
+      "priority": "Optional",
+      "repository": "microsoft/UFO",
+      "url": "https://github.com/microsoft/UFO",
+      "role": "Windows UI agent research",
+      "adoption_note": "Reference capabilities; may duplicate Cua and require extra model calls",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Windows computer and OS",
+      "priority": "Optional",
+      "repository": "asweigart/pyautogui",
+      "url": "https://github.com/asweigart/pyautogui",
+      "role": "Mouse/keyboard automation fallback",
+      "adoption_note": "Coordinate-based actions fragile; always verify target window and user approval",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Windows computer and OS",
+      "priority": "Optional",
+      "repository": "AutoHotkey/AutoHotkey",
+      "url": "https://github.com/AutoHotkey/AutoHotkey",
+      "role": "Windows native keyboard macros",
+      "adoption_note": "Simple deterministic triggers better than model calls",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Windows computer and OS",
+      "priority": "Optional",
+      "repository": "tauri-apps/global-hotkey",
+      "url": "https://github.com/tauri-apps/global-hotkey",
+      "role": "Cross-platform global keyboard shortcut Rust crate",
+      "adoption_note": "Tauri official plugin is normally easier; use native crate only if necessary",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Windows computer and OS",
+      "priority": "Defer",
+      "repository": "bytedance/UI-TARS-desktop",
+      "url": "https://github.com/bytedance/UI-TARS-desktop",
+      "role": "Vision-driven GUI agent",
+      "adoption_note": "Archived by owner Nov 9 2026; benchmark research only, not new long-term dependency",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Windows computer and OS",
+      "priority": "Optional",
+      "repository": "microsoft/PowerToys",
+      "url": "https://github.com/microsoft/PowerToys",
+      "role": "OS tooling, shortcuts and UX reference",
+      "adoption_note": "Reuse behavior not complete application",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Windows computer and OS",
+      "priority": "Optional",
+      "repository": "giampaolo/psutil",
+      "url": "https://github.com/giampaolo/psutil",
+      "role": "Local CPU/GPU process system observations",
+      "adoption_note": "Expose narrow read-only telemetry to dashboard and agent",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Core",
+      "repository": "cjpais/handy",
+      "url": "https://github.com/cjpais/handy",
+      "role": "Local speech-to-text dictation",
+      "adoption_note": "Reuse as Windows STT UX or inspect integration; avoid duplicate always-on capture",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Evaluate",
+      "repository": "k2-fsa/sherpa-onnx",
+      "url": "https://github.com/k2-fsa/sherpa-onnx",
+      "role": "Offline STT/TTS/VAD/keyword detection",
+      "adoption_note": "Promising single speech stack; benchmark accuracy and the chosen voice",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Evaluate",
+      "repository": "snakers4/silero-vad",
+      "url": "https://github.com/snakers4/silero-vad",
+      "role": "Voice activity detection",
+      "adoption_note": "Stop silence from triggering repeated cloud calls",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Evaluate",
+      "repository": "ggml-org/whisper.cpp",
+      "url": "https://github.com/ggml-org/whisper.cpp",
+      "role": "Local Whisper ASR",
+      "adoption_note": "CPU-friendly baseline, GPU options depend on build",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Evaluate",
+      "repository": "SYSTRAN/faster-whisper",
+      "url": "https://github.com/SYSTRAN/faster-whisper",
+      "role": "Fast Python ASR",
+      "adoption_note": "Windows CUDA/cuDNN version setup must match",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Evaluate",
+      "repository": "hexgrad/kokoro",
+      "url": "https://github.com/hexgrad/kokoro",
+      "role": "Local TTS",
+      "adoption_note": "Benchmark metallic post-processing separately; verify voice/model licensing",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Optional",
+      "repository": "dscripka/openWakeWord",
+      "url": "https://github.com/dscripka/openWakeWord",
+      "role": "Wake-word listening",
+      "adoption_note": "Bundled model license may differ from source; avoid constant microphone if unneeded",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Optional",
+      "repository": "myshell-ai/OpenVoice",
+      "url": "https://github.com/myshell-ai/OpenVoice",
+      "role": "Timbre conversion and voice transfer",
+      "adoption_note": "Potential cinematic character voices with consent; test speed/quality",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Optional",
+      "repository": "OHF-Voice/piper1-gpl",
+      "url": "https://github.com/OHF-Voice/piper1-gpl",
+      "role": "Lightweight local TTS",
+      "adoption_note": "Current project GPL-3.0 and voice model licenses vary; review distribution obligations",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Optional",
+      "repository": "Pipecat-AI/pipecat",
+      "url": "https://github.com/Pipecat-AI/pipecat",
+      "role": "Real-time conversational voice pipelines",
+      "adoption_note": "Heavy if only simple push-to-talk speech is needed",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Optional",
+      "repository": "livekit/agents",
+      "url": "https://github.com/livekit/agents",
+      "role": "Streaming and interruptible voice sessions",
+      "adoption_note": "Best for distributed/networked real-time voice, not needed for purely local desktop",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Optional",
+      "repository": "FFmpeg/FFmpeg",
+      "url": "https://github.com/FFmpeg/FFmpeg",
+      "role": "Audio/video encoding and DSP",
+      "adoption_note": "Use for metallic effects, clipping, pitch and audio output preprocessing",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Speech, voice and sound",
+      "priority": "Defer",
+      "repository": "resemble-ai/chatterbox",
+      "url": "https://github.com/resemble-ai/chatterbox",
+      "role": "Expressive TTS research",
+      "adoption_note": "Upstream states it was retired August 2026; archive only",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Models, routing and inference",
+      "priority": "Core",
+      "repository": "ollama/ollama",
+      "url": "https://github.com/ollama/ollama",
+      "role": "Easy local model runtime",
+      "adoption_note": "Cheap local classification, summarization and private tasks when quality suffices",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Models, routing and inference",
+      "priority": "Evaluate",
+      "repository": "ggml-org/llama.cpp",
+      "url": "https://github.com/ggml-org/llama.cpp",
+      "role": "Efficient GGUF inference engine",
+      "adoption_note": "Alternative to Ollama, benchmark before deploying second server",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Models, routing and inference",
+      "priority": "Evaluate",
+      "repository": "Portkey-AI/gateway",
+      "url": "https://github.com/Portkey-AI/gateway",
+      "role": "Multi-provider proxy/routing and guardrails",
+      "adoption_note": "Use only if Hermes native providers/routing do not suffice; separate hosted features",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Models, routing and inference",
+      "priority": "Evaluate",
+      "repository": "microsoft/onnxruntime",
+      "url": "https://github.com/microsoft/onnxruntime",
+      "role": "Optimized local inference runtime",
+      "adoption_note": "Useful for speech, embedding and compact classifiers",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Models, routing and inference",
+      "priority": "Optional",
+      "repository": "BerriAI/litellm",
+      "url": "https://github.com/BerriAI/litellm",
+      "role": "Broad provider gateway",
+      "adoption_note": "Security-sensitive credential store; review advisories and package provenance, don't blindly pip install",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Models, routing and inference",
+      "priority": "Optional",
+      "repository": "vllm-project/vllm",
+      "url": "https://github.com/vllm-project/vllm",
+      "role": "GPU server inference",
+      "adoption_note": "Great for larger Linux GPU servers, poor first fit on Windows laptop",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Models, routing and inference",
+      "priority": "Optional",
+      "repository": "sgl-project/sglang",
+      "url": "https://github.com/sgl-project/sglang",
+      "role": "High-throughput serving",
+      "adoption_note": "Same server-oriented caution as vLLM",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Models, routing and inference",
+      "priority": "Defer",
+      "repository": "nomic-ai/gpt4all",
+      "url": "https://github.com/nomic-ai/gpt4all",
+      "role": "Local chat app",
+      "adoption_note": "Redundant as Immortility already has its own UI and inference integration",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Core",
+      "repository": "oraios/serena",
+      "url": "https://github.com/oraios/serena",
+      "role": "Language-server-powered symbolic code navigation and edits",
+      "adoption_note": "Reduce token-heavy whole-file dumps, include only matching symbols",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Evaluate",
+      "repository": "yamadashy/repomix",
+      "url": "https://github.com/yamadashy/repomix",
+      "role": "Pack selected repo context",
+      "adoption_note": "Use scope filters and token reports; full repo prompts are expensive",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Evaluate",
+      "repository": "coderamp-labs/gitingest",
+      "url": "https://github.com/coderamp-labs/gitingest",
+      "role": "Convert GitHub repos to text summaries",
+      "adoption_note": "Useful first-pass research input; redact secrets and trim output",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Evaluate",
+      "repository": "Aider-AI/aider",
+      "url": "https://github.com/Aider-AI/aider",
+      "role": "Git-aware coding agent",
+      "adoption_note": "Consider as isolated specialist worker only, not simultaneous core brain",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Evaluate",
+      "repository": "anomalyco/opencode",
+      "url": "https://github.com/anomalyco/opencode",
+      "role": "Open-source coding agent/CLI",
+      "adoption_note": "Evaluate as specialized executor with broker and spend limits",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Optional",
+      "repository": "OpenHands/OpenHands",
+      "url": "https://github.com/OpenHands/OpenHands",
+      "role": "Software engineering agent environment",
+      "adoption_note": "Heavy runtime, commonly uses sandboxes/containers; only if benchmark wins",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Optional",
+      "repository": "cline/cline",
+      "url": "https://github.com/cline/cline",
+      "role": "VS Code coding assistant",
+      "adoption_note": "Useful user-facing coding reference, redundant to Hermes coding harness",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Optional",
+      "repository": "block/goose",
+      "url": "https://github.com/block/goose",
+      "role": "Local extensible coding assistant",
+      "adoption_note": "Agent-runtime alternative for architecture comparisons",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Optional",
+      "repository": "SWE-agent/SWE-agent",
+      "url": "https://github.com/SWE-agent/SWE-agent",
+      "role": "Issue-to-patch agent research",
+      "adoption_note": "May improve benchmark strategies, not necessary as live component",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Optional",
+      "repository": "microsoft/markitdown",
+      "url": "https://github.com/microsoft/markitdown",
+      "role": "Convert Office, PDF, HTML and more to text",
+      "adoption_note": "Cheap deterministic document preparation; security-check input file types",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Optional",
+      "repository": "pymupdf/PyMuPDF",
+      "url": "https://github.com/pymupdf/PyMuPDF",
+      "role": "Fast local PDF text and rendering",
+      "adoption_note": "Add only if Hermes lacks suitable extraction path",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Coding and repository intelligence",
+      "priority": "Optional",
+      "repository": "ocrmypdf/OCRmyPDF",
+      "url": "https://github.com/ocrmypdf/OCRmyPDF",
+      "role": "Searchable scanned PDFs",
+      "adoption_note": "Enable only when scanned content requires OCR",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "MCP, plugins and integrations",
+      "priority": "Core",
+      "repository": "modelcontextprotocol/python-sdk",
+      "url": "https://github.com/modelcontextprotocol/python-sdk",
+      "role": "Build typed Python MCP adapters",
+      "adoption_note": "Small, permission-aware wrappers for special OS and API tools",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "MCP, plugins and integrations",
+      "priority": "Evaluate",
+      "repository": "modelcontextprotocol/servers",
+      "url": "https://github.com/modelcontextprotocol/servers",
+      "role": "Official MCP examples and integrations",
+      "adoption_note": "Source of patterns, not a reason to install all servers",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "MCP, plugins and integrations",
+      "priority": "Evaluate",
+      "repository": "jlowin/fastmcp",
+      "url": "https://github.com/jlowin/fastmcp",
+      "role": "Rapid MCP service implementation",
+      "adoption_note": "Use only if SDK ergonomics justify another dependency",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "MCP, plugins and integrations",
+      "priority": "Core",
+      "repository": "modelcontextprotocol/inspector",
+      "url": "https://github.com/modelcontextprotocol/inspector",
+      "role": "Test MCP tools, schemas, resources and OAuth",
+      "adoption_note": "Use its CLI and TUI modes in CI; audit remote endpoints before access",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "MCP, plugins and integrations",
+      "priority": "Optional",
+      "repository": "activepieces/activepieces",
+      "url": "https://github.com/activepieces/activepieces",
+      "role": "Self-hostable integration/workflow catalog",
+      "adoption_note": "MIT community core; enterprise features commercial; likely heavier than needed",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "MCP, plugins and integrations",
+      "priority": "Optional",
+      "repository": "n8n-io/n8n",
+      "url": "https://github.com/n8n-io/n8n",
+      "role": "Workflow automation builder",
+      "adoption_note": "Source-available license restrictions; separate always-on stack",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "MCP, plugins and integrations",
+      "priority": "Optional",
+      "repository": "HomeAssistant/core",
+      "url": "https://github.com/HomeAssistant/core",
+      "role": "Smart-home platform integration",
+      "adoption_note": "Use Hermes official plugin if already have Home Assistant",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "MCP, plugins and integrations",
+      "priority": "Optional",
+      "repository": "punkpeye/awesome-mcp-servers",
+      "url": "https://github.com/punkpeye/awesome-mcp-servers",
+      "role": "Curated MCP server discovery",
+      "adoption_note": "Index only; vet every third-party server before granting credentials",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Core",
+      "repository": "tauri-apps/tauri",
+      "url": "https://github.com/tauri-apps/tauri",
+      "role": "Lightweight Rust desktop shell",
+      "adoption_note": "Keep the existing Windows UI rather than rewriting into Electron",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Core",
+      "repository": "pmndrs/react-three-fiber",
+      "url": "https://github.com/pmndrs/react-three-fiber",
+      "role": "React Three.js canvas",
+      "adoption_note": "Use for immersive holographic orb/avatar visualization",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Core",
+      "repository": "pmndrs/drei",
+      "url": "https://github.com/pmndrs/drei",
+      "role": "3D controls, environment, helpers",
+      "adoption_note": "Prefer mature helpers instead of custom shader/scene glue",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Core",
+      "repository": "pmndrs/zustand",
+      "url": "https://github.com/pmndrs/zustand",
+      "role": "Lightweight UI state management",
+      "adoption_note": "Centralize live agent status with minimal React rerendering",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Evaluate",
+      "repository": "xyflow/xyflow",
+      "url": "https://github.com/xyflow/xyflow",
+      "role": "Editable node graph for agents/workflows",
+      "adoption_note": "Best foundation for multi-agent visual orchestration view",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Evaluate",
+      "repository": "shadcn-ui/ui",
+      "url": "https://github.com/shadcn-ui/ui",
+      "role": "Accessible high-quality UI primitives",
+      "adoption_note": "Use for status panels, tool approval dialogs and settings",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Evaluate",
+      "repository": "pmndrs/react-postprocessing",
+      "url": "https://github.com/pmndrs/react-postprocessing",
+      "role": "3D bloom, outlines, shader effects",
+      "adoption_note": "Use carefully; expensive post-processing should adapt to frame budget",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Evaluate",
+      "repository": "motiondivision/motion",
+      "url": "https://github.com/motiondivision/motion",
+      "role": "Interface microanimations",
+      "adoption_note": "Use tasteful deterministic UI transitions",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Evaluate",
+      "repository": "pixiv/three-vrm",
+      "url": "https://github.com/pixiv/three-vrm",
+      "role": "Anime/VRM avatar loading and animation",
+      "adoption_note": "Only if character asset uses VRM rather than GLB rig",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Optional",
+      "repository": "pmndrs/react-spring",
+      "url": "https://github.com/pmndrs/react-spring",
+      "role": "Physics-based UI/3D animation",
+      "adoption_note": "Great animation option; avoid stacking competing animation libraries",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Evaluate",
+      "repository": "assistant-ui/assistant-ui",
+      "url": "https://github.com/assistant-ui/assistant-ui",
+      "role": "AI chat primitives, streaming, retries and tool-approval UI",
+      "adoption_note": "Use inside existing React Tauri frontend via a custom backend runtime, not a new Next app",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Evaluate",
+      "repository": "tauri-apps/plugins-workspace",
+      "url": "https://github.com/tauri-apps/plugins-workspace",
+      "role": "Official Tauri system integrations including shortcuts and notifications",
+      "adoption_note": "Use capabilities/permissions to restrict plugins; inspect exact version compatibility",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Optional",
+      "repository": "pmndrs/leva",
+      "url": "https://github.com/pmndrs/leva",
+      "role": "3D controls/debug panel",
+      "adoption_note": "Dev mode only; never ship raw dev toggles to end users",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Optional",
+      "repository": "radix-ui/primitives",
+      "url": "https://github.com/radix-ui/primitives",
+      "role": "Accessible control primitives",
+      "adoption_note": "Potential base for approval and command palettes",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Optional",
+      "repository": "lucide-icons/lucide",
+      "url": "https://github.com/lucide-icons/lucide",
+      "role": "Icon system",
+      "adoption_note": "Tiny visual affordances with consistent styling",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Optional",
+      "repository": "recharts/recharts",
+      "url": "https://github.com/recharts/recharts",
+      "role": "Cost/usage dashboard charts",
+      "adoption_note": "Mount charts only when their tab is visible",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Optional",
+      "repository": "tanstack/query",
+      "url": "https://github.com/tanstack/query",
+      "role": "React query and caching",
+      "adoption_note": "Keep session data cached, avoid polling too often",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Optional",
+      "repository": "tanstack/virtual",
+      "url": "https://github.com/tanstack/virtual",
+      "role": "Virtualized conversation and log streams",
+      "adoption_note": "Render long agent traces without excessive DOM nodes",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "3D UI and frontend",
+      "priority": "Optional",
+      "repository": "mermaid-js/mermaid",
+      "url": "https://github.com/mermaid-js/mermaid",
+      "role": "Workflow and architecture diagrams",
+      "adoption_note": "Read-only flow view or documentation export",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "nexu-io/open-design",
+      "url": "https://github.com/nexu-io/open-design",
+      "role": "Local-first multi-agent design workspace",
+      "adoption_note": "Works with Hermes CLI and BYOK; separate creative workflow only",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "Anil-matcha/Open-Generative-AI",
+      "url": "https://github.com/Anil-matcha/Open-Generative-AI",
+      "role": "Local and keyed cloud media generation UI",
+      "adoption_note": "MuAPI credit requirement for cloud models; local GPU weights can be multi-GB",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "Comfy-Org/ComfyUI",
+      "url": "https://github.com/Comfy-Org/ComfyUI",
+      "role": "Local image and video workflow graphs",
+      "adoption_note": "Start only when requested, GPU load conflicts with local LLM",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "nexu-io/html-video",
+      "url": "https://github.com/nexu-io/html-video",
+      "role": "Local HTML-to-video rendering driven by agents",
+      "adoption_note": "Promising for Immortility promo/exports; optional soundtrack API costs",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "nexu-io/motion-anything",
+      "url": "https://github.com/nexu-io/motion-anything",
+      "role": "Promptable motion recipes and export",
+      "adoption_note": "Explore if building animated holographic assets",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "blender/blender",
+      "url": "https://github.com/blender/blender",
+      "role": "3D asset creation",
+      "adoption_note": "Invoke in supervised creative tasks via official Hermes Blender plugin",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "google-ai-edge/mediapipe",
+      "url": "https://github.com/google-ai-edge/mediapipe",
+      "role": "Face/hand/body tracking",
+      "adoption_note": "Only if webcam gesture features wanted, with explicit camera consent",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "upscayl/upscayl",
+      "url": "https://github.com/upscayl/upscayl",
+      "role": "Image upscaling utility",
+      "adoption_note": "Useful asset prep outside always-on assistant runtime",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "danielgatis/rembg",
+      "url": "https://github.com/danielgatis/rembg",
+      "role": "Local image background removal",
+      "adoption_note": "Small utility for avatar thumbnails and UI art",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "xinntao/Real-ESRGAN",
+      "url": "https://github.com/xinntao/Real-ESRGAN",
+      "role": "Super-resolution for image assets",
+      "adoption_note": "Optional, GPU intensive",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Design and multimodal creation",
+      "priority": "Optional",
+      "repository": "KhronosGroup/glTF-Sample-Models",
+      "url": "https://github.com/KhronosGroup/glTF-Sample-Models",
+      "role": "Sample 3D models",
+      "adoption_note": "Dev visual test assets; check licenses per model",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Security, permissions and integrity",
+      "priority": "Core",
+      "repository": "gitleaks/gitleaks",
+      "url": "https://github.com/gitleaks/gitleaks",
+      "role": "Detect accidentally committed secrets",
+      "adoption_note": "Run before installing imported repos or publishing code",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Security, permissions and integrity",
+      "priority": "Core",
+      "repository": "google/osv-scanner",
+      "url": "https://github.com/google/osv-scanner",
+      "role": "Vulnerability scan for dependencies",
+      "adoption_note": "Gate integration on vulnerable dependency findings",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Security, permissions and integrity",
+      "priority": "Evaluate",
+      "repository": "semgrep/semgrep",
+      "url": "https://github.com/semgrep/semgrep",
+      "role": "Static analysis and code scanning",
+      "adoption_note": "Target custom broker and newly added plugin handlers",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Security, permissions and integrity",
+      "priority": "Evaluate",
+      "repository": "aquasecurity/trivy",
+      "url": "https://github.com/aquasecurity/trivy",
+      "role": "Filesystem/image dependency scanner",
+      "adoption_note": "Useful if you introduce containers or bundled binaries",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Security, permissions and integrity",
+      "priority": "Evaluate",
+      "repository": "promptfoo/promptfoo",
+      "url": "https://github.com/promptfoo/promptfoo",
+      "role": "LLM regression and prompt-injection tests",
+      "adoption_note": "Model + tool-approval safety benchmark for every release",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Security, permissions and integrity",
+      "priority": "Optional",
+      "repository": "restic/restic",
+      "url": "https://github.com/restic/restic",
+      "role": "Encrypted backup of memory and config",
+      "adoption_note": "Back up SQLite data and local state, never raw cloud keys",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Core",
+      "repository": "astral-sh/uv",
+      "url": "https://github.com/astral-sh/uv",
+      "role": "Fast Python environment/dependency manager",
+      "adoption_note": "Isolate tools to avoid polluting system Python; clean caches thoughtfully",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Core",
+      "repository": "pytest-dev/pytest",
+      "url": "https://github.com/pytest-dev/pytest",
+      "role": "Broker unit/integration test runner",
+      "adoption_note": "Use cancellation, restart, tool approval and provider failover tests",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Evaluate",
+      "repository": "langfuse/langfuse",
+      "url": "https://github.com/langfuse/langfuse",
+      "role": "Traces and token/cost accounting",
+      "adoption_note": "Official Hermes plugin available; full self-hosting adds services",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Evaluate",
+      "repository": "Arize-ai/phoenix",
+      "url": "https://github.com/Arize-ai/phoenix",
+      "role": "LLM traces and evaluations",
+      "adoption_note": "Alternative observability path; don't run multiple backends by default",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Evaluate",
+      "repository": "open-telemetry/opentelemetry-python",
+      "url": "https://github.com/open-telemetry/opentelemetry-python",
+      "role": "Vendor-neutral traces and spans",
+      "adoption_note": "Collect event and error metadata, scrub user content and secrets",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Evaluate",
+      "repository": "agronholm/apscheduler",
+      "url": "https://github.com/agronholm/apscheduler",
+      "role": "Python job scheduling",
+      "adoption_note": "Choose only if Hermes has no satisfactory native scheduler; v4 currently prerelease",
+      "source_confidence": "Docs reviewed"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Evaluate",
+      "repository": "astral-sh/ruff",
+      "url": "https://github.com/astral-sh/ruff",
+      "role": "Python lint and formatting",
+      "adoption_note": "Fast precommit quality gate",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Evaluate",
+      "repository": "pre-commit/pre-commit",
+      "url": "https://github.com/pre-commit/pre-commit",
+      "role": "Automated repository checks",
+      "adoption_note": "Run secret scan and lint before commits",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Optional",
+      "repository": "encode/httpx",
+      "url": "https://github.com/encode/httpx",
+      "role": "Async HTTP client for API adapters",
+      "adoption_note": "Use only through broker and with endpoint allowlists",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Optional",
+      "repository": "fastapi/fastapi",
+      "url": "https://github.com/fastapi/fastapi",
+      "role": "Local broker HTTP interface",
+      "adoption_note": "Already likely present; do not add a second backend web server",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Optional",
+      "repository": "samuelcolvin/watchfiles",
+      "url": "https://github.com/samuelcolvin/watchfiles",
+      "role": "Fast file watcher for local skills/config",
+      "adoption_note": "Hot reload in dev only, avoid constant production scans",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Optional",
+      "repository": "Textualize/rich",
+      "url": "https://github.com/Textualize/rich",
+      "role": "Developer CLI progress and logging",
+      "adoption_note": "Keep diagnostics readable without cloud LLM tokens",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Observability, testing and utilities",
+      "priority": "Optional",
+      "repository": "rclone/rclone",
+      "url": "https://github.com/rclone/rclone",
+      "role": "Optional storage sync",
+      "adoption_note": "Use only with per-provider scoped credentials and encryption",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Discovery collections",
+      "priority": "Optional",
+      "repository": "awesome-selfhosted/awesome-selfhosted",
+      "url": "https://github.com/awesome-selfhosted/awesome-selfhosted",
+      "role": "Curated self-hosted tools index",
+      "adoption_note": "Discovery source, never wholesale install",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Discovery collections",
+      "priority": "Optional",
+      "repository": "openai/skills",
+      "url": "https://github.com/openai/skills",
+      "role": "Skill format and reusable patterns",
+      "adoption_note": "Import selectively using Hermes skills hub review path",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Discovery collections",
+      "priority": "Optional",
+      "repository": "anthropics/skills",
+      "url": "https://github.com/anthropics/skills",
+      "role": "Example skill bundles",
+      "adoption_note": "Licenses and executable content vary across files",
+      "source_confidence": "Candidate"
+    },
+    {
+      "category": "Discovery collections",
+      "priority": "Optional",
+      "repository": "vercel-labs/agent-skills",
+      "url": "https://github.com/vercel-labs/agent-skills",
+      "role": "Frontend engineering skills",
+      "adoption_note": "Use selected source-audited skills; progressive disclosure",
+      "source_confidence": "Candidate"
+    }
+  ]
+}

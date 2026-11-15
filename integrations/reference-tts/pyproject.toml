@@ -1,0 +1,27 @@
+[project]
+name = "immortility-reference-tts-evaluation"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "coqui-tts[codec]==0.28.0",
+  "torch==2.15.0+cu132",
+  "torchaudio==2.11.1",
+  "torchcodec==0.17.0",
+  "transformers==5.15.1",
+  "setuptools==84.2.1",
+  "psutil==7.2.2",
+  "pedalboard==0.9.26",
+  "sounddevice==0.5.6",
+  "six==1.17.0",
+]
+
+[tool.uv]
+package = false
+
+[[tool.uv.index]]
+name = "pytorch-cu132"
+url = "https://download.pytorch.org/whl/cu132"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu132" }

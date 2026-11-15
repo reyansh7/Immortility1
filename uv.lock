@@ -483,6 +483,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
+    { name = "httpcore" },
     { name = "httpx" },
     { name = "jsonschema" },
     { name = "pydantic" },
@@ -515,6 +516,7 @@ requires-dist = [
     { name = "av", marker = "extra == 'voice'", specifier = "==18.0.0" },
     { name = "fastapi", specifier = "==0.162.5" },
     { name = "faster-whisper", marker = "extra == 'voice'", specifier = "==1.2.1" },
+    { name = "httpcore", specifier = "==1.0.9" },
     { name = "httpx", specifier = "==0.28.1" },
     { name = "jsonschema", specifier = "==4.23.0" },
     { name = "numpy", marker = "python_full_version >= '3.12' and extra == 'voice'", specifier = "==2.5.4" },
