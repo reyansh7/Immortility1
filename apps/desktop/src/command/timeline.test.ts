@@ -25,6 +25,7 @@ suite("timeline", () => {
       "File accessed",
     );
     expect(phase(entry("approval.requested", {}))).toBe("Approval required");
+    expect(phase(entry("task.state", { status: "stopping" }))).toBe("Stopping");
     expect(phase(entry("task.error", { code: "x", attempt: 2 }))).toBe("Retry");
     expect(phase(entry("unknown.thing", {}))).toBe("Event");
   });

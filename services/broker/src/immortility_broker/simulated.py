@@ -55,7 +55,9 @@ def _current_turn(messages: list[dict[str, Any]]) -> tuple[str, int]:
     return tag, done
 
 
-def _chunk(delta: dict[str, Any], finish: str | None = None, *, usage: dict[str, int] | None = None) -> bytes:
+def _chunk(
+    delta: dict[str, Any], finish: str | None = None, *, usage: dict[str, int] | None = None
+) -> bytes:
     body: dict[str, Any] = {
         "id": "sim",
         "object": "chat.completion.chunk",
@@ -154,6 +156,10 @@ def scripted_pieces(messages: list[dict[str, Any]]) -> list[tuple[float, bytes]]
         )
     if tag == "SIM:slow" and done == 0:
         return _text("Simulated slow reply.", delay=20)
+    if tag == "SIM:approve":
+        if done == 0:
+            return _tool("clock.now.v1", {}, "sim-approve")
+        return _text("Simulated approved clock.")
     if tag in {"SIM:clock", "SIM:steps", "SIM:inject"}:
         if done == 0:
             return _tool("clock.now.v1", {}, "sim-clock")

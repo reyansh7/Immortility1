@@ -148,6 +148,34 @@ class WorkspaceChoice(BaseModel):
 class ApprovalDecision(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     decision: Literal["approve", "deny"]
+    request_id: str | None = Field(default=None, min_length=1, max_length=64)
+
+
+_IDENT = re.compile(r"[A-Za-z0-9_.:-]{1,128}")
+
+
+def safe_ident(value: Any) -> str:
+    """Model-supplied ids are untrusted. Keep only a bounded printable token."""
+    return value if isinstance(value, str) and _IDENT.fullmatch(value) else ""
+
+
+def parse_proposal(call: dict[str, Any]) -> tuple[str, Any]:
+    try:
+        body = json.loads(call["function"]["arguments"])
+        capability = body["capability"]
+        arguments = body.get("arguments", {})
+    except (KeyError, TypeError, ValueError):
+        return "", {}
+    return (capability if isinstance(capability, str) else ""), arguments
+
+
+def proposal_identity(calls: dict[int, dict[str, Any]]) -> dict[str, Any]:
+    ids = [safe_ident(call.get("id")) for _, call in sorted(calls.items())]
+    names = []
+    for _, call in sorted(calls.items()):
+        name, _arguments = parse_proposal(call)
+        names.append(name if re.fullmatch(r"[a-z0-9_.-]{1,64}", name or "") else "unrecognized")
+    return {"tool_call_ids": [ident for ident in ids if ident], "capabilities": names}
 
 
 class RepairRequest(BaseModel):
@@ -326,6 +354,16 @@ class Engine:
         self.route_identity = ""
         self.inference_deadline = 0.0
         self.approvals: dict[str, tuple[str, float]] = {}
+        # Milestone 1.7 lifecycle: partial text held while a stop is being confirmed,
+        # the Hermes run bound to each task, and one-shot tool approvals.
+        self._partial: dict[str, str] = {}
+        self.run_ids: dict[str, str] = {}
+        self.tool_approvals: dict[str, dict[str, Any]] = {}
+        self.approved_calls: dict[str, list[tuple[str, str, str]]] = {}
+        self.resolved_approvals: dict[str, str] = {}
+        self.require_tool_approval: set[str] = set()
+        self.authorized_calls: dict[str, list[tuple[str, str, str]]] = {}
+        self.approval_ttl = 45.0
         self.gateway = Gateway(store)
         self.workflows = WorkflowJournal(store)
         self.workflow_wake = asyncio.Event()
@@ -1039,7 +1077,11 @@ class Engine:
             self.model_route = offer
             self.route_identity = credential_identity(self.settings, offer.provider)
             self.store.ledger.bind_route(
-                self.attempt_id, offer.provider, offer.model_id, "single-broker-account", offer.route_id
+                self.attempt_id,
+                offer.provider,
+                offer.model_id,
+                "single-broker-account",
+                offer.route_id,
             )
             self.runtime = DirectChat(self.settings, offer)
         else:
@@ -1051,6 +1093,17 @@ class Engine:
             self.runtime.broker_schemas = self.gateway.discover(tuple(approved))
             if getattr(self.runtime, "accepts_broker_schemas", False):
                 self.runtime.idempotency_key = str(task["input"].get("request_id", ""))[:255]
+            if hasattr(self.runtime, "on_run"):
+
+                def bind_run(run_id: str, task_id: str = task_id) -> None:
+                    self.run_ids[task_id] = run_id
+                    self.store.event(
+                        task_id,
+                        "audit.notice",
+                        {"name": "hermes.run.started", "run_id": run_id},
+                    )
+
+                setattr(self.runtime, "on_run", bind_run)
         started = time.perf_counter()
         first_token: float | None = None
         try:
@@ -1387,7 +1440,11 @@ class Engine:
                 },
             )
         except asyncio.CancelledError:
-            self._finish_interrupted(task_id, "cancelled", locals().get("text", ""))
+            if self.store.get(task_id)["status"] == "stopping":
+                # engine.cancel records the final state only after the run is confirmed stopped.
+                self._partial[task_id] = locals().get("text", "")
+            else:
+                self._finish_interrupted(task_id, "cancelled", locals().get("text", ""))
             raise
         except ExceptionGroup as group:
             error = group.exceptions[0]
@@ -1426,6 +1483,14 @@ class Engine:
             finally:
                 self.runtime = None
                 self.active = None
+                self.authorized_calls.pop(task_id, None)
+                self.approved_calls.pop(task_id, None)
+                self.require_tool_approval.discard(task_id)
+                self.tool_approvals.pop(task_id, None)
+                if self.store.get(task_id)["status"] != "stopping":
+                    self.run_ids.pop(task_id, None)
+                while len(self.resolved_approvals) > 256:
+                    self.resolved_approvals.pop(next(iter(self.resolved_approvals)))
                 self.workflow_wake.set()
 
     def _metrics(self, task_id: str, plan: Plan, started: float, first_token: float | None) -> None:
@@ -1530,8 +1595,14 @@ class Engine:
         self.store.state(task_id, "awaiting_approval")
         return text, True
 
-    def _finish_interrupted(self, task_id: str, status: str, text: str) -> None:
-        if self.store.get(task_id)["status"] in TERMINAL:
+    def _finish_interrupted(
+        self, task_id: str, status: str, text: str, *, confirmed: bool = False
+    ) -> None:
+        current = self.store.get(task_id)["status"]
+        if current in TERMINAL:
+            return
+        if current == "stopping" and not confirmed:
+            self._partial[task_id] = text or self._partial.get(task_id, "")
             return
         updates: dict[str, Any] = {}
         if text.strip():
@@ -1590,7 +1661,12 @@ class Engine:
             "hermes_unavailable": "disconnected",
             "tool_denied": "blocked",
             "tools_enabled": "blocked",
+            "approval_denied": "blocked",
+            "approval_expired": "blocked",
         }.get(issue.code, "failed")
+        if self.store.get(task_id)["status"] == "stopping":
+            self._partial[task_id] = partial or self._partial.get(task_id, "")
+            return
         if self.store.get(task_id)["status"] not in TERMINAL:
             updates: dict[str, Any] = {"error": {"code": issue.code, "message": issue.message}}
             if partial.strip():
@@ -1609,10 +1685,93 @@ class Engine:
         except Exception:
             return
 
+    @staticmethod
+    def call_digest(capability: str, arguments: Any) -> str:
+        body = json.dumps({"capability": capability, "arguments": arguments}, sort_keys=True)
+        return hashlib.sha256(body.encode()).hexdigest()
+
+    def tool_needs_approval(self, task_id: str, capability: str) -> bool:
+        return task_id in self.require_tool_approval or govern(capability, "assisted") == "approval"
+
+    def open_tool_approval(
+        self, task_id: str, call_id: str, capability: str, digest: str
+    ) -> dict[str, Any]:
+        """One pending approval per task. The request id is single use and expires."""
+        pending = {
+            "request_id": uid(),
+            "tool_call_id": call_id,
+            "capability": capability,
+            "digest": digest,
+            "expires": time.monotonic() + self.approval_ttl,
+            "future": asyncio.get_running_loop().create_future(),
+        }
+        self.tool_approvals[task_id] = pending
+        self.store.event(
+            task_id,
+            "approval.requested",
+            {
+                "name": "tool",
+                "kind": "tool_call",
+                "capability": capability,
+                "tool_call_id": call_id,
+                "request_id": pending["request_id"],
+                "expires_in_s": self.approval_ttl,
+                "preview": f"Allow one {capability} call ({call_id}).",
+            },
+        )
+        self.store.state(task_id, "awaiting_approval")
+        return pending
+
+    async def wait_tool_approval(
+        self, task_id: str, pending: dict[str, Any], slice_s: float = 5.0
+    ) -> str | None:
+        """Return approve/deny/expired/cancelled, or None while still pending."""
+        future = pending["future"]
+        remaining = pending["expires"] - time.monotonic()
+        if not future.done() and remaining <= 0:
+            future.set_result("expired")
+        if not future.done():
+            try:
+                await asyncio.wait_for(asyncio.shield(future), min(slice_s, max(0.01, remaining)))
+            except asyncio.TimeoutError:
+                if time.monotonic() < pending["expires"]:
+                    return None
+                if not future.done():
+                    future.set_result("expired")
+        outcome = str(future.result())
+        self.resolved_approvals[pending["request_id"]] = outcome
+        if self.tool_approvals.get(task_id) is pending:
+            self.tool_approvals.pop(task_id, None)
+        if outcome == "cancelled":
+            return outcome
+        self.store.event(
+            task_id,
+            "approval.resolved",
+            {
+                "name": "tool",
+                "decision": outcome,
+                "request_id": pending["request_id"],
+                "tool_call_id": pending["tool_call_id"],
+                "capability": pending["capability"],
+            },
+        )
+        if outcome == "approve":
+            self.approved_calls.setdefault(task_id, []).append(
+                (pending["capability"], pending["digest"], pending["tool_call_id"])
+            )
+            if self.store.get(task_id)["status"] == "awaiting_approval":
+                self.store.state(task_id, "running")
+        return outcome
+
     async def cancel(self, task_id: str) -> None:
+        """Cancel requested is not cancelled. The task stays `stopping` until the executor
+        has exited and, for Hermes 0.23.2, the gateway reports the run terminal."""
         self.laptop_stop.set()
         if self.active == task_id:
             self.inference_allowed = False
+        pending = self.tool_approvals.get(task_id)
+        if pending is not None and not pending["future"].done():
+            pending["future"].set_result("cancelled")
         lease = self.observation
         if lease is not None and lease.task_id == task_id:
             self.observation = None
@@ -1625,13 +1784,50 @@ class Engine:
         delete_proposal(self.settings.data_dir, task_id)
         task = self.store.get(task_id)
         if self.active == task_id and self.worker and not self.worker.done():
+            started = time.perf_counter()
             self.inference_allowed = False
+            if task["status"] in {"running", "awaiting_approval", "verifying", "queued"}:
+                self.store.state(task_id, "stopping")
+            runtime = self.runtime
             self.worker.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await self.worker
-            # Cancellation before the coroutine's first instruction still gets persisted.
-            if self.store.get(task_id)["status"] not in TERMINAL:
-                self.store.state(task_id, "cancelled")
+            phase = getattr(runtime, "stop_phase", None) if runtime is not None else None
+            if phase is None:
+                # In-process or per-task Hermes 0.21.1 work: the awaited worker and its
+                # runtime.stop() (process reap) have returned, so the executor has exited.
+                phase = "executor_exited"
+            confirmed = phase in {
+                "executor_exited",
+                "not_started",
+                "cancelled",
+                "completed",
+                "failed",
+            }
+            evidence = {
+                "name": "cancellation.confirmed" if confirmed else "cancellation.unconfirmed",
+                "run_phase": phase,
+                "run_id": self.run_ids.get(task_id),
+                "latency_ms": round((time.perf_counter() - started) * 1000, 1),
+            }
+            current = self.store.get(task_id)["status"]
+            if current not in TERMINAL:
+                if confirmed:
+                    self._finish_interrupted(
+                        task_id, "cancelled", self._partial.get(task_id, ""), confirmed=True
+                    )
+                else:
+                    self.store.state(
+                        task_id,
+                        "disconnected",
+                        error={
+                            "code": "stop_unconfirmed",
+                            "message": "The run did not confirm it stopped. Recovery is required.",
+                        },
+                    )
+            self.store.event(task_id, "audit.notice", evidence)
+            self._partial.pop(task_id, None)
+            self.run_ids.pop(task_id, None)
             self.active = None
         elif task["status"] not in TERMINAL:
             self.store.state(task_id, "cancelled")
@@ -1757,12 +1953,20 @@ def create_app(
                 await supervisor.start()
             except Exception as error:
                 if settings.data_dir.name.startswith("canary-"):
-                    with (settings.data_dir / "gateway-steps.log").open("a", encoding="utf-8") as handle:
+                    with (settings.data_dir / "gateway-steps.log").open(
+                        "a", encoding="utf-8"
+                    ) as handle:
                         handle.write(type(error).__name__ + ": " + str(error)[:300] + "\n")
                 raise
         try:
             yield
         finally:
+            # Stop the active task first so its Hermes run is confirmed stopped while the
+            # gateway is still up, then stop the gateway itself.
+            # Only for the Hermes gateway path; local workflows keep their resumable state.
+            if supervisor is not None and engine.active:
+                with contextlib.suppress(Exception):
+                    await engine.cancel(engine.active)
             if supervisor is not None:
                 await supervisor.stop()
         await engine.shutdown()
@@ -1862,9 +2066,7 @@ def create_app(
                 and engine.active is not None
                 and peer in {"127.0.0.1", "::1"}
             ):
-                authorized = hmac.compare_digest(
-                    presented, "Bearer " + engine.warm_inference_key
-                )
+                authorized = hmac.compare_digest(presented, "Bearer " + engine.warm_inference_key)
             if not authorized:
                 return JSONResponse(
                     {"error": {"code": "unauthorized", "message": "Authentication required."}}, 401
@@ -1916,9 +2118,7 @@ def create_app(
             "hermes": hermes,
             "ready": (hermes["status"] == "available" and engine.registry.ready())
             or bool(
-                settings.simulated_inference
-                and supervisor is not None
-                and supervisor.runtime_ready
+                settings.simulated_inference and supervisor is not None and supervisor.runtime_ready
             ),
             "simulated_inference": settings.simulated_inference,
             "free_only": True,
@@ -2140,6 +2340,15 @@ def create_app(
                     },
                 )
                 return store.get(task["task_id"])
+        if (
+            settings.simulated_inference
+            and settings.data_dir.name.startswith("canary-")
+            or settings.simulated_inference
+            and factory is not None
+        ) and "SIM:approve" in request.content:
+            # Fixture only: the canary asks for fresh approval before any tool call in this
+            # task. This only adds a gate; it never widens what the task may call.
+            engine.require_tool_approval.add(task["task_id"])
         store.state(task["task_id"], "queued")
         engine.active, engine.calls, engine.provider_error = task["task_id"], 0, None
         engine.worker = asyncio.create_task(engine.execute(task))
@@ -2363,6 +2572,32 @@ def create_app(
     @app.post("/v1/tasks/{task_id}/approval")
     async def resolve_approval(task_id: str, body: ApprovalDecision) -> dict[str, Any]:
         task = store.get(task_id)
+        if body.request_id is not None and body.request_id in engine.resolved_approvals:
+            store.event(
+                task_id,
+                "audit.notice",
+                {"name": "approval.replay_rejected", "request_id": body.request_id},
+            )
+            raise BrokerError(
+                "approval_replayed", "That approval was already used or has expired.", 409
+            )
+        pending = engine.tool_approvals.get(task_id)
+        if pending is not None:
+            if body.request_id is not None and body.request_id != pending["request_id"]:
+                raise BrokerError("approval_mismatch", "That approval is not the pending one.", 409)
+            if pending["future"].done():
+                raise BrokerError("approval_replayed", "That approval was already resolved.", 409)
+            if time.monotonic() >= pending["expires"]:
+                pending["future"].set_result("expired")
+                raise BrokerError("approval_expired", "The tool approval expired.", 409)
+            pending["future"].set_result(body.decision)
+            engine.resolved_approvals[pending["request_id"]] = body.decision
+            # Let the relay record the decision before answering the window.
+            for _ in range(40):
+                if store.get(task_id)["status"] != "awaiting_approval":
+                    break
+                await asyncio.sleep(0.025)
+            return store.get(task_id)
         if task["status"] != "awaiting_approval":
             raise BrokerError("invalid_transition", "This task is not waiting for approval.")
         if body.decision == "deny":
@@ -2810,14 +3045,47 @@ def create_app(
             raise BrokerError(
                 "tool_denied", "Operation is outside this task's approved scope.", 403
             )
-        if govern(proposal.capability, "assisted") != "allow":
+        digest = engine.call_digest(proposal.capability, proposal.arguments)
+        if engine.tool_needs_approval(task_id, proposal.capability):
+            grants = engine.approved_calls.get(task_id, [])
+            match = next(
+                (
+                    grant
+                    for grant in grants
+                    if grant[0] == proposal.capability and grant[1] == digest
+                ),
+                None,
+            )
+            if match is None:
+                store.event(
+                    task_id,
+                    "audit.notice",
+                    {
+                        "name": "tool.authorization",
+                        "decision": "deny",
+                        "reason": "approval_missing_or_used",
+                        "capability": proposal.capability,
+                    },
+                )
+                raise BrokerError("tool_denied", "This tool call has no unused approval.", 403)
+            grants.remove(match)  # approve-once: a replayed call finds nothing
+        elif govern(proposal.capability, "assisted") != "allow":
             store.event(
                 task_id,
                 "audit.notice",
                 {"code": "tool_denied", "message": "Permission policy denied this operation."},
             )
             raise BrokerError("tool_denied", "Operation is outside the permission policy.", 403)
-        store.event(task_id, "tool.started", {"name": proposal.capability})
+        call_ident = ""
+        authorized = engine.authorized_calls.get(task_id, [])
+        for entry in authorized:
+            if entry[0] == proposal.capability and entry[1] == digest:
+                call_ident = entry[2]
+                authorized.remove(entry)
+                break
+        store.event(
+            task_id, "tool.started", {"name": proposal.capability, "tool_call_id": call_ident}
+        )
         engine.bridge_calls += 1
         arguments = dict(proposal.arguments)
         if proposal.capability.startswith("project."):
@@ -2856,7 +3124,15 @@ def create_app(
         store.event(
             task_id,
             "tool.completed",
-            {"name": proposal.capability, "status": "ok", "verified": True},
+            {
+                "name": proposal.capability,
+                "status": "ok",
+                "verified": True,
+                "tool_call_id": call_ident,
+                "receipt": hashlib.sha256(
+                    json.dumps(result, sort_keys=True, default=str).encode()
+                ).hexdigest()[:16],
+            },
         )
         return {
             "capability": proposal.capability,
@@ -2998,8 +3274,8 @@ def create_app(
             floor = minimum_report_output_reservation()
             if settings.typed_tool_schemas_enabled:
                 floor = max(floor, 1200)
-            report_available = engine.token_cap - used - max(
-                input_tokens, min(raw_bytes, engine.token_cap)
+            report_available = (
+                engine.token_cap - used - max(input_tokens, min(raw_bytes, engine.token_cap))
             )
             if min(report_available, payload["max_tokens"]) < floor:
                 store.event(
@@ -3021,9 +3297,7 @@ def create_app(
                     403,
                 )
         if available < 128:
-            payload["messages"] = fit_prompt(
-                payload["messages"], payload.get("tools") or [], 1200
-            )
+            payload["messages"] = fit_prompt(payload["messages"], payload.get("tools") or [], 1200)
             components = prompt_byte_components(payload)
             input_tokens = estimate_input_tokens(components)
             available = max(128, engine.token_cap - used - input_tokens)
@@ -3096,7 +3370,10 @@ def create_app(
             )
         route = engine.model_route
         dispatch_identity = engine.route_identity
-        if not settings.simulated_inference and credential_identity(settings, route.provider) != engine.route_identity:
+        if (
+            not settings.simulated_inference
+            and credential_identity(settings, route.provider) != engine.route_identity
+        ):
             raise BrokerError(
                 "credential_changed",
                 "Provider credential changed during the task; no account switch permitted.",
@@ -3352,6 +3629,15 @@ def create_app(
                             ):
                                 termination = "tool_denied"
                                 rejected_proposals += 1
+                                store.event(
+                                    task_id,
+                                    "audit.notice",
+                                    {
+                                        "name": "tool.authorization",
+                                        "decision": "deny",
+                                        "reason": "no_tools_granted",
+                                    },
+                                )
                                 engine.provider_error = BrokerError(
                                     "tool_denied", "Unsafe provider output blocked.", 403
                                 )
@@ -3376,6 +3662,65 @@ def create_app(
                                         "reason": error.diagnostic or "stream_shape",
                                     },
                                 )
+                                store.event(
+                                    task_id,
+                                    "audit.notice",
+                                    {
+                                        "name": "tool.authorization",
+                                        "decision": "deny",
+                                        "reason": error.diagnostic or "stream_shape",
+                                        **proposal_identity(semantic.calls),
+                                    },
+                                )
+                                break
+                            refused: BrokerError | None = None
+                            for call in [semantic.calls[index] for index in sorted(semantic.calls)]:
+                                capability, arguments = parse_proposal(call)
+                                digest = engine.call_digest(capability, arguments)
+                                needs = engine.tool_needs_approval(task_id, capability)
+                                store.event(
+                                    task_id,
+                                    "audit.notice",
+                                    {
+                                        "name": "tool.authorization",
+                                        "decision": "approval" if needs else "allow",
+                                        "capability": capability,
+                                        "tool_call_id": safe_ident(call.get("id")),
+                                    },
+                                )
+                                if not needs:
+                                    engine.authorized_calls.setdefault(task_id, []).append(
+                                        (capability, digest, safe_ident(call.get("id")))
+                                    )
+                                    continue
+                                pending = engine.open_tool_approval(
+                                    task_id, safe_ident(call.get("id")), capability, digest
+                                )
+                                while True:
+                                    outcome = await engine.wait_tool_approval(task_id, pending)
+                                    if outcome is not None:
+                                        break
+                                    # SSE comment: keeps Hermes' provider stream alive, ignored by clients.
+                                    yield ": approval-pending\n\n"
+                                if outcome != "approve":
+                                    refused = BrokerError(
+                                        "approval_expired"
+                                        if outcome == "expired"
+                                        else "approval_denied",
+                                        "The tool approval expired."
+                                        if outcome == "expired"
+                                        else "The tool call was not approved.",
+                                        403,
+                                    )
+                                    break
+                                engine.authorized_calls.setdefault(task_id, []).append(
+                                    (capability, digest, safe_ident(call.get("id")))
+                                )
+                            if refused is not None:
+                                termination = "tool_denied"
+                                rejected_proposals += 1
+                                if engine.inference_allowed and engine.active == task_id:
+                                    engine.provider_error = refused
                                 break
                             for chunk in buffered:
                                 yield "data: " + json.dumps(chunk) + "\n\n"

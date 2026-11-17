@@ -417,7 +417,13 @@ class Store:
         with self.db:
             self.db.execute(
                 "INSERT INTO tasks VALUES(?,?,?,?,?)",
-                (task["task_id"], session_id, identity, json.dumps({"request_id": identity}), json.dumps(task)),
+                (
+                    task["task_id"],
+                    session_id,
+                    identity,
+                    json.dumps({"request_id": identity}),
+                    json.dumps(task),
+                ),
             )
             self._event(task["task_id"], "task.state", {"status": "created"})
         return task
@@ -449,7 +455,7 @@ class Store:
         task = self.get(task_id)
         allowed = {
             "created": {"queued", "blocked", "cancelled", "disconnected"},
-            "queued": {"running", "cancelled", "disconnected", "failed"},
+            "queued": {"running", "cancelled", "disconnected", "failed", "stopping"},
             "running": {
                 "queued",
                 "verifying",
@@ -459,9 +465,19 @@ class Store:
                 "blocked",
                 "rate_limited",
                 "disconnected",
+                "stopping",
             },
-            "awaiting_approval": {"running", "cancelled", "blocked", "failed", "disconnected"},
-            "verifying": {"queued", "succeeded", "failed", "cancelled", "disconnected"},
+            "awaiting_approval": {
+                "running",
+                "cancelled",
+                "blocked",
+                "failed",
+                "disconnected",
+                "stopping",
+            },
+            "verifying": {"queued", "succeeded", "failed", "cancelled", "disconnected", "stopping"},
+            # A stop was requested. Only a confirmed executor exit may record `cancelled`.
+            "stopping": {"cancelled", "disconnected", "failed"},
         }
         if status not in allowed.get(task["status"], set()):
             raise BrokerError("invalid_transition", "Invalid task transition.")

@@ -89,4 +89,8 @@ describe("durable event presentation", () => {
     expect(orbState("running", true)).toBe("thinking");
     expect(orbState("succeeded", true)).toBe("idle");
   });
+  it("keeps a requested stop active until the broker confirms it", () => {
+    expect(orbState("stopping", true)).toBe("thinking");
+    expect(orbState("cancelled", true)).toBe("idle");
+  });
 });

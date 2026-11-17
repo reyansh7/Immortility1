@@ -32,7 +32,13 @@ export interface FaceInputs {
   ttsState: string;
 }
 
-const running = new Set<Status>(["created", "queued", "running", "verifying"]);
+const running = new Set<Status>([
+  "created",
+  "queued",
+  "running",
+  "verifying",
+  "stopping",
+]);
 
 export function playbackEnergy(level: number, speaking: boolean): number {
   return speaking && Number.isFinite(level)

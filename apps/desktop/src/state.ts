@@ -173,7 +173,8 @@ export function orbState(
     status === "running" ||
     status === "queued" ||
     status === "created" ||
-    status === "verifying"
+    status === "verifying" ||
+    status === "stopping"
   )
     return "thinking";
   return "idle";

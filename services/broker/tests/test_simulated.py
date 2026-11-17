@@ -86,7 +86,7 @@ def test_checkout_revision_does_not_call_git(tmp_path, monkeypatch):
     supervisor._verify_checkout()
 
 
-async def test_occupied_gateway_port_is_left_running():
+async def test_occupied_gateway_port_is_left_running(tmp_path):
     from immortility_broker.contracts import BrokerError
     from immortility_broker.hermes_gateway import GatewaySupervisor
 
@@ -102,6 +102,7 @@ async def test_occupied_gateway_port_is_left_running():
         pytest.skip("Port 8642 is already in use outside this test.")
     supervisor = GatewaySupervisor.__new__(GatewaySupervisor)
     supervisor.runtime_ready = False
+    supervisor.home = tmp_path  # no ownership record: the listener is not ours
 
     def forbidden():
         raise AssertionError("Startup continued after finding an existing listener.")
