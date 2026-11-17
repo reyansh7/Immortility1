@@ -2227,6 +2227,17 @@ def create_app(
             )
         if (
             settings.simulated_inference
+            and settings.local_tools_enabled
+            and request.source == "text"
+            and not request.allowed_capabilities
+            and "SIM:steps" in request.content
+        ):
+            # Fixture only: the scripted multistep turn uses exactly these two local tools.
+            request = request.model_copy(
+                update={"allowed_capabilities": ["clock.now.v1", "arithmetic.multiply.v1"]}
+            )
+        if (
+            settings.simulated_inference
             and request.source == "text"
             and "247" in folded
             and "36" in folded

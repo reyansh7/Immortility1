@@ -32,7 +32,10 @@ $psi = New-Object System.Diagnostics.ProcessStartInfo
 $psi.FileName = $Exe
 $psi.UseShellExecute = $false
 $psi.EnvironmentVariables["IMMORTILITY_CANARY_DATA"] = $Canary
-$psi.EnvironmentVariables["WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS"] = "--no-proxy-server"
+# The packaged build embeds the frontend, so no proxy bypass is needed.
+if ($psi.EnvironmentVariables.ContainsKey("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS")) {
+    $psi.EnvironmentVariables.Remove("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS")
+}
 $proc = [System.Diagnostics.Process]::Start($psi)
 $deadline = (Get-Date).AddSeconds(150)
 $port = $false
