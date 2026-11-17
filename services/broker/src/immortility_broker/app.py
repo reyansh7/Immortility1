@@ -3161,6 +3161,7 @@ def create_app(
 
     @app.post("/inference/v1/chat/completions")
     async def inference(request: Request) -> StreamingResponse:
+        received = time.perf_counter()
         if (
             engine.inference_allowed
             and engine.active
@@ -3346,6 +3347,7 @@ def create_app(
                 "audit.notice",
                 {
                     "name": "model.route",
+                    "preflight_ms": round((time.perf_counter() - received) * 1000, 1),
                     "provider": engine.model_route.provider,
                     "model": engine.model_route.model_id,
                     "route_id": engine.model_route.route_id,
@@ -3370,6 +3372,7 @@ def create_app(
                 "audit.notice",
                 {
                     "name": "model.route",
+                    "preflight_ms": round((time.perf_counter() - received) * 1000, 1),
                     "provider": engine.model_route.provider,
                     "model": engine.model_route.model_id,
                     "route_id": engine.model_route.route_id,
@@ -3509,9 +3512,18 @@ def create_app(
             )
         try:
             if settings.simulated_inference:
-                from .simulated import SimulatedUpstream, scripted_pieces
+                from .simulated import SimulatedUpstream, scripted_pieces, turn_diagnostics
 
-                upstream = SimulatedUpstream(scripted_pieces(payload["messages"]))
+                current = str(store.get(task_id)["input"].get("content", ""))
+                store.event(
+                    task_id,
+                    "audit.notice",
+                    {
+                        "name": "fixture.turn",
+                        **turn_diagnostics(payload["messages"], current),
+                    },
+                )
+                upstream = SimulatedUpstream(scripted_pieces(payload["messages"], current))
             else:
                 upstream = await http.send(
                     compatible_request(http, settings, route, payload),

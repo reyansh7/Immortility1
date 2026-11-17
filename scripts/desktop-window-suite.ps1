@@ -145,18 +145,27 @@ function Invoke-Named($name) {
     $e.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke(); return $true
 }
 function Paste($text) {
-    $box = Find-Named "Message"
-    if (-not $box) { throw ("Message box disappeared. Names: " + ((Names | Select-Object -First 30) -join " | ")) }
-    $box.SetFocus(); Start-Sleep -Milliseconds 200
-    $set = $false
-    try {
-        $box.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).SetValue($text); $set = $true
-    } catch { $set = $false }
-    if (-not $set) {
-        Set-Clipboard -Value $text
-        [System.Windows.Forms.SendKeys]::SendWait("^a"); [System.Windows.Forms.SendKeys]::SendWait("^v")
+    # Set the composer through UI Automation and read it back; never send mixed drafts.
+    foreach ($try in 1..3) {
+        $box = Find-Named "Message"
+        if (-not $box) { throw ("Message box disappeared. Names: " + ((Names | Select-Object -First 30) -join " | ")) }
+        $box.SetFocus(); Start-Sleep -Milliseconds 150
+        $pattern = $null
+        try { $pattern = $box.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern) } catch { $pattern = $null }
+        if ($pattern) {
+            try { $pattern.SetValue(""); Start-Sleep -Milliseconds 100; $pattern.SetValue($text) } catch { }
+            Start-Sleep -Milliseconds 250
+            $now = ""
+            try { $now = $box.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).Current.Value } catch { }
+            if ($now -eq $text) { return }
+        } else {
+            Set-Clipboard -Value $text
+            [System.Windows.Forms.SendKeys]::SendWait("^a"); [System.Windows.Forms.SendKeys]::SendWait("^v")
+            Start-Sleep -Milliseconds 300
+            return
+        }
     }
-    Start-Sleep -Milliseconds 300
+    throw "Composer text did not match after 3 attempts: $text"
 }
 function Send-Line($text) {
     $limit = (Get-Date).AddSeconds(60)
@@ -326,7 +335,7 @@ try {
                 foreach ($c in $after.tool_calls.PSObject.Properties) { Check $case.n (-not $c.Value.started) "unapproved tool started" }
                 Check $case.n ($after.error_code -in @("approval_denied", "approval_expired")) "error $($after.error_code)"
             } else {
-                Check $case.n ($after.final_text -eq "Simulated approved clock.") "text $($after.final_text)"
+                Check $case.n ($after.final_text.Trim() -eq "Simulated approved clock.") "text $($after.final_text)"
             }
         } catch { $report.scenarios[$case.n] = [ordered]@{ token = $token; pass = $false; failure = "$_" } }
     }

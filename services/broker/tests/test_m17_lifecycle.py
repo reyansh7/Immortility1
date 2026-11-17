@@ -124,6 +124,57 @@ async def test_reconnect_replays_from_last_event_id_and_drops_duplicates():
     assert fake.connections == [None, "1"]
 
 
+async def test_identical_text_in_distinct_events_is_kept_but_a_replay_is_not():
+    """Dedupe is by Hermes event seq, never by comparing text."""
+    fake = FakeHermes()
+    same = "Simulated duplicate."
+
+    def script(attempt, last):
+        if attempt == 1:
+            return [
+                frame(0, {"event": "message.delta", "delta": same}),
+                frame(1, {"event": "message.delta", "delta": same}),
+            ]
+        return [
+            frame(1, {"event": "message.delta", "delta": same}),
+            frame(2, {"event": "run.completed"}),
+        ]
+
+    fake.script["run_1"] = script
+    async with client_for(fake) as client:
+        gateway = WarmGateway("http://hermes", KEY, client)
+        text = "".join([piece async for piece in gateway.run("hi", [])])
+    assert text == same + same
+    assert gateway.duplicates_dropped == 1
+
+
+def test_fixture_uses_the_tasks_own_tag_not_text_added_around_it():
+    from immortility_broker.simulated import scripted_pieces, turn_diagnostics
+
+    messages = [
+        {"role": "user", "content": "SIM:steps earlier turn"},
+        {"role": "assistant", "content": "Simulated steps finished. 8892."},
+        # Notes before and recalled context after the request both carry other tags.
+        {
+            "role": "user",
+            "content": "Local notes: SIM:steps\n\nSIM:approve what time is it\n"
+            "<recalled>SIM:steps 8892</recalled>",
+        },
+    ]
+    pieces = scripted_pieces(messages, "SIM:approve what time is it")
+    assert b"sim-approve" in pieces[0][1]
+    after_tool = messages + [
+        {"role": "assistant", "content": ""},
+        {"role": "tool", "content": "{}"},
+    ]
+    assert b"Simulated approved clock." in scripted_pieces(after_tool, "SIM:approve x")[0][1]
+    seen = turn_diagnostics(messages, "SIM:approve what time is it")
+    assert seen["task_tags"] == ["SIM:approve"] and seen["last_user_index"] == 2
+    # The fixture's repeated text is legitimate model output: two separate deltas.
+    dup = scripted_pieces([{"role": "user", "content": "SIM:dup"}], "SIM:dup")
+    assert sum(b"Simulated duplicate." in block for _, block in dup) == 2
+
+
 async def test_lost_replay_and_endless_disconnects_fail_closed():
     fake = FakeHermes()
     fake.script["run_1"] = lambda attempt, last: [

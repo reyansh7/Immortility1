@@ -39,6 +39,35 @@ class SimulatedUpstream:
         self._closed = True
 
 
+def turn_diagnostics(messages: list[dict[str, Any]], current: str | None) -> dict[str, Any]:
+    """What the fixture saw: SIM tags per message position, for the audit trail."""
+    last_user = max((i for i, m in enumerate(messages) if m.get("role") == "user"), default=-1)
+    tagged = []
+    for index, message in enumerate(messages):
+        content = message.get("content")
+        if isinstance(content, str):
+            found = re.findall(r"SIM:[a-z]+", content)
+            if found:
+                tagged.append({"index": index, "role": message.get("role"), "tags": found[-3:]})
+    return {
+        "messages": len(messages),
+        "last_user_index": last_user,
+        "tagged": tagged[-6:],
+        "task_tags": re.findall(r"SIM:[a-z]+", current or "")[-3:],
+    }
+
+
+def _task_turn(messages: list[dict[str, Any]], current: str) -> tuple[str, int]:
+    """Tag from the broker's own record of this task's text; tool results after the last
+    user message. Text Hermes or the broker adds around the request (notes, recalled
+    history, memory) cannot redirect the fixture."""
+    found = re.findall(r"SIM:[a-z]+", current)
+    tag = found[-1] if found else "SIM:chat"
+    start = max((i for i, m in enumerate(messages) if m.get("role") == "user"), default=0)
+    done = sum(message.get("role") == "tool" for message in messages[start:])
+    return tag, done
+
+
 def _current_turn(messages: list[dict[str, Any]]) -> tuple[str, int]:
     """Use the latest SIM tag, and count only tool results after that request."""
     start = 0
@@ -114,13 +143,20 @@ def _milestone(text: str) -> bool:
     return "247" in folded and "36" in folded and "time" in folded and "project" in folded
 
 
-def scripted_pieces(messages: list[dict[str, Any]]) -> list[tuple[float, bytes]]:
-    """Choose a fixture from the latest SIM tag. Older transcript text cannot redirect it."""
-    latest = _latest_user(messages)
+def scripted_pieces(
+    messages: list[dict[str, Any]], current: str | None = None
+) -> list[tuple[float, bytes]]:
+    """Choose a fixture from the latest SIM tag. Older transcript text cannot redirect it.
+
+    ``current`` is the active task's own request text, when the broker knows it.
+    """
+    latest = current if current is not None else _latest_user(messages)
     if _milestone(latest):
         start = 0
         for index, message in enumerate(messages):
-            if message.get("role") == "user" and message.get("content") == latest:
+            if message.get("role") == "user" and (
+                current is not None or message.get("content") == latest
+            ):
                 start = index
         done = sum(item.get("role") == "tool" for item in messages[start:])
         if done == 0:
@@ -130,7 +166,7 @@ def scripted_pieces(messages: list[dict[str, Any]]) -> list[tuple[float, bytes]]
         if done == 2:
             return _tool("project.outline.v1", {}, "sim-outline")
         return _text("Verified. 247 × 36 = 8892. The clock and project inspection ran.")
-    tag, done = _current_turn(messages)
+    tag, done = _task_turn(messages, current) if current is not None else _current_turn(messages)
     if tag == "SIM:malformed" and done == 0:
         payload = {"error": {"code": "server_error", "message": "simulated malformed output"}}
         return [(0, ("data: " + json.dumps(payload) + "\n\n").encode())]
