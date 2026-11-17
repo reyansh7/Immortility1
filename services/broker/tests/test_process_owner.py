@@ -113,6 +113,56 @@ async def test_invalid_job_limit_rejected_before_launch(limit, monkeypatch):
         await spawn_owned(sys.executable, job_memory_limit=limit)
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Windows process-tree cleanup without a second job")
+async def test_reap_without_a_job_stops_descendants_and_leaves_other_processes():
+    other = await asyncio.create_subprocess_exec(
+        sys.executable,
+        "-c",
+        "import time; time.sleep(30)",
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    parent = (
+        "import subprocess,sys,time; "
+        "p=subprocess.Popen([sys.executable,'-c','import time;time.sleep(30)']); "
+        "print(p.pid, flush=True); time.sleep(30)"
+    )
+    process = await asyncio.create_subprocess_exec(
+        sys.executable,
+        "-u",
+        "-c",
+        parent,
+        stdout=asyncio.subprocess.PIPE,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.OpenProcess.restype = ctypes.c_void_p
+    kernel.OpenProcess.argtypes = [ctypes.c_uint32, ctypes.c_int, ctypes.c_uint32]
+    kernel.GetExitCodeProcess.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint32)]
+    kernel.CloseHandle.argtypes = [ctypes.c_void_p]
+    child_handle = None
+    try:
+        child_pid = int(await asyncio.wait_for(process.stdout.readline(), 5))
+        child_handle = kernel.OpenProcess(0x1000, False, child_pid)
+        await reap(process, None)
+        code = ctypes.c_uint32(259)
+        for _ in range(100):
+            assert kernel.GetExitCodeProcess(child_handle, ctypes.byref(code))
+            if code.value != 259:
+                break
+            await asyncio.sleep(0.02)
+        assert code.value != 259
+        assert other.returncode is None
+    finally:
+        if other.returncode is None:
+            other.kill()
+            await other.wait()
+        if process.returncode is None:
+            process.kill()
+            await process.wait()
+        if child_handle:
+            kernel.CloseHandle(child_handle)
+
+
 @pytest.mark.skipif(os.name != "nt", reason="Native Windows descendant file-handle cleanup")
 async def test_reap_waits_for_all_descendants_to_release_owned_files(tmp_path):
     path = tmp_path / "owned-native-worker.log"

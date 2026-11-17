@@ -71,6 +71,27 @@ def inference_payload(
 ) -> dict[str, Any]:
     if not isinstance(body, dict):
         raise BrokerError("inference_denied", "Invalid inference envelope.", 403)
+    # The 0.23.2 gateway always advertises the broker bridge. A task that approved
+    # no capability must not gain one from that advertisement.
+    tools = body.get("tools")
+    if tools and not approved_capabilities:
+        from .agent_bridge import TOOL_NAME
+
+        bridge_only = (
+            isinstance(tools, list)
+            and all(
+                isinstance(tool, dict)
+                and tool.get("type") == "function"
+                and (tool.get("function") or {}).get("name") == TOOL_NAME
+                for tool in tools
+            )
+        )
+        if approved_capabilities is not None and bridge_only:
+            body = {key: value for key, value in body.items() if key != "tools"}
+        else:
+            raise BrokerError(
+                "inference_denied", "Model or tool selection violates Phase 1 policy.", 403
+            )
     # Rebuild an allowlisted request: no paid fallbacks, plugins, search, audio, images, or tools.
     if (
         body.get("model") != MODEL
@@ -98,6 +119,17 @@ def inference_payload(
             for tool in body.get("tools", [])
         ):
             raise BrokerError("tool_denied", "Only the reviewed broker bridge is available.", 403)
+        from .agent_bridge import capability_input
+
+        argument_guide = "Approved execute arguments: " + "; ".join(
+            name
+            + " fields="
+            + (
+                ",".join(sorted(capability_input(name).model_json_schema().get("properties", {})))
+                or "none"
+            )
+            for name in approved_capabilities
+        ) + ". JSON numbers only for integers. No extra fields.\n\n"
         # Rebuild schemas from trusted broker code; never forward arbitrary definitions.
         clean = bridge_messages(messages, approved_capabilities, compact_results=typed_tools)
         noted = False
@@ -111,7 +143,9 @@ def inference_payload(
                         **rendered,
                         "content": (
                             "The only callable function is execute. "
-                            "Copy that name exactly.\n\n" + rendered["content"]
+                            "Copy that name exactly.\n"
+                            + argument_guide
+                            + rendered["content"]
                         ),
                     }
                     noted = True

@@ -73,7 +73,7 @@ class Ledger:
                 "SELECT provider,account_scope FROM inference_routes WHERE attempt_id=?",
                 (attempt_id,),
             ).fetchone()
-            if scope:
+            if scope and scope["provider"] != "simulated":
                 # Application policy across tasks; not a claim of provider quota.
                 # Unknown/sent reservations count, failed preflight does not.
                 day = date.fromisoformat(now()[:10])
@@ -127,11 +127,20 @@ class Ledger:
             )
         return call_id
 
-    def settle(self, call_id: str, usage: dict[str, Any] | None, *, sent: bool = True) -> None:
+    def settle(
+        self,
+        call_id: str,
+        usage: dict[str, Any] | None,
+        *,
+        sent: bool = True,
+        synthetic: bool = False,
+    ) -> None:
         with self.lock:
-            self._settle(call_id, usage, sent=sent)
+            self._settle(call_id, usage, sent=sent, synthetic=synthetic)
 
-    def _settle(self, call_id: str, usage: dict[str, Any] | None, *, sent: bool) -> None:
+    def _settle(
+        self, call_id: str, usage: dict[str, Any] | None, *, sent: bool, synthetic: bool = False
+    ) -> None:
         row = self.db.execute("SELECT * FROM usage_calls WHERE id=?", (call_id,)).fetchone()
         if row is None:
             raise BrokerError("inference_closed", "Unknown inference call.", 403)
@@ -148,13 +157,26 @@ class Ledger:
             ):
                 usage = None
             else:
-                clean = {"prompt_tokens": prompt, "completion_tokens": completion}
+                clean = {
+                    "prompt_tokens": prompt,
+                    "completion_tokens": completion,
+                    "billing_status": "synthetic" if synthetic else "reported_unverified",
+                }
                 for name in ("prompt_tokens_details", "completion_tokens_details"):
                     details = usage.get(name)
                     if isinstance(details, dict):
                         clean[name] = {
                             str(k): v for k, v in details.items() if type(v) is int and v >= 0
                         }
+                reasoning = (clean.get("completion_tokens_details") or {}).get("reasoning_tokens")
+                cached = (clean.get("prompt_tokens_details") or {}).get("cached_tokens")
+                if type(reasoning) is int:
+                    # OpenAI-compatible providers include reasoning tokens inside
+                    # completion_tokens. They are recorded separately and not added again.
+                    clean["reasoning_tokens"] = reasoning
+                    clean["reasoning_included_in_completion"] = reasoning <= completion
+                if type(cached) is int:
+                    clean["cached_tokens"] = cached
         charged = (
             0
             if not sent
@@ -247,6 +269,63 @@ class Ledger:
             "calls": calls,
             "routes": routes,
         }
+
+
+def local_billing() -> dict[str, Any]:
+    """No provider was called, so there is no usage and no invoice to verify."""
+    return {
+        "billing_status": "not_applicable",
+        "verified_billed_usd": None,
+        "usage_status": "not_sent",
+        "inference_category": "local_deterministic",
+    }
+
+
+def simulated_billing(summary: dict[str, Any]) -> dict[str, Any]:
+    """Fixture tokens are estimates. They are not provider usage and not a charge."""
+    return {
+        "billing_status": "not_applicable",
+        "verified_billed_usd": None,
+        "usage_status": "not_sent",
+        "inference_category": "simulated_model",
+        "provider_requests": 0,
+        "synthetic_prompt_tokens": summary.get("prompt_tokens"),
+        "synthetic_completion_tokens": summary.get("completion_tokens"),
+    }
+
+
+def billing_view(summary: dict[str, Any]) -> dict[str, Any]:
+    """Provider-reported tokens are not a verified charge. Missing usage stays unknown."""
+    if summary.get("dispatch_attempts", 0) == 0 and summary.get("unknown_calls", 0) == 0:
+        return local_billing()
+    status = "unknown" if summary.get("unknown_calls") or summary.get("prompt_tokens") is None else "reported"
+    return {
+        "billing_status": "unknown" if status == "unknown" else "reported_unverified",
+        "verified_billed_usd": None,
+        "usage_status": status,
+        "prompt_tokens": summary.get("prompt_tokens"),
+        "completion_tokens": summary.get("completion_tokens"),
+        "charged_tokens": summary.get("charged_tokens"),
+    }
+
+
+def quota_headers(headers: Any) -> dict[str, str]:
+    """Copy only short rate-limit headers. Authorization and cookies are never ledger fields."""
+    names = (
+        "retry-after",
+        "x-ratelimit-limit-requests",
+        "x-ratelimit-remaining-requests",
+        "x-ratelimit-reset-requests",
+        "x-ratelimit-limit-tokens",
+        "x-ratelimit-remaining-tokens",
+        "x-ratelimit-reset-tokens",
+    )
+    found: dict[str, str] = {}
+    for name in names:
+        value = headers.get(name) if hasattr(headers, "get") else None
+        if isinstance(value, str) and value.strip() and len(value) <= 80:
+            found[name] = value.strip()
+    return found
 
 
 def input_upper_bound(messages: list[dict[str, str]]) -> int:

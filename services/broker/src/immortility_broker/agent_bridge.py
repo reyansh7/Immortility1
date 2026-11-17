@@ -6,7 +6,7 @@ import math
 from copy import deepcopy
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, ValidationError
 
 from .capabilities import StrictModel
 from .contracts import BrokerError
@@ -17,6 +17,7 @@ PROVIDER_TOOL_NAME = "execute"
 APPROVED_CAPABILITIES = frozenset(
     {
         "arithmetic.add.v1",
+        "arithmetic.multiply.v1",
         "clock.now.v1",
         "public.research.v1",
         "report.create.v1",
@@ -60,6 +61,7 @@ def capability_input(name: str) -> type[StrictModel]:
 
     models: dict[str, type[StrictModel]] = {
         "arithmetic.add.v1": AddInput,
+        "arithmetic.multiply.v1": AddInput,
         "clock.now.v1": EmptyInput,
         "public.research.v1": ResearchInput,
         "report.create.v1": ReportInput,
@@ -190,7 +192,14 @@ def validate_calls(calls: Any, names: list[str]) -> list[dict[str, Any]]:
             if proposal.capability not in names or proposal.capability not in APPROVED_CAPABILITIES:
                 raise ValueError
             reason = "capability_arguments"
-            capability_input(proposal.capability).model_validate(proposal.arguments, strict=True)
+            try:
+                capability_input(proposal.capability).model_validate(proposal.arguments, strict=True)
+            except ValidationError as error:
+                fields = ",".join(
+                    ".".join(str(part) for part in item.get("loc", ())) for item in error.errors()
+                )
+                reason = "capability_arguments:" + proposal.capability + ":" + fields
+                raise ValueError from None
             ids.add(ident)
             clean.append(
                 {

@@ -44,6 +44,7 @@ from .memory import (
 )
 from .dialogue import asks_identity, ground_project_answer, identity_text, prepare_history
 from .direct_chat import DirectChat
+from .hermes_gateway import authorize_call
 from .permission_policy import govern
 from .policy import MODEL, guard_secret_egress, inference_payload
 from .providers import (
@@ -60,17 +61,27 @@ from .providers import (
 from .provider_stream import sse_data, StreamCounters, provider_error_category
 from .semantic_stream import SemanticToolStream
 from .routing import Plan, classify, wants_edit
-from .ledger import estimate_input_tokens, fit_prompt, prompt_byte_components
+from .ledger import (
+    billing_view,
+    estimate_input_tokens,
+    fit_prompt,
+    local_billing,
+    prompt_byte_components,
+    quota_headers,
+    simulated_billing,
+)
 from .capabilities import (
     AddInput,
     AddOutput,
     Capability,
+    MultiplyOutput,
     ClockOutput,
     EmptyInput,
     Gateway,
     Grant,
     Registration,
     parse_add,
+    verified_product,
 )
 from .standard_mcp import sdk_request
 from .workflows import WorkflowJournal, WorkflowRequest
@@ -239,6 +250,15 @@ class ToolCall(BaseModel):
     name: str = Field(min_length=1, max_length=32)
 
 
+class AuthorizeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    capability: str = Field(min_length=1, max_length=80)
+    profile: Literal["observer", "assisted"] = "observer"
+    crashed: bool = False
+    timed_out: bool = False
+    disabled: bool = False
+
+
 class ProviderKey(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     provider: Literal["openrouter", "gemini", "groq", "nvidia"]
@@ -298,6 +318,7 @@ class Engine:
         self.answer_complete = False
         self.attempt_id = uid()
         self.inference_key = secrets.token_urlsafe(32)
+        self.warm_inference_key = ""
         self.token_cap = 4000
         self.registry = ModelRegistry(store.db, settings)
         self.model_selection = ModelSelection()
@@ -386,9 +407,22 @@ class Engine:
                 )
             return result
 
+        async def multiply(arguments: dict[str, Any]) -> dict[str, Any]:
+            output = MultiplyOutput(result=verified_product(arguments["a"], arguments["b"]))
+            return output.model_dump()
+
         self.gateway.register(
             Registration(
                 Capability(), AddInput, AddOutput, calculate, lambda: settings.standard_mcp_enabled
+            )
+        )
+        self.gateway.register(
+            Registration(
+                Capability(name="arithmetic.multiply.v1", provider="local-python"),
+                AddInput,
+                MultiplyOutput,
+                multiply,
+                lambda: settings.local_tools_enabled,
             )
         )
         self.gateway.register(
@@ -857,7 +891,7 @@ class Engine:
                     "text": text,
                     "provider": "local",
                     "model": "workflow.local.v1",
-                    "paid_usd": 0,
+                    **local_billing(),
                     "steps": verified,
                 },
             )
@@ -980,6 +1014,8 @@ class Engine:
         identity = asks_identity(content) and local_choice is None
         simple_chat = (
             self.direct_simple_chat
+            and not self.settings.hermes_0232_gateway
+            and not self.settings.simulated_inference
             and local_choice is None
             and not identity
             and not approved
@@ -1008,9 +1044,13 @@ class Engine:
             self.runtime = DirectChat(self.settings, offer)
         else:
             self.runtime = None if local_choice or delegate or edit or identity else self.factory()
-        if isinstance(self.runtime, Hermes):
+        if isinstance(self.runtime, Hermes) or getattr(
+            self.runtime, "accepts_broker_schemas", False
+        ):
             self.runtime.response_length = task["input"].get("response_length", "normal")
             self.runtime.broker_schemas = self.gateway.discover(tuple(approved))
+            if getattr(self.runtime, "accepts_broker_schemas", False):
+                self.runtime.idempotency_key = str(task["input"].get("request_id", ""))[:255]
         started = time.perf_counter()
         first_token: float | None = None
         try:
@@ -1036,7 +1076,7 @@ class Engine:
                         "text": text,
                         "provider": "local",
                         "model": offer.model_id,
-                        "paid_usd": 0,
+                        **local_billing(),
                     },
                 )
                 return
@@ -1077,7 +1117,7 @@ class Engine:
                             "text": text,
                             "provider": "local",
                             "model": name,
-                            "paid_usd": 0,
+                            **local_billing(),
                         },
                     )
                     return
@@ -1107,7 +1147,7 @@ class Engine:
                         "text": text,
                         "provider": "local",
                         "model": name,
-                        "paid_usd": 0,
+                        **local_billing(),
                     },
                 )
                 return
@@ -1276,16 +1316,16 @@ class Engine:
             self._metrics(task_id, plan, started, first_token)
             self._spoken(task_id, task, text, True)
             spawn_ms = getattr(self.runtime, "spawn_ms", None) if self.runtime is not None else None
-            if spawn_ms is not None:
-                self.store.event(
-                    task_id,
-                    "audit.notice",
-                    {
-                        "name": "hermes_timing",
-                        "spawn_ms": spawn_ms,
-                        "ready_ms": getattr(self.runtime, "ready_ms", None),
-                    },
-                )
+            if self.runtime is not None and (
+                spawn_ms is not None or getattr(self.runtime, "reused", False)
+            ):
+                timing: dict[str, Any] = {"name": "hermes_timing"}
+                if spawn_ms is not None:
+                    timing["cold_start_ms"] = spawn_ms
+                    timing["ready_ms"] = getattr(self.runtime, "ready_ms", None)
+                else:
+                    timing["reused"] = True
+                self.store.event(task_id, "audit.notice", timing)
             completed_tools = [
                 str(event["data"].get("name"))
                 for event in self.store.events(task_id)
@@ -1305,6 +1345,21 @@ class Engine:
                 )
             else:
                 memory = redact(content + "\n" + text)
+            denied_tool = any(
+                event.get("type") == "tool.completed"
+                and (event.get("data") or {}).get("code") == "tool_denied"
+                for event in self.store.events(task_id)
+            )
+            if denied_tool:
+                self.store.state(
+                    task_id,
+                    "blocked",
+                    error={
+                        "code": "tool_denied",
+                        "message": "A tool request was denied. The task was not completed.",
+                    },
+                )
+                return
             self.store.remember(task["session_id"], task_id, memory)
             self.store.state(task_id, "verifying")
             self.store.state(
@@ -1314,7 +1369,16 @@ class Engine:
                     "text": text,
                     "provider": self.model_route.provider if self.model_route else "openrouter",
                     "model": self.model_route.model_id if self.model_route else MODEL,
-                    "paid_usd": 0,
+                    **(
+                        simulated_billing(self.store.ledger.summary(task_id))
+                        if getattr(self.model_route, "provider", None) == "simulated"
+                        else {
+                            "inference_category": "live_model"
+                            if self.model_route
+                            else "local_deterministic",
+                            **billing_view(self.store.ledger.summary(task_id)),
+                        }
+                    ),
                     "source_refs": self.source_refs,
                     "artifacts": self.artifact_result["artifacts"] if self.artifact_result else [],
                     "finalization": "broker-verified-receipt"
@@ -1477,7 +1541,7 @@ class Engine:
                 "partial": True,
                 "provider": route.provider if route else "local",
                 "model": route.model_id if route else "local",
-                "paid_usd": 0,
+                **billing_view(self.store.ledger.summary(task_id)),
             }
         self.store.state(task_id, status, **updates)
 
@@ -1501,7 +1565,7 @@ class Engine:
                         "text": text,
                         "provider": route.provider if route else "local",
                         "model": route.model_id if route else "local",
-                        "paid_usd": 0,
+                        **billing_view(self.store.ledger.summary(task_id)),
                     },
                 )
                 return
@@ -1530,7 +1594,11 @@ class Engine:
         if self.store.get(task_id)["status"] not in TERMINAL:
             updates: dict[str, Any] = {"error": {"code": issue.code, "message": issue.message}}
             if partial.strip():
-                updates["result"] = {"text": partial, "partial": True, "paid_usd": 0}
+                updates["result"] = {
+                    "text": partial,
+                    "partial": True,
+                    **billing_view(self.store.ledger.summary(task_id)),
+                }
             self.store.state(task_id, status, **updates)
 
     def _spoken(self, task_id: str, task: dict[str, Any], text: str, final: bool) -> None:
@@ -1568,6 +1636,32 @@ class Engine:
         elif task["status"] not in TERMINAL:
             self.store.state(task_id, "cancelled")
         self.workflow_wake.set()
+
+
+def apply_simulated_flag(settings: Settings) -> None:
+    """Enable the local fixture only from a canary file. A missing file leaves it off."""
+    path = settings.data_dir / "simulated-inference.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeError):
+        return
+    if (
+        isinstance(data, dict)
+        and data.get("enabled") is True
+        and data.get("category") == "simulated_model"
+    ):
+        settings.simulated_inference = True
+
+
+def apply_gateway_flag(settings: Settings) -> None:
+    """Opt in to Hermes 0.23.2 from a local file. Absence leaves the 0.21.1 default."""
+    path = settings.data_dir / "hermes-gateway.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeError):
+        return
+    if isinstance(data, dict) and data.get("enabled") is True:
+        settings.hermes_0232_gateway = True
 
 
 def apply_capability_flags(settings: Settings) -> None:
@@ -1619,6 +1713,8 @@ def create_app(
         raise ValueError("A random per-launch session token is required")
     instance_id = instance_id or uid()
     apply_capability_flags(settings)
+    apply_gateway_flag(settings)
+    apply_simulated_flag(settings)
     apply_delegation_file(settings)
     apply_local_tools_file(settings)
     apply_laptop_file(settings)
@@ -1636,18 +1732,39 @@ def create_app(
         settings.data_dir / "broker.log", maxBytes=1000000, backupCount=2, encoding="utf-8"
     )
     audit.addHandler(audit_handler)
-    engine = Engine(
-        store,
-        factory or (lambda: Hermes(settings, base_url + "/inference/v1", engine.inference_key)),
-        settings,
-    )
+    supervisor = None
+    if factory is None and settings.hermes_0232_gateway:
+        from .hermes_gateway import GatewaySupervisor
+
+        supervisor = GatewaySupervisor(settings, base_url)
+
+    def default_runtime() -> Runtime:
+        if supervisor is not None and supervisor.runtime_ready:
+            return supervisor.session()
+        return Hermes(settings, base_url + "/inference/v1", engine.inference_key)
+
+    engine = Engine(store, factory or default_runtime, settings)
+    if supervisor is not None:
+        engine.warm_inference_key = supervisor.inference_key
     engine.direct_simple_chat = factory is None
     http = client or httpx.AsyncClient(trust_env=False, follow_redirects=False, timeout=30)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         engine.start_workflows()
-        yield
+        if supervisor is not None:
+            try:
+                await supervisor.start()
+            except Exception as error:
+                if settings.data_dir.name.startswith("canary-"):
+                    with (settings.data_dir / "gateway-steps.log").open("a", encoding="utf-8") as handle:
+                        handle.write(type(error).__name__ + ": " + str(error)[:300] + "\n")
+                raise
+        try:
+            yield
+        finally:
+            if supervisor is not None:
+                await supervisor.stop()
         await engine.shutdown()
         await voice.cancel()
         await voice.qwen.shutdown()
@@ -1734,9 +1851,21 @@ def create_app(
             )
         if request.url.path != "/health/live" and request.method != "OPTIONS":
             expected = engine.inference_key if request.url.path.startswith("/inference/") else token
-            if not hmac.compare_digest(
-                request.headers.get("authorization", ""), f"Bearer {expected}"
+            presented = request.headers.get("authorization", "")
+            authorized = hmac.compare_digest(presented, f"Bearer {expected}")
+            peer = request.client.host if request.client is not None else ""
+            if (
+                not authorized
+                and request.url.path.startswith("/inference/")
+                and engine.warm_inference_key
+                and engine.inference_allowed
+                and engine.active is not None
+                and peer in {"127.0.0.1", "::1"}
             ):
+                authorized = hmac.compare_digest(
+                    presented, "Bearer " + engine.warm_inference_key
+                )
+            if not authorized:
                 return JSONResponse(
                     {"error": {"code": "unauthorized", "message": "Authentication required."}}, 401
                 )
@@ -1785,7 +1914,13 @@ def create_app(
         nvidia = bool(settings.nvidia_api_key.get_secret_value())
         return {
             "hermes": hermes,
-            "ready": hermes["status"] == "available" and engine.registry.ready(),
+            "ready": (hermes["status"] == "available" and engine.registry.ready())
+            or bool(
+                settings.simulated_inference
+                and supervisor is not None
+                and supervisor.runtime_ready
+            ),
+            "simulated_inference": settings.simulated_inference,
             "free_only": True,
             "runtime_mode": "local-background" if settings.local_only_mode else "desktop",
             "instance_id": instance_id,
@@ -1879,6 +2014,31 @@ def create_app(
                 engine.gateway.discover(tuple(request.allowed_capabilities))
             ) != len(request.allowed_capabilities):
                 raise BrokerError("tool_denied", "Task requests a disabled broker capability.", 403)
+        folded = request.content.casefold()
+        if (
+            settings.simulated_inference
+            and settings.local_tools_enabled
+            and request.source == "text"
+            and not request.allowed_capabilities
+            and "SIM:bad" in request.content
+        ):
+            request = request.model_copy(
+                update={"allowed_capabilities": ["arithmetic.multiply.v1"]}
+            )
+        if (
+            settings.simulated_inference
+            and request.source == "text"
+            and "247" in folded
+            and "36" in folded
+            and "time" in folded
+            and "project" in folded
+        ):
+            admitted: list[str] = []
+            if settings.local_tools_enabled:
+                admitted.extend(["clock.now.v1", "arithmetic.multiply.v1"])
+            if settings.project_read_enabled and settings.workspace_root is not None:
+                admitted.append("project.outline.v1")
+            request = request.model_copy(update={"allowed_capabilities": admitted[:4]})
         if (
             settings.local_tools_enabled
             and request.source == "text"
@@ -1945,7 +2105,7 @@ def create_app(
                 },
             )
             return store.get(task["task_id"])
-        if factory is None and not local:
+        if factory is None and not local and not settings.simulated_inference:
             if not any(
                 credential_identity(settings, provider.id) for provider in PROVIDERS.values()
             ):
@@ -2355,7 +2515,7 @@ def create_app(
                 "text": text,
                 "provider": "local" if payload.get("test_path") else "openrouter",
                 "model": "project.repair.v1" if payload.get("test_path") else MODEL,
-                "paid_usd": 0,
+                **billing_view(store.ledger.summary(task_id)),
             },
         )
         return store.get(task_id)
@@ -2545,6 +2705,18 @@ def create_app(
         await voice.interrupt(task_id)
         return store.get(task_id)
 
+    @app.post("/v1/authorize")
+    def authorize(body: AuthorizeRequest) -> dict[str, str]:
+        decision = authorize_call(
+            body.capability,
+            body.profile,
+            {"action": "allow"},
+            crashed=body.crashed,
+            timed_out=body.timed_out,
+            disabled=body.disabled,
+        )
+        return {"decision": decision}
+
     @app.post("/v1/stop")
     async def stop(request: Request) -> dict[str, bool]:
         engine.stopping_workflows = True
@@ -2645,6 +2817,7 @@ def create_app(
                 {"code": "tool_denied", "message": "Permission policy denied this operation."},
             )
             raise BrokerError("tool_denied", "Operation is outside the permission policy.", 403)
+        store.event(task_id, "tool.started", {"name": proposal.capability})
         engine.bridge_calls += 1
         arguments = dict(proposal.arguments)
         if proposal.capability.startswith("project."):
@@ -2680,6 +2853,11 @@ def create_app(
         )
         if proposal.capability.startswith("project."):
             engine.tool_evidence.append(json.dumps(result)[:4000])
+        store.event(
+            task_id,
+            "tool.completed",
+            {"name": proposal.capability, "status": "ok", "verified": True},
+        )
         return {
             "capability": proposal.capability,
             "result": model_evidence(
@@ -2866,7 +3044,33 @@ def create_app(
             remaining_tokens=available,
             deadline=engine.inference_deadline,
         )
-        if engine.model_route is None:
+        if engine.model_route is None and settings.simulated_inference:
+            from .simulated import SimulatedRoute
+
+            engine.model_route = SimulatedRoute()
+            engine.route_identity = "simulated-local"
+            store.ledger.bind_route(
+                attempt_id,
+                engine.model_route.provider,
+                engine.model_route.model_id,
+                "local-test",
+                engine.model_route.route_id,
+            )
+            store.event(
+                task_id,
+                "audit.notice",
+                {
+                    "name": "model.route",
+                    "provider": engine.model_route.provider,
+                    "model": engine.model_route.model_id,
+                    "route_id": engine.model_route.route_id,
+                    "task_class": need.task_class,
+                    "mode": engine.model_selection.mode,
+                    "qualification": "offline",
+                    "inference_category": "simulated_model",
+                },
+            )
+        elif engine.model_route is None:
             engine.model_route = engine.registry.choose(engine.model_selection, need)
             engine.route_identity = credential_identity(settings, engine.model_route.provider)
             store.ledger.bind_route(
@@ -2887,17 +3091,18 @@ def create_app(
                     "task_class": need.task_class,
                     "mode": engine.model_selection.mode,
                     "qualification": engine.model_route.qualification,
+                    "inference_category": "live_model",
                 },
             )
         route = engine.model_route
         dispatch_identity = engine.route_identity
-        if credential_identity(settings, route.provider) != engine.route_identity:
+        if not settings.simulated_inference and credential_identity(settings, route.provider) != engine.route_identity:
             raise BrokerError(
                 "credential_changed",
                 "Provider credential changed during the task; no account switch permitted.",
                 403,
             )
-        rejection = engine.registry.rejection(route, need)
+        rejection = None if settings.simulated_inference else engine.registry.rejection(route, need)
         if rejection:
             raise BrokerError(
                 "route_unavailable", "Selected route is no longer eligible: " + rejection, 403
@@ -2936,37 +3141,50 @@ def create_app(
             )
 
         try:
-            quota = await verify_dispatch(
-                http,
-                route,
-                key=getattr(
-                    settings, PROVIDERS[route.provider].credential_field
-                ).get_secret_value(),
-                minimum_requests=2
-                if "report.create.v1" in approved and not engine.source_refs
-                else 1,
-                still_authorized=lambda: (
-                    engine.inference_allowed
-                    and engine.active == task_id
-                    and engine.inference_key == grant_key
-                    and credential_identity(settings, route.provider) == dispatch_identity
-                    and time.time() < engine.inference_deadline
-                    and engine.registry.rejection(route, need) is None
-                ),
-            )
-            store.event(
-                task_id,
-                "audit.notice",
-                {
-                    "name": "provider.quota_verified",
-                    "provider": route.provider,
-                    "remaining_requests_observed": quota,
-                    "source": "official-current-key-api"
-                    if quota is not None
-                    else "free-tier-allowlist; provider quota was not read",
-                    "validity": "this dispatch only",
-                },
-            )
+            if settings.simulated_inference:
+                store.event(
+                    task_id,
+                    "audit.notice",
+                    {
+                        "name": "provider.quota_verified",
+                        "provider": "simulated",
+                        "remaining_requests_observed": None,
+                        "source": "simulated_model; no provider was contacted",
+                        "validity": "local fixture",
+                    },
+                )
+            else:
+                quota = await verify_dispatch(
+                    http,
+                    route,
+                    key=getattr(
+                        settings, PROVIDERS[route.provider].credential_field
+                    ).get_secret_value(),
+                    minimum_requests=2
+                    if "report.create.v1" in approved and not engine.source_refs
+                    else 1,
+                    still_authorized=lambda: (
+                        engine.inference_allowed
+                        and engine.active == task_id
+                        and engine.inference_key == grant_key
+                        and credential_identity(settings, route.provider) == dispatch_identity
+                        and time.time() < engine.inference_deadline
+                        and engine.registry.rejection(route, need) is None
+                    ),
+                )
+                store.event(
+                    task_id,
+                    "audit.notice",
+                    {
+                        "name": "provider.quota_verified",
+                        "provider": route.provider,
+                        "remaining_requests_observed": quota,
+                        "source": "official-current-key-api"
+                        if quota is not None
+                        else "free-tier-allowlist; provider quota was not read",
+                        "validity": "this dispatch only",
+                    },
+                )
         except BaseException as error:
             store.ledger.settle(call_id, None, sent=False)
             early_notice(
@@ -2986,9 +3204,15 @@ def create_app(
             not engine.inference_allowed
             or engine.active != task_id
             or engine.inference_key != grant_key
-            or credential_identity(settings, route.provider) != dispatch_identity
+            or (
+                not settings.simulated_inference
+                and credential_identity(settings, route.provider) != dispatch_identity
+            )
             or time.time() >= engine.inference_deadline
-            or engine.registry.rejection(route, need) is not None
+            or (
+                not settings.simulated_inference
+                and engine.registry.rejection(route, need) is not None
+            )
         ):
             store.ledger.settle(call_id, None, sent=False)
             early_notice("revoked_preflight", sent=False)
@@ -2996,10 +3220,15 @@ def create_app(
                 "inference_closed", "Inference grant was revoked during preflight.", 403
             )
         try:
-            upstream = await http.send(
-                compatible_request(http, settings, route, payload),
-                stream=True,
-            )
+            if settings.simulated_inference:
+                from .simulated import SimulatedUpstream, scripted_pieces
+
+                upstream = SimulatedUpstream(scripted_pieces(payload["messages"]))
+            else:
+                upstream = await http.send(
+                    compatible_request(http, settings, route, payload),
+                    stream=True,
+                )
         except BaseException as error:
             # Once dispatch begins, a transport error/cancel cannot prove no bytes
             # reached the provider. Keep the full reservation charged as unknown.
@@ -3220,7 +3449,11 @@ def create_app(
                         ):
                             engine.registry.failure(route, 503, credential=dispatch_identity)
                         try:
-                            store.ledger.settle(call_id, reported_usage)
+                            store.ledger.settle(
+                                call_id,
+                                reported_usage,
+                                synthetic=settings.simulated_inference,
+                            )
                         except BrokerError as error:
                             if engine.active == task_id and engine.inference_key == grant_key:
                                 engine.provider_error = error
@@ -3266,6 +3499,7 @@ def create_app(
                                 if reported_usage is not None
                                 and type(reported_usage.get("completion_tokens")) is int
                                 else None,
+                                "quota_headers": quota_headers(upstream.headers),
                                 "finish_reason": finish_reason,
                                 "accepted_proposals": accepted_proposals,
                                 "rejected_proposals": rejected_proposals,

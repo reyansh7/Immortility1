@@ -253,7 +253,8 @@ function App() {
     },
     [watch],
   );
-  const cloudChat = prefs.cloudChat === true;
+  const fixtureChat = health?.simulated_inference === true;
+  const cloudChat = fixtureChat || prefs.cloudChat === true;
   const voice = useVoice(session, cloudChat, onVoiceTask, setInput);
   const level = voice.level;
 
@@ -863,7 +864,7 @@ function App() {
                 </button>
               </div>
             </header>
-            {prefs.cloudChat === undefined && !localOnly && (
+            {prefs.cloudChat === undefined && !localOnly && !fixtureChat && (
               <div className="onboarding" role="region" aria-label="Cloud chat">
                 <p>
                   Cloud chat sends what you type to a qualified free model. File

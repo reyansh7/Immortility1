@@ -64,6 +64,27 @@ class AddOutput(StrictModel):
     result: int = Field(ge=-(2 * 10**9), le=2 * 10**9)
 
 
+class MultiplyOutput(StrictModel):
+    result: int = Field(ge=-(10**18), le=10**18)
+
+
+def verified_product(left: int, right: int) -> int:
+    """Integer product checked by division, so a bad result cannot pass as success."""
+    if type(left) is not int or type(right) is not int:
+        raise BrokerError("invalid_request", "Bounded integer arguments required.", 400)
+    product = left * right
+    if right == 0:
+        if product != 0:
+            raise BrokerError(
+                "verification_failed", "Arithmetic result failed independent validation.", 503
+            )
+    elif product // right != left:
+        raise BrokerError(
+            "verification_failed", "Arithmetic result failed independent validation.", 503
+        )
+    return product
+
+
 def parse_add(content: str) -> AddInput | None:
     match = re.fullmatch(
         r"\s*add\s+(-?\d{1,10})\s+and\s+(-?\d{1,10})\s*[.?]?\s*", content, re.IGNORECASE

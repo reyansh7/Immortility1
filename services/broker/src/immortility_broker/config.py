@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     groq_api_key: SecretStr = SecretStr("")
     nvidia_api_key: SecretStr = SecretStr("")
     hermes_source: Path = Path.home() / "AppData/Local/hermes/hermes-agent"
+    # Off until the 0.23.2 gateway passes the live tool-selection gate.
+    hermes_0232_gateway: bool = False
+    # Environment cannot enable this. Only the canary file, applied after load, may.
+    simulated_inference: bool = False
     # A reviewed, tested release. Never silently follow upstream main.
     hermes_revision: str = "04b88a4c"
     data_dir: Path = ROOT / "data/dev"
@@ -66,6 +70,12 @@ class Settings(BaseSettings):
     @field_validator("code_execution_enabled", "experimental_qwen_tts", mode="before")
     @classmethod
     def execution_stays_off(cls, value: object) -> object:
+        del value
+        return False
+
+    @field_validator("simulated_inference", mode="before")
+    @classmethod
+    def simulated_stays_off(cls, value: object) -> object:
         del value
         return False
 

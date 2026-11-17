@@ -46,6 +46,7 @@ class TaskRequest(BaseModel):
     allowed_capabilities: list[
         Literal[
             "arithmetic.add.v1",
+            "arithmetic.multiply.v1",
             "clock.now.v1",
             "public.research.v1",
             "report.create.v1",

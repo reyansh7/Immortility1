@@ -183,6 +183,61 @@ class ProcessOwner:
             self.handle = None
 
 
+def _terminate_descendants(root: int) -> None:
+    """Stop children of one process we created. Other process IDs are left running."""
+    if os.name != "nt" or root <= 0:
+        return
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+    kernel.Process32FirstW.argtypes = [wintypes.HANDLE, ctypes.c_void_p]
+    kernel.Process32NextW.argtypes = [wintypes.HANDLE, ctypes.c_void_p]
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+
+    class Entry(ctypes.Structure):
+        _fields_ = [
+            ("size", wintypes.DWORD),
+            ("usage", wintypes.DWORD),
+            ("process_id", wintypes.DWORD),
+            ("heap", ctypes.c_size_t),
+            ("module_id", wintypes.DWORD),
+            ("threads", wintypes.DWORD),
+            ("parent", wintypes.DWORD),
+            ("priority", wintypes.LONG),
+            ("flags", wintypes.DWORD),
+            ("exe", wintypes.WCHAR * 260),
+        ]
+
+    snapshot = kernel.CreateToolhelp32Snapshot(2, 0)
+    if snapshot in {None, ctypes.c_void_p(-1).value}:
+        return
+    entry = Entry()
+    entry.size = ctypes.sizeof(Entry)
+    children: dict[int, list[int]] = {}
+    try:
+        present = kernel.Process32FirstW(snapshot, ctypes.byref(entry))
+        while present:
+            children.setdefault(int(entry.parent), []).append(int(entry.process_id))
+            present = kernel.Process32NextW(snapshot, ctypes.byref(entry))
+    finally:
+        kernel.CloseHandle(snapshot)
+    ordered: list[int] = []
+    pending = list(children.get(root, []))
+    while pending:
+        pid = pending.pop()
+        if pid == root or pid in ordered:
+            continue
+        ordered.append(pid)
+        pending.extend(children.get(pid, []))
+    for pid in reversed(ordered):
+        handle = kernel.OpenProcess(0x0001, False, pid)
+        if handle:
+            kernel.TerminateProcess(handle, 1)
+            kernel.CloseHandle(handle)
+
+
 async def reap(process: asyncio.subprocess.Process, owner: ProcessOwner | None) -> None:
     """No WMI/taskkill subprocess, name lookup or broad process termination."""
     deadline = asyncio.get_running_loop().time() + 3
@@ -190,6 +245,9 @@ async def reap(process: asyncio.subprocess.Process, owner: ProcessOwner | None) 
         if owner is not None:
             owner.terminate()
         elif process.returncode is None:
+            # No second job is available when this process already inherited one.
+            # Stop only descendants of the process we created, then that process.
+            _terminate_descendants(process.pid)
             process.kill()
         await asyncio.wait_for(
             process.wait(), max(0.001, deadline - asyncio.get_running_loop().time())

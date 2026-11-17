@@ -7,6 +7,7 @@ from .config import ROOT
 _HARD_DENY = ("shell", "computer", "browser", "yolo", "mcp.install")
 _ACTIONS = {
     "arithmetic.add.v1": "local_arithmetic",
+    "arithmetic.multiply.v1": "local_arithmetic",
     "clock.now.v1": "local_clock",
     "public.research.v1": "browse_public_web",
     "report.create.v1": "write_approved_workspace",

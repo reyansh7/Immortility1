@@ -128,7 +128,8 @@ def test_storage_question_stays_local_and_does_not_call_a_model(tmp_path: Path, 
             pytest.fail("storage task did not settle")
     assert task["status"] == "succeeded"
     assert task["result"]["provider"] == "local"
-    assert task["result"]["paid_usd"] == 0
+    assert task["result"]["billing_status"] == "not_applicable"
+    assert task["result"]["verified_billed_usd"] is None
     assert "node_modules" in task["result"]["text"]
     assert "rebuildable-candidate" in task["result"]["text"]
     assert called == []

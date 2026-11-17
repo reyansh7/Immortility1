@@ -208,6 +208,34 @@ def free_tier(provider: str, model_id: str) -> bool:
     return (provider, model_id) in FREE_TIER
 
 
+def quota_evidence() -> dict[str, dict[str, str]]:
+    """What this process can know without a provider call.
+
+    A missing rate-limit header is not remaining quota. A free-tier model name
+    is not proof that the next request is free.
+    """
+    return {
+        "groq": {
+            "automated_remaining_quota": "unsupported",
+            "free_tier_allowlist": "openai/gpt-oss-120b",
+            "observed_remaining": "unknown",
+            "check": "https://console.groq.com/settings/limits",
+        },
+        "gemini": {
+            "automated_remaining_quota": "unsupported",
+            "free_tier_allowlist": "gemini-3.5-flash",
+            "observed_remaining": "unknown",
+            "check": "https://ai.google.dev/gemini-api/docs/rate-limits",
+        },
+        "nvidia": {
+            "automated_remaining_quota": "unsupported",
+            "free_tier_allowlist": "nvidia/nemotron-3-ultra-550b-a55b",
+            "observed_remaining": "unknown",
+            "check": "https://build.nvidia.com/",
+        },
+    }
+
+
 def preference_order(kind: TaskClass, content: str, tools: bool) -> tuple[RouteCandidate, ...]:
     advanced = bool(
         re.search(r"\b(architecture|debug|refactor|agentic|planning)\b", content.lower())

@@ -12,6 +12,7 @@ import type { ModelSelection } from "./contracts.generated";
 export interface Health {
   credential_source?: string;
   ready: boolean;
+  simulated_inference?: boolean;
   hermes: { status: string; version?: string; message?: string };
   providers: Record<string, string>;
   free_only: boolean;
