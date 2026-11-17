@@ -1,0 +1,84 @@
+{
+  "status": "BLOCKED",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "inference_calls_this_review": 0,
+  "metadata_get_repeated": false,
+  "production_enabled": false,
+  "warm_hermes_reuse": false,
+  "excluded_providers": ["openrouter", "omniroute"],
+  "stored_evidence": {
+    "file": ".cache/verification/groq-model-metadata-2cb3e864-4a90-4bda-96fb-317c6420886b.json",
+    "listed_for_credential": true,
+    "reported_active": true,
+    "reported_context_tokens": 131072,
+    "billing_verified": false,
+    "quota_verified": false,
+    "model_requests": 0
+  },
+  "broker_gate": "verify_dispatch rejects every provider other than the preserved OpenRouter virtual route with price_unverified before any chat POST. Groq is not a registered production route.",
+  "public_docs_read": [
+    "https://console.groq.com/docs/model/openai/gpt-oss-120b",
+    "https://console.groq.com/docs/models",
+    "https://console.groq.com/docs/rate-limits",
+    "https://console.groq.com/docs/billing-faqs",
+    "https://console.groq.com/settings/billing/plans",
+    "https://console.groq.com/docs/tool-use",
+    "https://console.groq.com/docs/deprecations"
+  ],
+  "established_from_public_docs": {
+    "published_token_price_usd_per_million": {"input": 0.15, "cached_input": 0.075, "output": 0.6},
+    "advertised_context_tokens": 131072,
+    "advertised_max_completion_tokens": 65536,
+    "developer_plan_limits_on_models_page": "250K TPM, 1K RPM",
+    "rate_limits_table_row": "30 RPM, 1K RPD, 8K TPM, 200K TPD",
+    "rate_limits_page_label": "The same page calls its table a Developer-plan summary and says the organization Limits page is authoritative.",
+    "plans": "Free is advertised as $0. Developer is pay per token and starts billing after upgrade. Enterprise is separate.",
+    "account_plan_api": "No documented models-list or chat field returns the organization plan or a zero-price entitlement.",
+    "local_function_calling": "Documented for this model. Parallel tool calls are documented as unsupported. One local tool round trip is two chat completions.",
+    "hosted_tools_not_authorized": ["browser search", "code execution", "remote MCP"]
+  },
+  "user_attested_organization_caps": {
+    "plan": "Free",
+    "requests_per_minute": 30,
+    "requests_per_day": 1000,
+    "tokens_per_minute": 8000,
+    "tokens_per_day": 200000,
+    "remaining_quota_verified": false,
+    "source": "User attestation on 2026-11-16. Not an API read and not remaining capacity."
+  },
+  "nvidia_deep_candidate": {
+    "model": "nvidia/nemotron-3-ultra-550b-a55b",
+    "published_serverless_usd_per_million": {"input": 0.6, "output": 2.4},
+    "admitted": false
+  },
+  "gemini_reasoning_candidate": {
+    "model": "gemini-3.8-flash",
+    "account_qualified": false
+  },
+  "not_established": [
+    "This organization's plan is Free rather than Developer or Enterprise.",
+    "Free-plan use of this model is unbilled for this organization.",
+    "Current remaining requests and tokens cover two calls and 8000 tokens.",
+    "Hermes streaming function-call deltas for this model survive the broker tool bridge.",
+    "A completed model-selected broker tool result."
+  ],
+  "approval_required_before_any_request": {
+    "phase_a_account_observation": {
+      "network": false,
+      "inference": false,
+      "metadata_get": false,
+      "observe": "Signed-in Groq console Billing plan name and the Limits row for openai/gpt-oss-120b only.",
+      "pass": "Plan label is Free, and the displayed limits leave at least 2 requests and 8000 tokens.",
+      "fail_closed": "Developer, Enterprise, unknown, a visible per-token charge, or remaining capacity below the ceiling. Do not call the model."
+    },
+    "phase_b_only_after_phase_a_passes": {
+      "route": "direct Groq openai/gpt-oss-120b through one new Hermes task",
+      "tool": "one existing public broker tool, clock.now.v1",
+      "calls": 2,
+      "token_ceiling": 8000,
+      "data": "public prompt only; no project files, uploads, or private memory",
+      "forbidden": ["paid fallback", "retry", "warm Hermes reuse", "parallel tool calls", "Groq hosted tools", "remote MCP", "OpenRouter", "OmniRoute"]
+    }
+  }
+}

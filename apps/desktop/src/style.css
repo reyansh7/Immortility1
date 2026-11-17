@@ -610,6 +610,26 @@ h3 {
   color: var(--gray);
   line-height: 1.7;
 }
+.onboarding {
+  margin: 0 16px 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #ffffff08;
+}
+.onboarding p {
+  margin: 0 0 10px;
+  color: var(--gray);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.settings details.advanced {
+  margin-top: 14px;
+}
+.settings details.advanced summary {
+  cursor: pointer;
+  font-weight: 600;
+}
 article {
   font-size: 13px;
   line-height: 1.65;
@@ -945,6 +965,20 @@ textarea::placeholder {
 }
 .composer-meta .hint {
   font-size: 10px;
+}
+.pace {
+  display: flex;
+  gap: 4px;
+}
+.pace button {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border-color: #ffffff1a;
+}
+.pace button[aria-pressed="true"] {
+  border-color: var(--energy);
+  color: var(--white);
 }
 .consent {
   display: flex;

@@ -4,7 +4,9 @@ Path checks reject links, drive roots, and protected names. They are not a
 sandbox. Untrusted Python is not executed: Windows Sandbox is an optional VM
 feature, and AppContainer is not a verified boundary for this process.
 Writes happen only after approval, and only when the file bytes still match
-the snapshot taken at proposal time.
+the snapshot taken at proposal time. A repair may run one `test_*.py` file
+through `python -m unittest` before the proposal and again after approval.
+`run_unittest` stays denied.
 """
 
 import difflib
@@ -12,6 +14,8 @@ import hashlib
 import json
 import os
 import re
+import subprocess
+import sys
 import tempfile
 import unicodedata
 from collections.abc import Iterator
@@ -318,6 +322,42 @@ def remove_created(root: Path, relative: str, expected: str) -> None:
         path.unlink()
 
 
+def run_allowlisted_unittest(root: Path, relative: str) -> tuple[int, str]:
+    """Run one test module inside the approved root. No shell and no extra arguments."""
+    checked = real_root(root)
+    path = locate(checked, relative)
+    module = path.relative_to(checked).with_suffix("").as_posix().replace("/", ".")
+    parts = module.split(".")
+    if (
+        not path.is_file()
+        or path.suffix.lower() != ".py"
+        or not path.name.startswith("test_")
+        or any(not part.isidentifier() for part in parts)
+        or not parts[-1].startswith("test_")
+    ):
+        raise BrokerError("tool_denied", "Only one test_*.py module inside the project can run.", 403)
+    env = {
+        key: os.environ[key]
+        for key in ("SYSTEMROOT", "WINDIR", "PATH", "PATHEXT", "COMSPEC", "TEMP", "TMP")
+        if key in os.environ
+    }
+    env.update(PYTHONUTF8="1", PYTHONDONTWRITEBYTECODE="1", PYTHONPATH=str(checked))
+    try:
+        completed = subprocess.run(
+            [sys.executable, "-m", "unittest", module],
+            cwd=checked,
+            env=env,
+            capture_output=True,
+            timeout=15,
+            shell=False,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as error:
+        raise BrokerError("timeout", "The allowlisted test timed out.", 408) from error
+    output = (completed.stdout + completed.stderr).decode("utf-8", errors="replace")[:4000]
+    return completed.returncode, output
+
+
 def run_unittest(root: Path) -> tuple[int, str]:
     """Untrusted code execution stays off until an isolation boundary is verified."""
     del root
@@ -374,6 +414,8 @@ def save_workspace_file(settings: Any, enabled: bool, root: str | None) -> None:
         if not root:
             raise BrokerError("invalid_request", "Choose a workspace folder.", 400)
         checked = real_root(Path(root))
+        if checked != settings.workspace_root:
+            settings.project_read_enabled = False
         settings.workspace_root = checked
         stored = str(checked)
     else:
@@ -406,7 +448,7 @@ def save_proposal(data_dir: Path, task_id: str, payload: dict[str, str]) -> None
     _atomic_json(path, payload)
 
 
-def _atomic_json(path: Path, payload: dict[str, str]) -> None:
+def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
     fd, name = tempfile.mkstemp(prefix=".record-", dir=path.parent)
     try:
         with os.fdopen(fd, "wb") as stream:
@@ -437,7 +479,10 @@ def load_proposal(data_dir: Path, task_id: str) -> dict[str, str]:
     }
     if not isinstance(data, dict) or not required <= data.keys():
         raise BrokerError("not_found", "The approval expired.", 404)
-    return {key: str(data[key]) for key in required}
+    loaded = {key: str(data[key]) for key in required}
+    if data.get("test_path"):
+        loaded["test_path"] = str(data["test_path"])
+    return loaded
 
 
 def delete_proposal(data_dir: Path, task_id: str) -> None:

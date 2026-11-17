@@ -3,7 +3,7 @@
 import io
 from typing import Any
 
-from .agent_bridge import TOOL_NAME, validate_stream
+from .agent_bridge import accepted_tool_prefix, validate_stream
 from .contracts import BrokerError
 
 
@@ -119,7 +119,7 @@ class SemanticToolStream:
                             raise ValueError
                         current = call["function"]["name"]
                         candidate = current if name == current else current + name
-                        if not TOOL_NAME.startswith(candidate):
+                        if not accepted_tool_prefix(candidate):
                             raise BrokerError(
                                 "tool_denied",
                                 "Provider requested an unapproved broker operation.",

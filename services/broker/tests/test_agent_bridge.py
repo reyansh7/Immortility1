@@ -58,7 +58,8 @@ def test_opt_in_payload_uses_broker_schema_and_requires_matching_results():
         inference_payload(raw)
     raw["tools"][0]["function"]["parameters"] = {"secret": "malicious schema"}
     result = inference_payload(raw, approved_capabilities=["clock.now.v1"])
-    assert result["tools"] == [tool_spec(["clock.now.v1"])]
+    assert result["tools"] == [tool_spec(["clock.now.v1"], provider=True)]
+    assert result["tools"][0]["function"]["name"] == "execute"
     assert "malicious" not in json.dumps(result)
     exchange = [
         *raw["messages"],

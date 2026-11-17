@@ -109,6 +109,24 @@ export function deriveFace(input: FaceInputs): {
   return { state: "thinking" };
 }
 
+export function presenceLabel(input: {
+  connected: boolean;
+  ready: boolean;
+  starting: boolean;
+  localOnly: boolean;
+  reconnecting?: boolean;
+  hermes?: string;
+}): string {
+  if (!input.connected)
+    return input.starting || input.reconnecting ? "Starting" : "Offline";
+  if (input.reconnecting) return "Reconnecting";
+  if (input.localOnly) return "Local";
+  if (input.hermes === "checking") return "Starting";
+  if (input.hermes && input.hermes !== "available")
+    return "Hermes is not ready";
+  return input.ready ? "Ready" : "Needs a qualified model";
+}
+
 export const faceLabel: Record<FaceState, string> = {
   idle: "Idle",
   listening: "Listening",

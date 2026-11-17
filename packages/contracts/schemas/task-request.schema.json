@@ -4,7 +4,7 @@
   "required": ["schema_version", "session_id", "request_id", "content", "privacy_class", "cloud_consent"],
   "properties": {
     "requested_artifacts": {"enum":["none","markdown-and-pdf"],"default":"none"},
-    "allowed_capabilities": {"type":"array", "maxItems":4, "uniqueItems":true, "items":{"enum":["arithmetic.add.v1","clock.now.v1","public.research.v1","report.create.v1"]}, "default":[]},
+    "allowed_capabilities": {"type":"array", "maxItems":4, "uniqueItems":true, "items":{"enum":["arithmetic.add.v1","clock.now.v1","public.research.v1","report.create.v1","project.outline.v1","project.search.v1","project.read.v1"]}, "default":[]},
     "budget_mode": { "type": "string", "enum": ["auto", "fast", "standard", "deep"], "default": "auto" },
     "schema_version": {"const": "1.0"},
     "session_id": {"type":"string", "minLength":1, "maxLength":64},

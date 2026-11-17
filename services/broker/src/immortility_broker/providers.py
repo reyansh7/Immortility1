@@ -149,6 +149,152 @@ def task_class(content: str, capabilities: list[str], artifacts: str = "none") -
     return "FAST_CHAT"
 
 
+def route_class(
+    content: str,
+    capabilities: list[str],
+    artifacts: str = "none",
+    budget_mode: str = "auto",
+    context_tokens: int = 0,
+) -> TaskClass:
+    """Pick a route class without a model call. NVIDIA stays out until it is free-tier qualified."""
+    kind = task_class(content, capabilities, artifacts)
+    if budget_mode == "deep":
+        return "DEEP_REASONING"
+    if budget_mode == "fast" and not capabilities and artifacts == "none":
+        return "FAST_CHAT"
+    if kind == "FAST_CHAT" and (context_tokens >= 6000 or len(content) >= 4000):
+        return "RESEARCH"
+    return kind
+
+
+@dataclass(frozen=True)
+class RouteCandidate:
+    provider: str
+    model_id: str
+    reason: str
+
+
+GROQ_FAST = RouteCandidate(
+    "groq",
+    "openai/gpt-oss-120b",
+    "Free plan and organization caps were attested, but remaining quota is unverified and zero-price dispatch stays closed.",
+)
+GEMINI_REASONING = RouteCandidate(
+    "gemini",
+    "gemini-3.8-flash",
+    "The public price page lists a free tier for this model. This account is not qualified.",
+)
+NVIDIA_DEEP = RouteCandidate(
+    "nvidia",
+    "nvidia/nemotron-3-ultra-550b-a55b",
+    "NVIDIA Build lists this model on its free prototype endpoint. Partner prices are a different route. Account quota is not read.",
+)
+LOCAL_HERETIC = RouteCandidate(
+    "local",
+    "xtools-at/DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED-heretic",
+    "The local model is not installed. Download requires separate approval.",
+)
+# Explicit free-tier allowlist. A published paid price does not remove a model
+# that the provider serves on its free plan. Models absent from this map stay closed.
+FREE_TIER: dict[tuple[str, str], dict[str, int | bool]] = {
+    ("groq", "openai/gpt-oss-120b"): {"context": 131072, "tools": True},
+    ("gemini", "gemini-3.5-flash"): {"context": 1048576, "tools": True},
+    ("nvidia", "nvidia/nemotron-3-ultra-550b-a55b"): {"context": 1048576, "tools": True},
+}
+CANDIDATES = (GROQ_FAST, GEMINI_REASONING, NVIDIA_DEEP, LOCAL_HERETIC)
+
+
+def free_tier(provider: str, model_id: str) -> bool:
+    return (provider, model_id) in FREE_TIER
+
+
+def preference_order(kind: TaskClass, content: str, tools: bool) -> tuple[RouteCandidate, ...]:
+    advanced = bool(
+        re.search(r"\b(architecture|debug|refactor|agentic|planning)\b", content.lower())
+    )
+    if tools:
+        return (NVIDIA_DEEP if advanced else GROQ_FAST,)
+    if (
+        kind == "DEEP_REASONING"
+        or (kind == "CODING" and advanced)
+        or (kind == "RESEARCH" and advanced)
+    ):
+        return (NVIDIA_DEEP, GEMINI_REASONING)
+    if kind in {"RESEARCH", "DOCUMENT_WRITING", "MULTIMODAL", "STRUCTURED_EXTRACTION"}:
+        return (GEMINI_REASONING, GROQ_FAST)
+    return (GROQ_FAST, GEMINI_REASONING)
+
+
+def decide_route(
+    *,
+    kind: TaskClass,
+    content: str = "",
+    tools: bool = False,
+    privacy: str = "public",
+    mode: ModelMode = "auto_cloud",
+    manual_model: str | None = None,
+    eligible: frozenset[str] = frozenset(),
+    local_ready: bool = False,
+) -> dict[str, Any]:
+    """Choose one preferred model. An empty eligibility set admits nothing and sends nothing."""
+    if mode == "local_qwen":
+        return {
+            "task_class": kind,
+            "provider": "local",
+            "model_id": "Qwen/Qwen3.5-9B",
+            "admitted": False,
+            "fallback_used": False,
+            "reason": "The selected local model is the Heretic build, and standard Qwen is not installed.",
+            "paid_fallback": False,
+        }
+    if mode == "local_heretic" or privacy == "personal":
+        order: tuple[RouteCandidate, ...] = (LOCAL_HERETIC,)
+    elif mode == "manual_cloud":
+        chosen = next((item for item in CANDIDATES if item.model_id == manual_model), None)
+        order = (chosen,) if chosen is not None else ()
+    else:
+        order = preference_order(kind, content, tools)
+    if tools or mode == "manual_cloud":
+        order = order[:1]
+    preferred: RouteCandidate | None = None
+    for index, candidate in enumerate(order):
+        if candidate.provider == "local":
+            admitted = local_ready
+        else:
+            admitted = candidate.model_id in eligible
+        if admitted:
+            return {
+                "task_class": kind,
+                "provider": candidate.provider,
+                "model_id": candidate.model_id,
+                "admitted": True,
+                "fallback_used": index > 0,
+                "reason": "eligible",
+                "paid_fallback": False,
+            }
+        if preferred is None:
+            preferred = candidate
+    if preferred is None:
+        return {
+            "task_class": kind,
+            "provider": None,
+            "model_id": None,
+            "admitted": False,
+            "fallback_used": False,
+            "reason": "No eligible direct model is admitted. No request was sent.",
+            "paid_fallback": False,
+        }
+    return {
+        "task_class": kind,
+        "provider": preferred.provider,
+        "model_id": preferred.model_id,
+        "admitted": False,
+        "fallback_used": False,
+        "reason": preferred.reason,
+        "paid_fallback": False,
+    }
+
+
 def credential_identity(settings: Settings, provider: ProviderId) -> str:
     secret = getattr(settings, PROVIDERS[provider].credential_field).get_secret_value()
     return hashlib.sha256(secret.encode()).hexdigest() if secret else ""
@@ -174,6 +320,26 @@ class ModelRegistry:
                 available=True,
             )
         }
+        self.refresh_free_routes()
+
+    def refresh_free_routes(self) -> None:
+        """Admit allowlisted free models when their credential is present. Paid models are never added."""
+        for (provider, model_id), spec in FREE_TIER.items():
+            route_id = provider + "/" + model_id
+            if not credential_identity(self.settings, provider):  # type: ignore[arg-type]
+                self.models.pop(route_id, None)
+                continue
+            self.models[route_id] = ModelOffer(
+                route_id=route_id,
+                provider=provider,  # type: ignore[arg-type]
+                model_id=model_id,
+                context_tokens=int(spec["context"]),
+                tools_qualified=bool(spec["tools"]),
+                structured_qualified=True,
+                qualification="live",
+                privacy=("public", "personal"),
+                available=True,
+            )
 
     def selection(self) -> ModelSelection:
         row = self.db.execute("SELECT body FROM model_preferences WHERE id=1").fetchone()
@@ -229,7 +395,7 @@ class ModelRegistry:
         legacy = (
             offer.route_id == MODEL and offer.provider == "openrouter" and offer.model_id == MODEL
         )
-        if not legacy and (
+        if not legacy and not free_tier(offer.provider, offer.model_id) and (
             offer.zero_price_until <= now
             or offer.account_until <= now
             or offer.credential_identity != identity
@@ -296,7 +462,15 @@ class ModelRegistry:
         def ranking(offer: ModelOffer) -> tuple[Any, ...]:
             count, success, latency = self.statistics(offer, need.task_class)
             measured = count >= 3
+            if need.task_class in {"DEEP_REASONING", "CODING"} and not need.tools:
+                preferred_provider = "nvidia"
+            elif need.task_class in {"FAST_CHAT", "TOOL_EXECUTION"} or need.tools:
+                preferred_provider = "groq"
+            else:
+                preferred_provider = "gemini"
+            preferred = offer.provider == preferred_provider
             return (
+                not preferred,
                 offer.provider == "openrouter",
                 not measured,
                 -success if measured else 0,
@@ -372,6 +546,12 @@ class ModelRegistry:
             )
 
     def view(self) -> dict[str, Any]:
+        samples: tuple[tuple[TaskClass, str, bool], ...] = (
+            ("FAST_CHAT", "hello", False),
+            ("DEEP_REASONING", "plan the architecture", False),
+            ("TOOL_EXECUTION", "what time is it", True),
+            ("CODING", "debug this refactor", False),
+        )
         rows = []
         for offer in self.models.values():
             rows.append(
@@ -388,7 +568,9 @@ class ModelRegistry:
                     "blocked_reason": self.rejection(offer, Requirements(privacy="public")),
                     "price_check": "fresh catalog required before each request"
                     if offer.route_id == MODEL
-                    else "account-specific proof required",
+                    else "free-tier allowlist; provider quota is not read"
+                    if free_tier(offer.provider, offer.model_id)
+                    else "paid or unverified models stay closed",
                     "quota_remaining": offer.quota_remaining,
                     "quota_checked_at": offer.quota_checked_at,
                     "cooldown_until": self.health(offer)[1],
@@ -408,9 +590,9 @@ class ModelRegistry:
                     )
                     if provider.id == "openrouter"
                     else {
-                        "groq": "blocked: concrete model qualification and account-plan zero-cost evidence missing; a model listing or rate-limit header does not prove free billing",
-                        "gemini": "blocked: concrete model qualification and project/model-specific free-tier billing evidence missing",
-                        "nvidia": "blocked: concrete model qualification and account/model-specific zero-cost production entitlement missing; trial credits alone do not qualify",
+                        "groq": "free-tier allowlist openai/gpt-oss-120b; provider quota is not read",
+                        "gemini": "free-tier allowlist gemini-3.5-flash; provider quota is not read",
+                        "nvidia": "free prototype allowlist nvidia/nemotron-3-ultra-550b-a55b; account quota is not read",
                     }[provider.id],
                     "docs": provider.docs,
                 }
@@ -427,6 +609,10 @@ class ModelRegistry:
             ],
             "automatic_local_fallback": False,
             "paid_fallback": False,
+            "routing": [
+                decide_route(kind=kind, content=sample, tools=tools)
+                for kind, sample, tools in samples
+            ],
         }
 
 
@@ -522,13 +708,20 @@ async def verify_dispatch(
     key: str = "",
     minimum_requests: int = 1,
     still_authorized: Callable[[], bool] | None = None,
-) -> int:
-    # Groq/Gemini/NVIDIA account billing status cannot be proven by their model
-    # advertisements. Keep their production dispatch closed pending that verifier.
+) -> int | None:
+    # Allowlisted free-tier models do not have an account quota document.
+    # Returning None means "not read", never an invented remaining count.
+    # Every other direct model, including priced NVIDIA routes, stays closed.
+    if free_tier(offer.provider, offer.model_id):
+        if not key:
+            raise BrokerError("missing_key", "Selected provider credential is unavailable.", 403)
+        if still_authorized is not None and not still_authorized():
+            raise BrokerError("inference_closed", "Inference grant changed during preflight.", 403)
+        return None
     if offer.provider != "openrouter" or offer.model_id != MODEL:
         raise BrokerError(
             "price_unverified",
-            "Account-specific zero-price dispatch verification is unavailable for this route. No inference sent.",
+            "This model is not on the free-tier allowlist. Paid and unverified routes stay closed.",
             403,
         )
     from .policy import verify_catalog

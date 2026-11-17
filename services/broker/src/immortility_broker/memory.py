@@ -1,6 +1,16 @@
 """Retrieval over local notes and succeeded tasks. This is the broker store, not a second engine."""
 
+import re
+from pathlib import Path
 from typing import Any
+
+from .contracts import BrokerError
+
+_SECRET = re.compile(
+    r"(?i)(?:bearer\s+[A-Za-z0-9._-]{8,})"
+    r"|(?:\b(?:sk|ghp|github_pat|nvapi|AIza)[-_][A-Za-z0-9_-]{8,})"
+    r"|(?:\b(?:api[_-]?key|token|password|secret)\b\s*[:=]\s*\S+)"
+)
 
 
 def words(text: str) -> set[str]:
@@ -61,6 +71,61 @@ def trim_history(history: list[dict[str, str]], max_chars: int = 6000) -> list[d
             break
     kept.reverse()
     return kept
+
+
+def current_project_id(enabled: bool, root: Path | None) -> str:
+    if not enabled or root is None:
+        return ""
+    try:
+        from .project_inspection import identity
+
+        return identity(root)
+    except (OSError, BrokerError):
+        return ""
+
+
+def redact(text: str) -> str:
+    """Remove credential-shaped text before anything is stored or recalled."""
+    return _SECRET.sub("[redacted]", text)
+
+
+def experience_record(
+    *,
+    request: str,
+    provider: str,
+    model: str,
+    tools: list[str],
+    outcome: str,
+) -> str:
+    """Compact receipt. Model prose is not stored as a verified fact."""
+    category = " ".join(re.findall(r"[A-Za-z0-9]{3,}", redact(request))[:8])
+    tool_list = ",".join(
+        tool for tool in tools if isinstance(tool, str) and re.fullmatch(r"[a-z0-9._]{3,64}", tool)
+    )
+    if not re.fullmatch(r"[A-Za-z0-9._-]{1,32}", provider):
+        provider = "unknown"
+    if not re.fullmatch(r"[A-Za-z0-9._:/-]{1,80}", model):
+        model = "unknown"
+    if outcome not in {"ok", "failed"}:
+        outcome = "unknown"
+    return (
+        f"verified experience category {category} provider {provider} model {model} "
+        f"tool {tool_list or 'none'} outcome {outcome}"
+    )[:500]
+
+
+def format_facts(facts: list[dict[str, str]], limit: int = 400) -> str:
+    lines: list[str] = []
+    used = 0
+    for fact in facts:
+        if fact.get("trust") != "user-confirmed" or fact.get("status") != "active":
+            continue
+        line = f"[{fact.get('scope', '')}|{fact.get('kind', '')}] {fact.get('body', '')}"
+        if used + len(line) > limit:
+            break
+        lines.append(line)
+        used += len(line) + 1
+    return "\n".join(lines)
 
 
 def prior_task_notes(tasks: list[dict[str, Any]], query: str, skip: str, limit: int = 600) -> str:

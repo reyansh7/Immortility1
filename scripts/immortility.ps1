@@ -3,6 +3,7 @@ param(
     [switch]$Balanced,
     [switch]$Battery,
     [switch]$Headless,
+    [switch]$Dev,
     [switch]$Integrated,
     [Alias("gpu")]
     [switch]$HighPerformanceGpu
@@ -66,5 +67,22 @@ public static extern bool IsIconic(System.IntPtr hWnd);
     exit 0
 }
 
-& (Join-Path $PSScriptRoot "dev.ps1") -Profile $profile
-exit $LASTEXITCODE
+if ($Dev) {
+    & (Join-Path $PSScriptRoot "dev.ps1") -Profile $profile
+    exit $LASTEXITCODE
+}
+
+. "$PSScriptRoot/power-profile.ps1"
+$repo = Split-Path $PSScriptRoot -Parent
+$release = Join-Path $repo "apps\desktop\src-tauri\target\release\immortility-desktop.exe"
+if (-not (Test-Path -LiteralPath $release)) {
+    throw "Production Immortility is not built. From the repository run: pnpm.cmd --filter @immortility/desktop tauri build. Use immortility-dev for the development app."
+}
+$power = Get-ImmortilityPowerState
+$choice = Resolve-ImmortilityProfile -Profile $profile -OnBattery ([bool]$power.OnBattery)
+$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS = $choice.BrowserArguments
+$env:VITE_IMMORTILITY_PROFILE = $choice.Requested
+$env:VITE_IMMORTILITY_ON_BATTERY = $(if ($choice.OnBattery) { "1" } else { "0" })
+Publish-ImmortilityGpuPreference -Repo $repo -Gpu $choice.Gpu
+Start-Process -FilePath $release
+exit 0

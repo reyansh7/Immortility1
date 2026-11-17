@@ -2,10 +2,10 @@
 default: deny
 profiles:
   observer:
-    allow: [chat, read_permitted_files, metadata_active_window]
+    allow: [chat, read_permitted_files, metadata_active_window, local_clock, local_arithmetic, local_resources, reveal_authorized_path]
     require_approval: [capture_screen, upload_content_to_cloud]
   assisted:
-    allow: [chat, read_permitted_files, browse_public_web, write_approved_workspace]
+    allow: [chat, read_permitted_files, browse_public_web, write_approved_workspace, local_clock, local_arithmetic, local_resources, reveal_authorized_path]
     require_approval: [capture_screen, upload_content_to_cloud, run_code, destructive_file_change, submit_form, send_message, deploy]
   autonomous_scoped:
     allow: [chat, read_permitted_files, browse_public_web, scoped_approved_workflows]

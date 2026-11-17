@@ -274,3 +274,59 @@ def prompt_byte_components(payload: dict[str, Any]) -> dict[str, int]:
     )
     result["message_envelope_reservation"] = 64 + 32 * len(messages)
     return result
+
+
+def estimate_input_tokens(components: dict[str, int]) -> int:
+    """Convert a byte estimate to a reservation that stays above short provider counts."""
+    return max(64, sum(components.values()) // 4)
+
+
+def fit_prompt(
+    messages: list[dict[str, Any]], tools: list[Any], max_input_bytes: int
+) -> list[dict[str, Any]]:
+    """Drop old turns until a prompt fits. The latest message is kept."""
+    kept = [dict(message) for message in messages]
+
+    def estimate(items: list[dict[str, Any]]) -> int:
+        return sum(prompt_byte_components({"messages": items, "tools": tools}).values())
+
+    while estimate(kept) > max_input_bytes and _droppable(kept):
+        kept = _drop_oldest_turn(kept)
+    while estimate(kept) > max_input_bytes:
+        shrunk = False
+        for message in kept:
+            if message.get("role") != "system":
+                continue
+            content = message.get("content") or ""
+            if len(content) <= 900:
+                continue
+            message["content"] = content[: max(400, len(content) // 2)]
+            shrunk = True
+            break
+        if shrunk:
+            continue
+        last = kept[-1]
+        content = last.get("content") or ""
+        if isinstance(content, str) and len(content) > 240:
+            last["content"] = content[-240:]
+            continue
+        break
+    return kept
+
+
+def _droppable(messages: list[dict[str, Any]]) -> bool:
+    return any(message.get("role") != "system" for message in messages[:-1])
+
+
+def _drop_oldest_turn(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    start = next(index for index, message in enumerate(messages) if message.get("role") != "system")
+    if start >= len(messages) - 1:
+        return messages
+    end = start + 1
+    if messages[start].get("role") == "assistant" and messages[start].get("tool_calls"):
+        while end < len(messages) - 1 and messages[end].get("role") == "tool":
+            end += 1
+    elif messages[start].get("role") == "tool":
+        while end < len(messages) - 1 and messages[end].get("role") == "tool":
+            end += 1
+    return messages[:start] + messages[end:]

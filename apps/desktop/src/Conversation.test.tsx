@@ -8,8 +8,6 @@ describe("rendered chat regressions", () => {
     const props = {
       input: "MCP report",
       setInput: () => {},
-      consent: true,
-      setConsent: () => {},
       running: false,
       canSend: true,
       onSend: () => {},
@@ -127,18 +125,32 @@ describe("rendered chat regressions", () => {
       <Composer
         input=""
         setInput={() => {}}
-        consent={false}
-        setConsent={() => {}}
         running={false}
         canSend={false}
+        blockedReason="This window accepts local tasks only."
         onSend={() => {}}
         onStop={() => {}}
         localOnly
       />,
     );
-    expect(composer).toContain("accepts local tasks only");
+    expect(composer).toContain("This window accepts local tasks only.");
     expect(composer).not.toContain(
       "Send this conversation to the free cloud model",
     );
+    const cloud = renderToStaticMarkup(
+      <Composer
+        input="Explain multithreading"
+        setInput={() => {}}
+        running={false}
+        canSend={false}
+        blockedReason="Allow cloud chat to send this message."
+        onSend={() => {}}
+        onStop={() => {}}
+      />,
+    );
+    expect(cloud).not.toContain(
+      "Send this conversation to the free cloud model",
+    );
+    expect(cloud).toContain("Allow cloud chat to send this message.");
   });
 });

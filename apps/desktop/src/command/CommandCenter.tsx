@@ -13,6 +13,7 @@ import {
 import { Approval } from "../Conversation";
 import {
   faceLabel,
+  presenceLabel,
   openTool,
   ROLES,
   type AgentStatus,
@@ -91,6 +92,7 @@ export interface CommandCenterProps {
   prefs: InterfacePrefs;
   health?: Health;
   connected: boolean;
+  starting?: boolean;
   consent: boolean;
   micLive: boolean;
   tasks: Task[];
@@ -466,11 +468,7 @@ function Permissions({
   micLive: boolean;
 }) {
   const rows: [string, boolean | "locked", string][] = [
-    [
-      "Cloud model",
-      consent,
-      consent ? "this conversation" : "ask each conversation",
-    ],
+    ["Cloud model", consent, consent ? "allowed" : "off"],
     ["Microphone", micLive, micLive ? "live now" : "off"],
     ["Specialist agents", health?.delegation_enabled === true, "no tools"],
     ["Web research", health?.web_research_enabled === true, "Wikipedia only"],
@@ -791,8 +789,8 @@ export default function CommandCenter(props: CommandCenterProps) {
     : live?.metrics?.route_mode
       ? `${live.metrics.route_mode} · openrouter/free`
       : ready
-        ? "openrouter/free · $0"
-        : "offline";
+        ? "Auto"
+        : "Needs a qualified model";
   const activity =
     status === "awaiting_approval"
       ? "Paused. Approve or reject the pending change."
@@ -1017,13 +1015,15 @@ export default function CommandCenter(props: CommandCenterProps) {
         </span>
         <span className="model">
           <span className={`dot ${ready ? "online" : ""}`} />
-          {props.connected
-            ? health?.ready
-              ? `Hermes ${health.hermes.version ?? ""} · openrouter/free`
-              : "Setup required"
-            : "Broker disconnected"}
+          {presenceLabel({
+            connected: props.connected,
+            ready: !!health?.ready,
+            starting: props.starting === true,
+            localOnly: health?.runtime_mode === "local-background",
+            hermes: health?.hermes.status,
+          })}
         </span>
-        <span className="badge">$0 · free only</span>
+        <span className="badge">Free</span>
         <span className="drag-zone" aria-hidden="true" />
         <div className="window-buttons">
           <MagneticButton

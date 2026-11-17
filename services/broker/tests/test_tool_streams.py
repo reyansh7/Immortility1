@@ -5,6 +5,7 @@ import json
 import pytest
 
 from immortility_broker.agent_bridge import (
+    PROVIDER_TOOL_NAME,
     TOOL_NAME,
     bridge_messages,
     validate_calls,
@@ -65,6 +66,19 @@ def test_standard_deltas_and_repeated_metadata_are_canonicalized_before_hermes(r
         {"role": "tool", "tool_call_id": "call.provider:0", "content": "bounded fixture"},
     ]
     assert bridge_messages(exchange, ["clock.now.v1"])[-1]["tool_call_id"] == "call.provider:0"
+
+
+def test_short_provider_name_is_canonicalized_and_a_misspelling_is_denied():
+    body = json.dumps({"capability": "clock.now.v1", "arguments": {}})
+    normalized = validate_stream(
+        stream(fragment(body, name=PROVIDER_TOOL_NAME)), ["clock.now.v1"]
+    )
+    call = normalized[-2]["choices"][0]["delta"]["tool_calls"][0]
+    assert call["function"]["name"] == TOOL_NAME
+    with pytest.raises(BrokerError, match="tool_denied"):
+        validate_stream(
+            stream(fragment(body, name="mcp__immortality__execute")), ["clock.now.v1"]
+        )
 
 
 @pytest.mark.parametrize(

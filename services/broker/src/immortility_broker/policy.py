@@ -84,7 +84,12 @@ def inference_payload(
     if not isinstance(messages, list) or len(messages) > 64:
         raise BrokerError("inference_denied", "Invalid conversation.", 403)
     if approved_capabilities:
-        from .agent_bridge import bridge_messages, tool_spec, TOOL_NAME
+        from .agent_bridge import (
+            PROVIDER_TOOL_NAME,
+            TOOL_NAME,
+            bridge_messages,
+            tool_spec,
+        )
 
         if any(
             not isinstance(tool, dict)
@@ -95,11 +100,34 @@ def inference_payload(
             raise BrokerError("tool_denied", "Only the reviewed broker bridge is available.", 403)
         # Rebuild schemas from trusted broker code; never forward arbitrary definitions.
         clean = bridge_messages(messages, approved_capabilities, compact_results=typed_tools)
+        noted = False
         for index, message in enumerate(clean):
             if message["role"] == "system":
-                clean[index] = inference_payload({"model": MODEL, "messages": [message]})[
-                    "messages"
-                ][0]
+                rendered = inference_payload({"model": MODEL, "messages": [message]})["messages"][
+                    0
+                ]
+                if not noted:
+                    rendered = {
+                        **rendered,
+                        "content": (
+                            "The only callable function is execute. "
+                            "Copy that name exactly.\n\n" + rendered["content"]
+                        ),
+                    }
+                    noted = True
+                clean[index] = rendered
+            calls = message.get("tool_calls")
+            if calls:
+                clean[index] = {
+                    **clean[index],
+                    "tool_calls": [
+                        {
+                            **call,
+                            "function": {**call["function"], "name": PROVIDER_TOOL_NAME},
+                        }
+                        for call in calls
+                    ],
+                }
         payload = inference_payload(
             {"model": MODEL, "messages": [{"role": "system", "content": ""}]}
         )
@@ -107,7 +135,7 @@ def inference_payload(
         visible = approved_capabilities if schema_capabilities is None else schema_capabilities
         if not visible or not set(visible) <= set(approved_capabilities):
             raise BrokerError("tool_denied", "Provider schema exceeds task scope.", 403)
-        payload["tools"] = [tool_spec(visible, typed=typed_tools)]
+        payload["tools"] = [tool_spec(visible, typed=typed_tools, provider=True)]
         payload["parallel_tool_calls"] = False
         return payload
     clean = []

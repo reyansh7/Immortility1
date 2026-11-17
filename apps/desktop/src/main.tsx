@@ -30,6 +30,7 @@ import {
   agentStatuses,
   deriveFace,
   faceLabel,
+  presenceLabel,
   wantsOverlay,
 } from "./face/faceState";
 import { FlatFace } from "./face/FlatFace";
@@ -76,6 +77,14 @@ function loadPrefs(): InterfacePrefs {
       reduced:
         typeof saved.reduced === "boolean" ? saved.reduced : defaults.reduced,
       pin: typeof saved.pin === "boolean" ? saved.pin : defaults.pin,
+      cloudChat:
+        saved.cloudChat === true
+          ? true
+          : saved.cloudChat === false
+            ? false
+            : undefined,
+      pace:
+        saved.pace === "fast" || saved.pace === "deep" ? saved.pace : "auto",
     };
   } catch {
     return defaults;
@@ -90,12 +99,11 @@ const blank: Transcript = {
 };
 
 /**
- * Development-only deep link (`?mode=command&view=chat`) so UI reviews and
- * screenshot runs can open a surface directly. Production builds always start
- * as the compact companion.
+ * Optional deep link (`?mode=command&view=chat`) for a specific surface.
+ * The normal launch opens chat immediately.
  */
 function devStart(): { mode: Mode; view: View } {
-  const fallback = { mode: "compact" as Mode, view: "home" as View };
+  const fallback = { mode: "chat" as Mode, view: "home" as View };
   if (!import.meta.env.DEV) return fallback;
   const query = new URLSearchParams(window.location.search);
   const mode = query.get("mode");
@@ -135,8 +143,9 @@ function App() {
   const [input, setInput] = useState(""),
     [error, setError] = useState(""),
     [connected, setConnected] = useState(false),
+    [starting, setStarting] = useState(true),
+    [reconnecting, setReconnecting] = useState(false),
     [sending, setSending] = useState(false),
-    [consent, setConsentState] = useState(false),
     [toolConsent, setToolConsent] = useState(false),
     [artifactConsent, setArtifactConsent] = useState(false),
     [errorSeen, setErrorSeen] = useState("");
@@ -153,7 +162,7 @@ function App() {
       content: string;
       cloud_consent: true;
       allowed_capabilities?: string[];
-      budget_mode?: "standard" | "auto";
+      budget_mode?: "standard" | "auto" | "fast" | "deep";
       requested_artifacts?: "none" | "markdown-and-pdf";
     } | null>(null),
     press = useRef<{ x: number; y: number } | null>(null),
@@ -244,7 +253,8 @@ function App() {
     },
     [watch],
   );
-  const voice = useVoice(session, consent, onVoiceTask, setInput);
+  const cloudChat = prefs.cloudChat === true;
+  const voice = useVoice(session, cloudChat, onVoiceTask, setInput);
   const level = voice.level;
 
   const derived = deriveFace({
@@ -287,7 +297,6 @@ function App() {
       sessionRef.current = id;
       setSession(id);
       setError("");
-      setConsentState(false);
       setToolConsent(false);
       setArtifactConsent(false);
       try {
@@ -329,31 +338,41 @@ function App() {
   );
   const refresh = useCallback(async () => {
     setError("");
-    try {
-      await connect();
-      const [status, rows] = await Promise.all([
-        api<Health>("/health/ready"),
-        api<Session[]>("/v1/sessions"),
-      ]);
-      setHealth(status);
-      setConnected(true);
-      setSessions(rows);
-      if (!sessionRef.current) {
-        const chosen = rows[0] ?? (await api<Session>("/v1/sessions", {}));
-        if (!rows.length) setSessions([chosen]);
-        await selectSession(chosen.id);
-      } else {
-        const running = tasksRef.current.find((t) => !terminal.has(t.status));
-        if (running) void watch(running);
+    let last: unknown;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      try {
+        await connect();
+        const [status, rows] = await Promise.all([
+          api<Health>("/health/ready"),
+          api<Session[]>("/v1/sessions"),
+        ]);
+        setHealth(status);
+        setConnected(true);
+        setReconnecting(false);
+        setSessions(rows);
+        if (!sessionRef.current) {
+          const chosen = rows[0] ?? (await api<Session>("/v1/sessions", {}));
+          if (!rows.length) setSessions([chosen]);
+          await selectSession(chosen.id);
+        } else {
+          const running = tasksRef.current.find((t) => !terminal.has(t.status));
+          if (running) void watch(running);
+        }
+        setStarting(false);
+        return;
+      } catch (issue) {
+        last = issue;
+        await new Promise((resolve) => window.setTimeout(resolve, 400));
       }
-    } catch (issue) {
-      setConnected(false);
-      setError(
-        issue instanceof Error
-          ? issue.message
-          : "Unable to start local service.",
-      );
     }
+    setConnected(false);
+    setReconnecting(false);
+    setStarting(false);
+    setError(
+      last instanceof Error
+        ? last.message
+        : "Immortility could not start its local service.",
+    );
   }, [selectSession, watch]);
   const backgroundChanged = useCallback(
     async (attached: boolean) => {
@@ -390,29 +409,49 @@ function App() {
 
   useEffect(() => {
     void refresh();
-    // The UI always starts compact, so a reload must not leave a large window behind.
-    if (start.mode === "compact")
-      void windowAction("collapse")
-        .then(() => windowAction(prefsRef.current.pin ? "pin" : "unpin"))
-        .catch(() => {});
+    const opening =
+      start.mode === "chat"
+        ? "expand"
+        : start.mode === "command"
+          ? "command"
+          : start.mode === "overlay"
+            ? "overlay"
+            : "collapse";
+    void windowAction(opening)
+      .then(() =>
+        windowAction(
+          opening === "expand" && prefsRef.current.pin ? "pin" : "unpin",
+        ),
+      )
+      .catch(() => {});
     const runtimeController = new AbortController();
+    const misses = { current: 0 };
     void followRuntimeStatus(
       runtimeController.signal,
       (snapshot) => {
+        misses.current = 0;
         const selected = JSON.stringify(snapshot.health.model_selection);
         if (
           runtimeModelChoice.current !== undefined &&
           selected !== runtimeModelChoice.current
         ) {
-          setConsentState(false);
           setToolConsent(false);
           setArtifactConsent(false);
         }
         runtimeModelChoice.current = selected;
         setHealth({ ...snapshot.health, voice_state: snapshot.voice_state });
         setConnected(true);
+        setReconnecting(false);
+        setStarting(false);
       },
-      () => setConnected(false),
+      () => {
+        misses.current += 1;
+        if (misses.current < 3) setReconnecting(true);
+        else {
+          setConnected(false);
+          setReconnecting(false);
+        }
+      },
     );
     const listeners = [
       listen("toggle-chat", () => {
@@ -437,20 +476,38 @@ function App() {
     };
   }, [refresh, changeMode]);
 
-  function setConsent(value: boolean) {
-    setConsentState(value);
+  function setCloudChat(value: boolean) {
+    setPrefs({ cloudChat: value });
     if (!value)
       void api("/v1/stop", {}).catch(() =>
-        setError("Stop could not reach the broker."),
+        setError("Stop could not reach Immortility."),
       );
   }
+  const localOnly = health?.runtime_mode === "local-background";
   const canSend =
     connected &&
     !!health?.ready &&
-    consent &&
+    cloudChat &&
     !sending &&
-    ["IDLE", "ERROR", "CANCELLED"].includes(voice.status.state);
-  const localOnly = health?.runtime_mode === "local-background";
+    ["IDLE", "ERROR", "CANCELLED", "SPEAKING"].includes(voice.status.state);
+  const savedKey = Object.values(health?.providers ?? {}).some(
+    (status) => status.length > 0 && !status.startsWith("missing"),
+  );
+  const blockedReason = localOnly
+    ? "This window accepts local tasks only."
+    : !connected
+      ? starting || reconnecting
+        ? "Starting Immortility."
+        : "The local broker is not answering. Use Reconnect."
+      : health?.hermes.status && health.hermes.status !== "available"
+        ? "Hermes is installed but not ready for this session."
+        : !health?.ready
+          ? savedKey
+            ? "Provider keys are saved. Chat stays off until a free-tier model is admitted."
+            : "No qualified free model is available. Open Settings to add one."
+          : !cloudChat
+            ? "Allow cloud chat to send this message."
+            : "Voice is finishing. Chat continues when it is idle.";
   async function send() {
     if (!input.trim() || active || !canSend || submitting.current) return;
     submitting.current = true;
@@ -476,7 +533,9 @@ function App() {
       JSON.stringify(lastRequest.current.allowed_capabilities ?? []) ===
         JSON.stringify(allowedCapabilities) &&
       (lastRequest.current.requested_artifacts ?? "none") ===
-        (report ? "markdown-and-pdf" : "none")
+        (report ? "markdown-and-pdf" : "none") &&
+      (lastRequest.current.budget_mode ?? "auto") ===
+        (prefs.pace === "fast" || prefs.pace === "deep" ? prefs.pace : "auto")
         ? lastRequest.current
         : {
             session_id: session,
@@ -487,9 +546,10 @@ function App() {
             requested_artifacts: report
               ? ("markdown-and-pdf" as const)
               : ("none" as const),
-            budget_mode: allowedCapabilities.length
-              ? ("standard" as const)
-              : ("auto" as const),
+            budget_mode:
+              prefs.pace === "fast" || prefs.pace === "deep"
+                ? prefs.pace
+                : ("auto" as const),
           };
     lastRequest.current = request;
     try {
@@ -593,25 +653,17 @@ function App() {
     <Composer
       input={input}
       setInput={setInput}
-      consent={consent}
-      setConsent={setConsent}
       running={!!active}
       canSend={canSend}
+      blockedReason={blockedReason}
       onSend={() => void send()}
       onStop={stop}
       quickActions={quick}
       localOnly={localOnly}
-      toolConsent={toolConsent}
-      setToolConsent={(value) => {
-        setToolConsent(value);
-        if (!value) setArtifactConsent(false);
-      }}
-      artifactConsent={artifactConsent}
-      setArtifactConsent={setArtifactConsent}
-      artifactsAvailable={
-        health?.artifact_tools_enabled === true &&
-        health?.web_research_enabled === true
+      pace={
+        prefs.pace === "fast" || prefs.pace === "deep" ? prefs.pace : "auto"
       }
+      onPace={(value) => setPrefs({ pace: value })}
       toolsAvailable={
         health?.local_tools_enabled === true ||
         health?.standard_mcp_enabled === true ||
@@ -631,8 +683,8 @@ function App() {
       onRefresh={() => void refresh()}
       onError={setError}
       localCapabilities={localCapabilities}
+      onCloudChat={setCloudChat}
       onModelChange={() => {
-        setConsentState(false);
         setToolConsent(false);
         setArtifactConsent(false);
       }}
@@ -654,11 +706,20 @@ function App() {
       </button>
     </div>
   );
-  const stateLabel = !connected
-    ? "Broker disconnected"
-    : !health?.ready && focus?.input.no_cloud !== true
-      ? "Setup required"
-      : faceLabel[face];
+  const presence = presenceLabel({
+    connected,
+    ready: !!health?.ready,
+    starting,
+    reconnecting,
+    localOnly,
+    hermes: health?.hermes.status,
+  });
+  const stateLabel =
+    presence === "Ready"
+      ? face === "idle"
+        ? "Ready"
+        : faceLabel[face]
+      : presence;
   const tip = `Immortility · ${stateLabel}. Click for chat, double-click for the command center, right-click for more.`;
 
   return (
@@ -769,15 +830,7 @@ function App() {
             <header>
               <div className="identity">
                 <div className="mini-face" aria-hidden="true">
-                  <Suspense fallback={<FlatFace face={face} compact />}>
-                    <HeadCanvas
-                      face={face}
-                      level={level}
-                      quality={prefs.quality}
-                      reduced={prefs.reduced}
-                      compact
-                    />
-                  </Suspense>
+                  <FlatFace face={face} compact />
                 </div>
                 <div>
                   <strong>IMMORTILITY</strong>
@@ -810,21 +863,23 @@ function App() {
                 </button>
               </div>
             </header>
-            <div className="connection">
-              <span
-                className={`dot ${connected && (health?.ready || localOnly) ? "online" : ""}`}
-              />
-              <span>
-                {connected
-                  ? localOnly
-                    ? "Attached · local tasks only"
-                    : health?.ready
-                      ? "Hermes connected · openrouter/free"
-                      : "Setup required"
-                  : "Broker disconnected"}
-              </span>
-              <span className="badge">$0 LOCKED</span>
-            </div>
+            {prefs.cloudChat === undefined && !localOnly && (
+              <div className="onboarding" role="region" aria-label="Cloud chat">
+                <p>
+                  Cloud chat sends what you type to a qualified free model. File
+                  changes, computer control, and paid inference still ask first.
+                  You can turn this off in Settings.
+                </p>
+                <div className="row">
+                  <button type="button" onClick={() => setCloudChat(true)}>
+                    Allow cloud chat
+                  </button>
+                  <button type="button" onClick={() => setCloudChat(false)}>
+                    Not now
+                  </button>
+                </div>
+              </div>
+            )}
             {settings ? (
               settingsPanel
             ) : (
@@ -886,7 +941,8 @@ function App() {
               prefs={prefs}
               health={health}
               connected={connected}
-              consent={consent}
+              consent={cloudChat}
+              starting={starting}
               micLive={micLive}
               tasks={tasks}
               transcripts={transcripts}

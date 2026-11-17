@@ -3,9 +3,66 @@ import type { LogEntry } from "../state";
 import {
   agentStatuses,
   deriveFace,
+  presenceLabel,
   wantsOverlay,
   playbackEnergy,
 } from "./faceState";
+
+describe("connection status", () => {
+  it("uses one label and stays quiet while services are still starting", () => {
+    expect(
+      presenceLabel({
+        connected: false,
+        ready: false,
+        starting: true,
+        localOnly: false,
+      }),
+    ).toBe("Starting");
+    expect(
+      presenceLabel({
+        connected: true,
+        ready: true,
+        starting: false,
+        localOnly: false,
+      }),
+    ).toBe("Ready");
+    expect(
+      presenceLabel({
+        connected: true,
+        ready: false,
+        starting: false,
+        localOnly: false,
+      }),
+    ).toBe("Needs a qualified model");
+    expect(
+      presenceLabel({
+        connected: true,
+        ready: false,
+        starting: false,
+        localOnly: false,
+        hermes: "missing",
+      }),
+    ).toBe("Hermes is not ready");
+    expect(
+      presenceLabel({
+        connected: true,
+        ready: false,
+        starting: false,
+        localOnly: false,
+        hermes: "checking",
+      }),
+    ).toBe("Starting");
+    expect(
+      presenceLabel({
+        connected: false,
+        ready: false,
+        starting: false,
+        localOnly: false,
+        reconnecting: true,
+      }),
+    ).toBe("Starting");
+  });
+});
 
 describe("playback-driven jaw", () => {
   it("closes on silence, stop and invalid meters and follows played amplitude", () => {

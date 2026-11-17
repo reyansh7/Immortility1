@@ -7,6 +7,8 @@ import re
 import time
 import hashlib
 import os
+import threading
+from pathlib import Path
 from logging.handlers import RotatingFileHandler
 import secrets
 from collections.abc import AsyncIterator, Callable
@@ -15,7 +17,7 @@ from typing import Any, Literal, Protocol
 
 import httpx
 from fastapi import FastAPI, Request
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -26,8 +28,24 @@ from .contracts import BrokerError, TERMINAL, TaskRequest, uid
 from .delegation import apply_delegation_file, orchestrate, project_notes, save_delegation_file
 from .hermes import Hermes, runtime_check
 from .local_tools import AUTHORIZED, apply_local_tools_file, call_local_tool, save_local_tools_file
-from .memory import prior_task_notes, retrieve, trim_history
-from .policy import MODEL, guard_secret_egress, inference_payload, route_model
+from .storage_audit import apply_laptop_file, intent as laptop_intent
+from .storage_audit import render as render_storage
+from .storage_audit import resource_summary
+from .storage_audit import reveal as reveal_folder
+from .storage_audit import save_report, scan as scan_storage
+from .memory import (
+    current_project_id,
+    experience_record,
+    format_facts,
+    prior_task_notes,
+    redact,
+    retrieve,
+    trim_history,
+)
+from .dialogue import asks_identity, ground_project_answer, identity_text, prepare_history
+from .direct_chat import DirectChat
+from .permission_policy import govern
+from .policy import MODEL, guard_secret_egress, inference_payload
 from .providers import (
     PROVIDERS,
     ModelRegistry,
@@ -36,13 +54,13 @@ from .providers import (
     Requirements,
     compatible_request,
     credential_identity,
-    task_class,
+    route_class,
     verify_dispatch,
 )
 from .provider_stream import sse_data, StreamCounters, provider_error_category
 from .semantic_stream import SemanticToolStream
 from .routing import Plan, classify, wants_edit
-from .ledger import prompt_byte_components
+from .ledger import estimate_input_tokens, fit_prompt, prompt_byte_components
 from .capabilities import (
     AddInput,
     AddOutput,
@@ -93,6 +111,7 @@ from .workspace import (
     preview_diff,
     read_source,
     real_root,
+    run_allowlisted_unittest,
     save_proposal,
     save_rollback,
     save_workspace_file,
@@ -120,6 +139,23 @@ class ApprovalDecision(BaseModel):
     decision: Literal["approve", "deny"]
 
 
+class RepairRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    session_id: str = Field(min_length=1, max_length=64)
+    request_id: str = Field(min_length=1, max_length=64)
+    path: str = Field(min_length=1, max_length=240)
+    test_path: str = Field(min_length=1, max_length=240)
+    content: str = Field(min_length=1, max_length=32000)
+    write_consent: Literal[True]
+
+    @field_validator("write_consent", mode="before")
+    @classmethod
+    def explicit_write(cls, value: object) -> object:
+        if value is not True:
+            raise ValueError("Explicit write approval is required before a patch can be proposed")
+        return value
+
+
 class McpCall(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     name: str = Field(min_length=1, max_length=32)
@@ -139,6 +175,65 @@ class MemoryForget(BaseModel):
     task_id: str = Field(min_length=1, max_length=64)
 
 
+class ConfirmedFact(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    kind: Literal["preference", "decision", "outcome"]
+    scope: Literal["user", "project"]
+    project_id: str = Field(default="", max_length=64, pattern=r"^$|^[a-f0-9]{64}$")
+    text: str = Field(min_length=1, max_length=500)
+    confirmed: Literal[True]
+
+    @field_validator("confirmed", mode="before")
+    @classmethod
+    def explicit(cls, value: object) -> object:
+        if value is not True:
+            raise ValueError("Explicit confirmation required")
+        return value
+
+    @field_validator("project_id")
+    @classmethod
+    def scoped(cls, value: str, info: Any) -> str:
+        scope = info.data.get("scope")
+        if scope == "project" and len(value) != 64:
+            raise ValueError("Project memory requires a project scope")
+        if scope == "user" and value:
+            raise ValueError("User memory has no project scope")
+        return value
+
+
+class FactCorrection(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    id: str = Field(pattern=r"^[a-f0-9-]{36}$")
+    text: str = Field(min_length=1, max_length=500)
+    confirmed: Literal[True]
+
+    @field_validator("confirmed", mode="before")
+    @classmethod
+    def explicit(cls, value: object) -> object:
+        if value is not True:
+            raise ValueError("Explicit confirmation required")
+        return value
+
+
+class FactQuery(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    query: str = Field(min_length=1, max_length=200)
+    project_id: str = Field(default="", max_length=64, pattern=r"^$|^[a-f0-9]{64}$")
+
+
+class FactRevoke(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    id: str = Field(pattern=r"^[a-f0-9-]{36}$")
+    confirmed: Literal[True]
+
+    @field_validator("confirmed", mode="before")
+    @classmethod
+    def explicit(cls, value: object) -> object:
+        if value is not True:
+            raise ValueError("Explicit confirmation required")
+        return value
+
+
 class ToolCall(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     name: str = Field(min_length=1, max_length=32)
@@ -154,7 +249,7 @@ def _provider_status(present: bool, chat: bool) -> str:
     if not present:
         return "missing key"
     if chat:
-        return "key present; live price checked on send"
+        return "free-tier allowlist; provider quota is not reported"
     return "key stored locally; dispatch requires a broker-verified free route"
 
 
@@ -197,6 +292,10 @@ class Engine:
         self.usage: dict[str, int] | None = None
         self.provider_error: BrokerError | None = None
         self.inference_allowed = False
+        self.laptop_stop = threading.Event()
+        self.tool_evidence: list[str] = []
+        self.direct_simple_chat = False
+        self.answer_complete = False
         self.attempt_id = uid()
         self.inference_key = secrets.token_urlsafe(32)
         self.token_cap = 4000
@@ -308,25 +407,51 @@ class Engine:
         async def read_project(arguments: dict[str, Any]) -> dict[str, Any]:
             return await projects.invoke(settings, "read", arguments)
 
-        for name, input_model, output_model, execute in [
-            ("project.search.v1", projects.SearchInput, projects.SearchOutput, search_project),
-            ("project.read.v1", projects.ReadInput, projects.ReadOutput, read_project),
+        async def outline_project(arguments: dict[str, Any]) -> dict[str, Any]:
+            return await projects.invoke(settings, "outline", arguments)
+
+        for registration in [
+            Registration(
+                Capability(
+                    name="project.search.v1",
+                    provider="local-python",
+                    max_payload_bytes=2048,
+                    max_output_bytes=64000,
+                    deadline_ms=5000,
+                ),
+                projects.SearchInput,
+                projects.SearchOutput,
+                search_project,
+                lambda: settings.project_read_enabled and settings.workspace_root is not None,
+            ),
+            Registration(
+                Capability(
+                    name="project.read.v1",
+                    provider="local-python",
+                    max_payload_bytes=2048,
+                    max_output_bytes=64000,
+                    deadline_ms=5000,
+                ),
+                projects.ReadInput,
+                projects.ReadOutput,
+                read_project,
+                lambda: settings.project_read_enabled and settings.workspace_root is not None,
+            ),
+            Registration(
+                Capability(
+                    name="project.outline.v1",
+                    provider="local-python",
+                    max_payload_bytes=2048,
+                    max_output_bytes=64000,
+                    deadline_ms=5000,
+                ),
+                projects.OutlineInput,
+                projects.OutlineOutput,
+                outline_project,
+                lambda: settings.project_read_enabled and settings.workspace_root is not None,
+            ),
         ]:
-            self.gateway.register(
-                Registration(
-                    Capability(
-                        name=name,
-                        provider="local-python",
-                        max_payload_bytes=2048,
-                        max_output_bytes=64000,
-                        deadline_ms=5000,
-                    ),
-                    input_model,
-                    output_model,
-                    execute,
-                    lambda: settings.project_read_enabled and settings.workspace_root is not None,
-                )
-            )
+            self.gateway.register(registration)
         self.gateway.register(
             Registration(
                 Capability(
@@ -631,7 +756,7 @@ class Engine:
         return self.settings.durable_workflows_enabled or (
             self.settings.project_read_enabled
             and all(
-                step.capability in {"project.search.v1", "project.read.v1"}
+                step.capability in {"project.search.v1", "project.read.v1", "project.outline.v1"}
                 for step in request.steps
             )
         )
@@ -768,6 +893,10 @@ class Engine:
             "utc time",
         }:
             return "clock.now.v1", {}
+        if self.settings.laptop_tools_enabled:
+            requested = laptop_intent(content)
+            if requested is not None:
+                return requested
         return None
 
     def open_grant(self, task_id: str, mode: str, timeout_s: int, route: str = MODEL) -> None:
@@ -788,6 +917,12 @@ class Engine:
         ):
             self.token_cap = min(self.token_cap, 8000)
             self.call_limit = min(self.call_limit, 2)
+        capabilities = task["input"].get("allowed_capabilities", [])
+        if any(str(name).startswith("project.") for name in capabilities):
+            # The byte estimator counts the Hermes prompt several times larger than
+            # provider tokens. A short inspection still needs room for the answer.
+            self.token_cap = max(self.token_cap, 24000)
+            self.call_limit = min(max(self.call_limit, 5), self.settings.model_call_cap)
         self.attempt_id = self.store.ledger.begin(task_id, self.token_cap, self.call_limit, route)
         self.store.budget(task_id, self.token_cap, self.call_limit, timeout_s)
         self.inference_key = secrets.token_urlsafe(32)
@@ -840,7 +975,39 @@ class Engine:
             180 if edit else plan.timeout_s,
             local_choice[0] if local_choice else MODEL,
         )
-        self.runtime = None if local_choice or delegate or edit else self.factory()
+        self.tool_evidence = []
+        self.answer_complete = False
+        identity = asks_identity(content) and local_choice is None
+        simple_chat = (
+            self.direct_simple_chat
+            and local_choice is None
+            and not identity
+            and not approved
+            and not edit
+            and not delegate
+            and not voice
+        )
+        if simple_chat:
+            offer = self.registry.choose(
+                self.model_selection,
+                Requirements(
+                    task_class=route_class(
+                        content, [], "none", task["input"].get("budget_mode", "auto")
+                    ),
+                    privacy=task["privacy_class"],
+                    remaining_calls=self.call_limit,
+                    remaining_tokens=self.token_cap,
+                    deadline=self.inference_deadline,
+                ),
+            )
+            self.model_route = offer
+            self.route_identity = credential_identity(self.settings, offer.provider)
+            self.store.ledger.bind_route(
+                self.attempt_id, offer.provider, offer.model_id, "single-broker-account", offer.route_id
+            )
+            self.runtime = DirectChat(self.settings, offer)
+        else:
+            self.runtime = None if local_choice or delegate or edit or identity else self.factory()
         if isinstance(self.runtime, Hermes):
             self.runtime.response_length = task["input"].get("response_length", "normal")
             self.runtime.broker_schemas = self.gateway.discover(tuple(approved))
@@ -848,9 +1015,72 @@ class Engine:
         first_token: float | None = None
         try:
             self.store.state(task_id, "running")
+            if asks_identity(content) and local_choice is None:
+                offer = self.model_route or self.registry.choose(
+                    self.model_selection,
+                    Requirements(
+                        task_class="FAST_CHAT",
+                        privacy=task["privacy_class"],
+                        remaining_calls=self.call_limit,
+                        remaining_tokens=self.token_cap,
+                        deadline=self.inference_deadline,
+                    ),
+                )
+                text = identity_text(offer.provider, offer.model_id)
+                self.store.event(task_id, "message.delta", {"text": text})
+                self.store.state(task_id, "verifying")
+                self.store.state(
+                    task_id,
+                    "succeeded",
+                    result={
+                        "text": text,
+                        "provider": "local",
+                        "model": offer.model_id,
+                        "paid_usd": 0,
+                    },
+                )
+                return
             if local_choice is not None:
                 self.inference_allowed = False
                 name, arguments = local_choice
+                if name in {"laptop.storage.v1", "desktop.reveal.v1", "laptop.resources.v1"}:
+                    if govern(name, "observer") != "allow":
+                        raise BrokerError(
+                            "tool_denied", "Operation is outside the permission policy.", 403
+                        )
+                    self.store.event(task_id, "tool.started", {"name": name})
+                    self.laptop_stop.clear()
+                    if name == "laptop.storage.v1":
+                        report = await asyncio.to_thread(
+                            scan_storage, Path.home(), cancelled=self.laptop_stop.is_set
+                        )
+                        if self.laptop_stop.is_set() or report.get("cancelled"):
+                            raise asyncio.CancelledError
+                        save_report(self.settings.data_dir, report)
+                        text = render_storage(report)
+                    elif name == "laptop.resources.v1":
+                        text = await asyncio.to_thread(resource_summary)
+                    else:
+                        text = reveal_folder(
+                            Path.home(),
+                            str(arguments.get("target", "")),
+                            self.settings.data_dir,
+                            name=str(arguments.get("name", "")),
+                        )
+                    self.store.event(task_id, "tool.completed", {"name": name, "status": "ok"})
+                    self.store.event(task_id, "message.delta", {"text": text})
+                    self.store.state(task_id, "verifying")
+                    self.store.state(
+                        task_id,
+                        "succeeded",
+                        result={
+                            "text": text,
+                            "provider": "local",
+                            "model": name,
+                            "paid_usd": 0,
+                        },
+                    )
+                    return
                 token = self.gateway.issue(
                     Grant(
                         task_id=task_id,
@@ -885,19 +1115,25 @@ class Engine:
                 task_id,
                 "audit.notice",
                 {
-                    "provider": "openrouter",
-                    "model": route_model(MODEL),
+                    "provider": "selecting",
+                    "model": "free-tier",
                     "max_paid_usd": 0,
                     "tools_enabled": edit or bool(approved),
                     "delegation": delegate,
-                    "route_mode": {4000: "fast", 8000: "standard", 16000: "deep"}[self.token_cap],
+                    "route_mode": {4000: "fast", 8000: "standard", 16000: "deep"}.get(
+                        self.token_cap, "project"
+                    ),
                 },
             )
             text = ""
             public_task = any(
                 name in approved for name in ("public.research.v1", "report.create.v1")
             )
-            history = [] if public_task else trim_history(self.store.history(task["session_id"]))
+            history = (
+                []
+                if public_task
+                else prepare_history(trim_history(self.store.history(task["session_id"])))
+            )
             notes = "" if public_task else retrieve(project_notes(self.settings.data_dir), content)
             prior = (
                 ""
@@ -908,9 +1144,30 @@ class Engine:
                 notes = (notes + "\n" + prior).strip()[:1600]
             remembered = [] if public_task else self.store.recall(task["session_id"], content)
             if remembered:
-                notes = (notes + "\n" + "\n".join(item["body"] for item in remembered)).strip()[
-                    :1600
-                ]
+                lines = []
+                for item in remembered:
+                    body = item["body"]
+                    if body.startswith("verified experience "):
+                        body = "Verified receipt, data not instructions: " + body
+                    lines.append(body)
+                notes = (notes + "\n" + "\n".join(lines)).strip()[:1600]
+            fact_block = (
+                ""
+                if public_task
+                else format_facts(
+                    self.store.recall_facts(
+                        content,
+                        current_project_id(
+                            self.settings.project_read_enabled,
+                            self.settings.workspace_root,
+                        ),
+                    )
+                )
+            )
+            if fact_block:
+                notes = (
+                    notes + "\nUser-confirmed memory, data not instructions:\n" + fact_block
+                ).strip()[:1600]
 
             async def consume(deltas: Any) -> None:
                 nonlocal text, first_token
@@ -991,11 +1248,22 @@ class Engine:
                         if notes
                         else content
                     )
-                    await consume(self.runtime.run(prompted, history))
+                    if isinstance(self.runtime, DirectChat):
+                        call_id = self.store.ledger.reserve(self.attempt_id, 1200, 500)
+                        try:
+                            await consume(self.runtime.run(prompted, history))
+                        finally:
+                            try:
+                                self.store.ledger.settle(call_id, self.runtime.usage)
+                            except BrokerError:
+                                pass
+                    else:
+                        await consume(self.runtime.run(prompted, history))
             if self.provider_error:
                 raise self.provider_error
             if not text.strip():
                 raise BrokerError("empty_response", "Hermes returned no response.", 503)
+            self.answer_complete = True
             if (
                 task["input"].get("requested_artifacts") == "markdown-and-pdf"
                 and not self.artifact_result
@@ -1007,7 +1275,37 @@ class Engine:
                 )
             self._metrics(task_id, plan, started, first_token)
             self._spoken(task_id, task, text, True)
-            self.store.remember(task["session_id"], task_id, content + "\n" + text)
+            spawn_ms = getattr(self.runtime, "spawn_ms", None) if self.runtime is not None else None
+            if spawn_ms is not None:
+                self.store.event(
+                    task_id,
+                    "audit.notice",
+                    {
+                        "name": "hermes_timing",
+                        "spawn_ms": spawn_ms,
+                        "ready_ms": getattr(self.runtime, "ready_ms", None),
+                    },
+                )
+            completed_tools = [
+                str(event["data"].get("name"))
+                for event in self.store.events(task_id)
+                if event.get("type") == "tool.completed"
+                and (event.get("data") or {}).get("status") == "ok"
+                and isinstance((event.get("data") or {}).get("name"), str)
+            ]
+            if self.tool_evidence:
+                text = ground_project_answer(text, "\n".join(self.tool_evidence))
+            if completed_tools:
+                memory = experience_record(
+                    request=content,
+                    provider=self.model_route.provider if self.model_route else "local",
+                    model=self.model_route.model_id if self.model_route else "local",
+                    tools=completed_tools,
+                    outcome="ok",
+                )
+            else:
+                memory = redact(content + "\n" + text)
+            self.store.remember(task["session_id"], task_id, memory)
             self.store.state(task_id, "verifying")
             self.store.state(
                 task_id,
@@ -1025,15 +1323,15 @@ class Engine:
                 },
             )
         except asyncio.CancelledError:
-            self.store.state(task_id, "cancelled")
+            self._finish_interrupted(task_id, "cancelled", locals().get("text", ""))
             raise
         except ExceptionGroup as group:
             error = group.exceptions[0]
             if isinstance(error, ExceptionGroup) and error.exceptions:
                 error = error.exceptions[0]
-            self._fail(task_id, error)
+            self._after_error(task_id, error, locals().get("text", ""))
         except Exception as error:
-            self._fail(task_id, error)
+            self._after_error(task_id, error, locals().get("text", ""))
         finally:
             self.inference_allowed = False
             if self.model_route is not None:
@@ -1046,8 +1344,11 @@ class Engine:
                     self.registry.observe(
                         self.model_route,
                         task_id,
-                        task_class(
-                            content, approved, task["input"].get("requested_artifacts", "none")
+                        route_class(
+                            content,
+                            approved,
+                            task["input"].get("requested_artifacts", "none"),
+                            task["input"].get("budget_mode", "auto"),
                         ),
                         current["status"] == "succeeded",
                         bool(approved),
@@ -1068,7 +1369,9 @@ class Engine:
             task_id,
             "audit.notice",
             {
-                "route_mode": {4000: "fast", 8000: "standard", 16000: "deep"}[self.token_cap],
+                "route_mode": {4000: "fast", 8000: "standard", 16000: "deep"}.get(
+                    self.token_cap, "project"
+                ),
                 "roles": []
                 if self.store.get(task_id)["input"].get("allowed_capabilities")
                 else list(plan.roles),
@@ -1163,7 +1466,50 @@ class Engine:
         self.store.state(task_id, "awaiting_approval")
         return text, True
 
-    def _fail(self, task_id: str, error: BaseException) -> None:
+    def _finish_interrupted(self, task_id: str, status: str, text: str) -> None:
+        if self.store.get(task_id)["status"] in TERMINAL:
+            return
+        updates: dict[str, Any] = {}
+        if text.strip():
+            route = self.model_route
+            updates["result"] = {
+                "text": text,
+                "partial": True,
+                "provider": route.provider if route else "local",
+                "model": route.model_id if route else "local",
+                "paid_usd": 0,
+            }
+        self.store.state(task_id, status, **updates)
+
+    def _after_error(self, task_id: str, error: BaseException, text: str) -> None:
+        if not self.inference_allowed:
+            self._finish_interrupted(task_id, "cancelled", text)
+            return
+        if self.answer_complete and text.strip() and not isinstance(error, BrokerError):
+            try:
+                self.store.event(
+                    task_id,
+                    "audit.notice",
+                    {"name": "persist_failed", "error": type(error).__name__},
+                )
+                route = self.model_route
+                self.store.state(task_id, "verifying")
+                self.store.state(
+                    task_id,
+                    "succeeded",
+                    result={
+                        "text": text,
+                        "provider": route.provider if route else "local",
+                        "model": route.model_id if route else "local",
+                        "paid_usd": 0,
+                    },
+                )
+                return
+            except Exception:
+                pass
+        self._fail(task_id, error, text)
+
+    def _fail(self, task_id: str, error: BaseException, partial: str = "") -> None:
         issue = self.provider_error or (
             error
             if isinstance(error, BrokerError)
@@ -1182,7 +1528,10 @@ class Engine:
             "tools_enabled": "blocked",
         }.get(issue.code, "failed")
         if self.store.get(task_id)["status"] not in TERMINAL:
-            self.store.state(task_id, status, error={"code": issue.code, "message": issue.message})
+            updates: dict[str, Any] = {"error": {"code": issue.code, "message": issue.message}}
+            if partial.strip():
+                updates["result"] = {"text": partial, "partial": True, "paid_usd": 0}
+            self.store.state(task_id, status, **updates)
 
     def _spoken(self, task_id: str, task: dict[str, Any], text: str, final: bool) -> None:
         if task["input"].get("source", "text") != "text" or self.on_user_text is None:
@@ -1193,6 +1542,7 @@ class Engine:
             return
 
     async def cancel(self, task_id: str) -> None:
+        self.laptop_stop.set()
         if self.active == task_id:
             self.inference_allowed = False
         lease = self.observation
@@ -1271,6 +1621,7 @@ def create_app(
     apply_capability_flags(settings)
     apply_delegation_file(settings)
     apply_local_tools_file(settings)
+    apply_laptop_file(settings)
     apply_workspace_file(settings)
     store = Store(
         settings.data_dir / "state.sqlite3", recover_workflows=settings.durable_workflows_enabled
@@ -1290,6 +1641,7 @@ def create_app(
         factory or (lambda: Hermes(settings, base_url + "/inference/v1", engine.inference_key)),
         settings,
     )
+    engine.direct_simple_chat = factory is None
     http = client or httpx.AsyncClient(trust_env=False, follow_redirects=False, timeout=30)
 
     @asynccontextmanager
@@ -1444,11 +1796,12 @@ def create_app(
             "active_task": engine.active,
             "voice_state": voice.state,
             "providers": {
-                "openrouter": _provider_status(key, True),
-                "gemini": _provider_status(gemini, False),
-                "groq": _provider_status(groq, False),
-                "nvidia": _provider_status(nvidia, False),
+                "openrouter": _provider_status(key, False),
+                "gemini": _provider_status(gemini, True),
+                "groq": _provider_status(groq, True),
+                "nvidia": _provider_status(nvidia, True),
             },
+            "route_admitted": engine.registry.ready(),
             "model_selection": engine.registry.selection().model_dump(),
             "active_model": {
                 "provider": engine.model_route.provider,
@@ -1526,6 +1879,29 @@ def create_app(
                 engine.gateway.discover(tuple(request.allowed_capabilities))
             ) != len(request.allowed_capabilities):
                 raise BrokerError("tool_denied", "Task requests a disabled broker capability.", 403)
+        if (
+            settings.local_tools_enabled
+            and request.source == "text"
+            and not request.allowed_capabilities
+            and re.search(r"\b(time|clock|utc)\b", request.content.casefold())
+        ):
+            request = request.model_copy(update={"allowed_capabilities": ["clock.now.v1"]})
+        if (
+            settings.project_read_enabled
+            and settings.workspace_root is not None
+            and request.source == "text"
+            and not request.allowed_capabilities
+            and projects.inspection_requested(request.content)
+        ):
+            request = request.model_copy(
+                update={
+                    "allowed_capabilities": [
+                        "project.outline.v1",
+                        "project.search.v1",
+                        "project.read.v1",
+                    ]
+                }
+            )
         # Admission precedes research egress, persistence, delegation and voice.
         # The inference check remains necessary for subsequently retrieved data.
         guard_secret_egress(
@@ -1553,7 +1929,6 @@ def create_app(
             "LISTENING",
             "TRANSCRIBING",
             "THINKING",
-            "SPEAKING",
         }:
             raise BrokerError("voice_busy", "Stop the current voice turn before sending text.", 429)
         task, _ = store.create(request, model_selection=engine.registry.selection().model_dump())
@@ -1720,6 +2095,7 @@ def create_app(
             CredentialManager(provider=body.provider).write(key)
             remove_env_assignments(ROOT / ".env", {env_name})
             settings.load_credentials()
+            engine.registry.refresh_free_routes()
         except CredentialError as error:
             raise BrokerError("credential_store", str(error)) from None
         return {"provider": body.provider, "stored": True}
@@ -1755,6 +2131,8 @@ def create_app(
 
     @app.post("/v1/settings/workspace")
     async def set_workspace(body: WorkspaceChoice) -> dict[str, bool]:
+        if engine.active:
+            raise BrokerError("busy", "Stop active work before changing the workspace.", 409)
         for task_id in list(engine.approvals):
             await engine.cancel(task_id)
         save_workspace_file(settings, body.enabled, body.root)
@@ -1763,6 +2141,53 @@ def create_app(
     @app.get("/v1/projects/scope")
     async def project_scope() -> dict[str, Any]:
         return projects.scope(settings)
+
+    @app.post("/v1/repairs")
+    async def propose_repair(body: RepairRequest) -> dict[str, Any]:
+        if engine.active or voice.state not in {"IDLE", "ERROR", "CANCELLED"}:
+            raise BrokerError("busy", "Stop active work before proposing a repair.", 409)
+        root = settings.workspace_root
+        if not settings.workspace_tools_enabled or root is None:
+            raise BrokerError("tool_denied", "Workspace edits are not enabled.", 403)
+        code, output = run_allowlisted_unittest(root, body.test_path)
+        if code == 0:
+            raise BrokerError(
+                "invalid_request", "The test already passes, so no patch was proposed.", 409
+            )
+        current = read_source(root, body.path, 32000)
+        if current == body.content:
+            raise BrokerError("invalid_request", "The proposed file matches the current file.", 400)
+        task = store.create_repair(body.session_id, body.request_id, f"Repair {body.path}")
+        task_id = task["task_id"]
+        store.state(task_id, "queued")
+        store.state(task_id, "running")
+        payload = {
+            "relative": body.path,
+            "content": body.content,
+            "expected": fingerprint(current),
+            "root": str(real_root(root)),
+            "previous": current,
+            "preview": preview_diff(current, body.content, body.path),
+            "task_id": task_id,
+            "session_id": body.session_id,
+            "attempt_id": uid(),
+            "previous_existed": "true",
+            "test_path": body.test_path,
+        }
+        save_proposal(settings.data_dir, task_id, payload)
+        engine.approvals[task_id] = (action_digest(payload), time.monotonic() + 300)
+        store.event(
+            task_id,
+            "tool.completed",
+            {"name": "unittest", "status": "failed", "path": body.test_path},
+        )
+        store.event(
+            task_id,
+            "approval.requested",
+            {"name": "patch", "preview": payload["preview"][:2000], "test_failure": output[:1500]},
+        )
+        store.state(task_id, "awaiting_approval")
+        return store.get(task_id)
 
     @app.post("/v1/settings/project")
     async def select_project(body: projects.ProjectChoice) -> dict[str, Any]:
@@ -1846,6 +2271,7 @@ def create_app(
     ) -> dict[str, Any]:
         task_id = task["task_id"]
         store.state(task_id, "running")
+        verified = "Code execution is disabled; tests were not run.\n"
         try:
             save_rollback(
                 settings.data_dir,
@@ -1872,17 +2298,39 @@ def create_app(
                     "verification_failed", "Written file does not match the approved bytes."
                 )
             store.event(task_id, "tool.completed", {"name": "patch", "status": "ok"})
+            if payload.get("test_path"):
+                code, output = run_allowlisted_unittest(root, payload["test_path"])
+                passed = code == 0
+                store.event(
+                    task_id,
+                    "tool.completed",
+                    {"name": "unittest", "status": "ok" if passed else "failed"},
+                )
+                if not passed:
+                    apply_proposed(
+                        root,
+                        payload["relative"],
+                        payload["previous"],
+                        fingerprint(payload["content"]),
+                        expected_exists=payload["previous_existed"] == "true",
+                    )
+                    raise BrokerError(
+                        "verification_failed",
+                        "The approved change did not make the allowlisted test pass.",
+                    )
+                verified = "Allowlisted unittest passed.\n" + output + "\n"
         except BrokerError as error:
             store.state(task_id, "failed", error={"code": error.code, "message": error.message})
             return store.get(task_id)
         finally:
             delete_proposal(settings.data_dir, task_id)
-        text = (
-            f"Applied {payload['relative']}. "
-            "Code execution is disabled; tests were not run.\n" + payload["preview"]
-        )
+        text = f"Applied {payload['relative']}. " + verified + payload["preview"]
         review_plan = classify(task["input"]["content"])
-        if settings.delegation_enabled and "review" in review_plan.roles:
+        if (
+            not payload.get("test_path")
+            and settings.delegation_enabled
+            and "review" in review_plan.roles
+        ):
             runtime = engine.factory()
             engine.runtime = runtime
             review: list[str] = []
@@ -1903,7 +2351,12 @@ def create_app(
         store.state(
             task_id,
             "succeeded",
-            result={"text": text, "provider": "openrouter", "model": MODEL, "paid_usd": 0},
+            result={
+                "text": text,
+                "provider": "local" if payload.get("test_path") else "openrouter",
+                "model": "project.repair.v1" if payload.get("test_path") else MODEL,
+                "paid_usd": 0,
+            },
         )
         return store.get(task_id)
 
@@ -1988,6 +2441,41 @@ def create_app(
     @app.post("/v1/memory/search")
     async def memory_search(body: MemoryQuery) -> dict[str, list[dict[str, str]]]:
         return {"matches": store.recall(body.session_id, body.query)}
+
+    def _fact_keys() -> list[str]:
+        return [
+            key.get_secret_value()
+            for key in (
+                settings.groq_api_key,
+                settings.gemini_api_key,
+                settings.nvidia_api_key,
+                settings.openrouter_api_key,
+            )
+        ]
+
+    @app.post("/v1/memory/facts")
+    async def save_fact(body: ConfirmedFact) -> dict[str, str]:
+        guard_secret_egress([{"content": body.text}], _fact_keys())
+        return store.confirm_fact(body.scope, body.project_id, body.kind, body.text)
+
+    @app.post("/v1/memory/facts/correct")
+    async def correct_fact(body: FactCorrection) -> dict[str, str]:
+        guard_secret_egress([{"content": body.text}], _fact_keys())
+        return store.correct_fact(body.id, body.text)
+
+    @app.post("/v1/memory/facts/search")
+    async def search_facts(body: FactQuery) -> dict[str, Any]:
+        started = time.perf_counter()
+        matches = store.recall_facts(body.query, body.project_id)
+        return {
+            "matches": matches,
+            "context_chars": sum(len(item["body"]) for item in matches),
+            "retrieval_ms": round((time.perf_counter() - started) * 1000, 3),
+        }
+
+    @app.post("/v1/memory/facts/revoke")
+    async def revoke_fact(body: FactRevoke) -> dict[str, str]:
+        return store.revoke_fact(body.id)
 
     @app.post("/v1/memory/delete")
     async def memory_delete(body: MemoryForget) -> dict[str, int]:
@@ -2150,7 +2638,17 @@ def create_app(
             raise BrokerError(
                 "tool_denied", "Operation is outside this task's approved scope.", 403
             )
+        if govern(proposal.capability, "assisted") != "allow":
+            store.event(
+                task_id,
+                "audit.notice",
+                {"code": "tool_denied", "message": "Permission policy denied this operation."},
+            )
+            raise BrokerError("tool_denied", "Operation is outside the permission policy.", 403)
         engine.bridge_calls += 1
+        arguments = dict(proposal.arguments)
+        if proposal.capability.startswith("project."):
+            arguments = projects.bind_scope(settings, arguments)
         token = engine.gateway.issue(
             Grant(
                 task_id=task_id,
@@ -2160,12 +2658,12 @@ def create_app(
                 expires=time.monotonic()
                 + engine.gateway.registrations[proposal.capability].manifest.deadline_ms / 1000,
             ),
-            proposal.arguments,
+            arguments,
             enabled=True,
         )
         try:
             result = await engine.gateway.invoke(
-                token, proposal.capability, proposal.arguments, enabled=True
+                token, proposal.capability, arguments, enabled=True
             )
         except asyncio.CancelledError:
             raise BrokerError("tool_cancelled", "Broker operation was stopped.", 409) from None
@@ -2175,6 +2673,13 @@ def create_app(
             or engine.inference_key != grant_key
         ):
             raise BrokerError("tool_denied", "Tool scope was revoked.", 403)
+        result = (
+            projects.compact_model_result(proposal.capability, result)
+            if proposal.capability.startswith("project.")
+            else result
+        )
+        if proposal.capability.startswith("project."):
+            engine.tool_evidence.append(json.dumps(result)[:4000])
         return {
             "capability": proposal.capability,
             "result": model_evidence(
@@ -2296,9 +2801,18 @@ def create_app(
             ],
         )
         task_id, attempt_id, grant_key = engine.active, engine.attempt_id, engine.inference_key
-        components = prompt_byte_components(payload)
-        input_tokens = sum(components.values())
         used = store.ledger.summary(task_id)["charged_tokens"]
+        # Byte length is not a token count. Keep the current question and discard
+        # older turns until the realistic estimate fits, instead of failing the chat.
+        reply_reserve = 512
+        max_input_bytes = max(1500, (engine.token_cap - used - reply_reserve) * 4)
+        if sum(prompt_byte_components(payload).values()) > max_input_bytes:
+            payload["messages"] = fit_prompt(
+                payload["messages"], payload.get("tools") or [], max_input_bytes
+            )
+        components = prompt_byte_components(payload)
+        raw_bytes = sum(components.values())
+        input_tokens = estimate_input_tokens(components)
         available = engine.token_cap - used - input_tokens
         if "report.create.v1" in approved:
             from .artifacts import minimum_report_output_reservation
@@ -2306,7 +2820,10 @@ def create_app(
             floor = minimum_report_output_reservation()
             if settings.typed_tool_schemas_enabled:
                 floor = max(floor, 1200)
-            if min(available, payload["max_tokens"]) < floor:
+            report_available = engine.token_cap - used - max(
+                input_tokens, min(raw_bytes, engine.token_cap)
+            )
+            if min(report_available, payload["max_tokens"]) < floor:
                 store.event(
                     task_id,
                     "audit.notice",
@@ -2314,7 +2831,7 @@ def create_app(
                         "name": "report.admission",
                         "status": "denied",
                         "required_output": floor,
-                        "available_output": min(available, payload["max_tokens"]),
+                        "available_output": min(report_available, payload["max_tokens"]),
                         "prompt_byte_components": components,
                         "schema_capabilities": visible,
                         "dispatch_attempted": False,
@@ -2326,14 +2843,21 @@ def create_app(
                     403,
                 )
         if available < 128:
-            raise BrokerError(
-                "budget_exhausted", "Required context exceeds task token budget.", 403
+            payload["messages"] = fit_prompt(
+                payload["messages"], payload.get("tools") or [], 1200
             )
+            components = prompt_byte_components(payload)
+            input_tokens = estimate_input_tokens(components)
+            available = max(128, engine.token_cap - used - input_tokens)
         payload["max_tokens"] = min(payload["max_tokens"], available)
         task = store.get(task_id)
         need = Requirements(
-            task_class=task_class(
-                task["input"]["content"], approved, task["input"].get("requested_artifacts", "none")
+            task_class=route_class(
+                task["input"]["content"],
+                approved,
+                task["input"].get("requested_artifacts", "none"),
+                task["input"].get("budget_mode", "auto"),
+                input_tokens,
             ),
             tools=bool(approved),
             privacy=task["privacy_class"],
@@ -2437,7 +2961,9 @@ def create_app(
                     "name": "provider.quota_verified",
                     "provider": route.provider,
                     "remaining_requests_observed": quota,
-                    "source": "official-current-key-api",
+                    "source": "official-current-key-api"
+                    if quota is not None
+                    else "free-tier-allowlist; provider quota was not read",
                     "validity": "this dispatch only",
                 },
             )

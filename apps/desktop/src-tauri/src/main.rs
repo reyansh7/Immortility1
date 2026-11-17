@@ -442,6 +442,11 @@ enum Operation {
     CallMcp,
     MemorySearch,
     MemoryDelete,
+    FactSave,
+    FactCorrect,
+    FactSearch,
+    FactRevoke,
+    Repair,
     Rollback,
 }
 fn valid_id(id: Option<String>) -> Result<String, String> {
@@ -515,6 +520,11 @@ fn endpoint(operation: Operation, id: Option<String>) -> Result<(reqwest::Method
         Operation::CallMcp => (Method::POST, "/v1/mcp/call".into()),
         Operation::MemorySearch => (Method::POST, "/v1/memory/search".into()),
         Operation::MemoryDelete => (Method::POST, "/v1/memory/delete".into()),
+        Operation::FactSave => (Method::POST, "/v1/memory/facts".into()),
+        Operation::FactCorrect => (Method::POST, "/v1/memory/facts/correct".into()),
+        Operation::FactSearch => (Method::POST, "/v1/memory/facts/search".into()),
+        Operation::FactRevoke => (Method::POST, "/v1/memory/facts/revoke".into()),
+        Operation::Repair => (Method::POST, "/v1/repairs".into()),
         Operation::Rollback => (
             Method::POST,
             format!("/v1/tasks/{}/rollback", valid_id(id)?),
@@ -1137,6 +1147,12 @@ fn main() {
                     _ => {}
                 })
                 .build(app)?;
+            // Start the broker while WebView2 paints. The window must not wait on Python.
+            let handle = app.handle().clone();
+            std::thread::spawn(move || {
+                let state = handle.state::<Supervisor>();
+                let _ = ensure_broker(&state);
+            });
             // Conflicts are visible; startup continues with tray controls available.
             for shortcut in ["Ctrl+Shift+Space", "Ctrl+Shift+Escape"] {
                 if app.global_shortcut().register(shortcut).is_err() {
@@ -1254,6 +1270,24 @@ mod tests {
             "local_model_download",
         ] {
             assert!(serde_json::from_value::<Operation>(serde_json::json!(name)).is_err());
+        }
+    }
+    #[test]
+    fn project_reads_use_only_fixed_native_routes() {
+        let scope = endpoint(Operation::ProjectScope, None).unwrap();
+        assert_eq!(scope.0, reqwest::Method::GET);
+        assert_eq!(scope.1, "/v1/projects/scope");
+        let selection = endpoint(Operation::SetProject, None).unwrap();
+        assert_eq!(selection.0, reqwest::Method::POST);
+        assert_eq!(selection.1, "/v1/settings/project");
+        let facts = endpoint(Operation::FactSearch, None).unwrap();
+        assert_eq!(facts.0, reqwest::Method::POST);
+        assert_eq!(facts.1, "/v1/memory/facts/search");
+        let repair = endpoint(Operation::Repair, None).unwrap();
+        assert_eq!(repair.0, reqwest::Method::POST);
+        assert_eq!(repair.1, "/v1/repairs");
+        for operation in ["project_shell", "project_write", "project_arbitrary_url"] {
+            assert!(serde_json::from_value::<Operation>(serde_json::json!(operation)).is_err());
         }
     }
     #[test]

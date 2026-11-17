@@ -44,7 +44,15 @@ class TaskRequest(BaseModel):
     budget_mode: Literal["auto", "fast", "standard", "deep"] = "auto"
     requested_artifacts: Literal["none", "markdown-and-pdf"] = "none"
     allowed_capabilities: list[
-        Literal["arithmetic.add.v1", "clock.now.v1", "public.research.v1", "report.create.v1"]
+        Literal[
+            "arithmetic.add.v1",
+            "clock.now.v1",
+            "public.research.v1",
+            "report.create.v1",
+            "project.outline.v1",
+            "project.search.v1",
+            "project.read.v1",
+        ]
     ] = Field(default_factory=list, max_length=4)
 
     @field_validator("allowed_capabilities")

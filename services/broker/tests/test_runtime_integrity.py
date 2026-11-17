@@ -41,6 +41,18 @@ def test_clean_reviewed_runtime_is_available(source):
     assert hermes.runtime_check(settings)["status"] == "available"
 
 
+def test_unchanged_runtime_does_not_run_git_again(source, monkeypatch):
+    _, settings = source
+    assert hermes.runtime_check(settings)["status"] == "available"
+
+    def fail(*_args, **_kwargs):
+        raise AssertionError("git should not run for an unchanged reviewed install")
+
+    monkeypatch.setattr(hermes.subprocess, "check_output", fail)
+    monkeypatch.setattr(hermes.subprocess, "run", fail)
+    assert hermes.runtime_check(settings)["status"] == "available"
+
+
 def test_same_commit_with_modified_tracked_source_is_rejected(source):
     path, settings = source
     (path / "tui_gateway/entry.py").write_text("raise RuntimeError('unreviewed change')")

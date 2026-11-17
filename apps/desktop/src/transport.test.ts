@@ -1,6 +1,29 @@
 import { it, expect, vi } from "vitest";
 import { invoke } from "@tauri-apps/api/core";
 import { connect, operation } from "./transport";
+it("restricts Project Inspector to fixed typed local routes", () => {
+  expect(operation("/v1/projects/scope", false)).toEqual({
+    operation: "project_scope",
+  });
+  expect(operation("/v1/settings/project", true)).toEqual({
+    operation: "set_project",
+  });
+  expect(operation("/v1/memory/facts", true).operation).toBe("fact_save");
+  expect(operation("/v1/memory/facts/search", true).operation).toBe(
+    "fact_search",
+  );
+  expect(operation("/v1/memory/facts/correct", true).operation).toBe(
+    "fact_correct",
+  );
+  expect(operation("/v1/repairs", true).operation).toBe("repair");
+  for (const [path, post] of [
+    ["/v1/projects/scope", true],
+    ["/v1/settings/project", false],
+    ["/v1/projects/../../files", false],
+    ["https://untrusted.invalid/v1/projects/scope", false],
+  ] as const)
+    expect(() => operation(path, post)).toThrow();
+});
 vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn(), Channel: class {} }));
 it("allows only bounded read-only runtime revision requests", () => {
   expect(operation("/v1/runtime/status", false)).toEqual({

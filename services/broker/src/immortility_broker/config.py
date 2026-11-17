@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     # Specialists stay off until the user turns them on. Side-effect tools stay disabled.
     delegation_enabled: bool = False
     local_tools_enabled: bool = False
+    # Read-only profile scan and File Explorer reveal. Deletion stays off.
+    laptop_tools_enabled: bool = False
     workspace_tools_enabled: bool = False
     project_read_enabled: bool = False
     workspace_root: Path | None = None
