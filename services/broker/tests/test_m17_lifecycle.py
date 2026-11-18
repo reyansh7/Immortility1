@@ -38,6 +38,7 @@ class FakeHermes:
         self.stop_polls_before_cancel = 2
         self.never_confirm = False
         self.polls = {}
+        self.create_delay = 0.0
         app = self.app
 
         @app.get("/health")
@@ -45,7 +46,9 @@ class FakeHermes:
             return {"status": "ok"}
 
         @app.post("/v1/runs")
-        def start(body: dict):
+        async def start(body: dict):
+            if self.create_delay:
+                await asyncio.sleep(self.create_delay)
             run_id = "run_" + str(len(self.statuses) + 1)
             self.statuses[run_id] = "running"
             return JSONResponse({"run_id": run_id, "status": "queued"}, status_code=202)
@@ -173,6 +176,30 @@ def test_fixture_uses_the_tasks_own_tag_not_text_added_around_it():
     # The fixture's repeated text is legitimate model output: two separate deltas.
     dup = scripted_pieces([{"role": "user", "content": "SIM:dup"}], "SIM:dup")
     assert sum(b"Simulated duplicate." in block for _, block in dup) == 2
+
+
+async def test_cancel_while_hermes_creates_the_run_still_stops_that_run():
+    """A run Hermes creates after the broker cancelled must not keep running: a stale run
+    would otherwise reach the next task's inference grant through the shared warm key."""
+    fake = FakeHermes()
+    fake.create_delay = 0.2
+    fake.stop_polls_before_cancel = 0
+    seen = []
+    async with client_for(fake) as client:
+        gateway = WarmGateway("http://hermes", KEY, client)
+
+        async def consume():
+            async for _ in gateway.run("hi", [], on_run=seen.append):
+                pass
+
+        worker = asyncio.create_task(consume())
+        await asyncio.sleep(0.05)  # the POST /v1/runs is in flight
+        worker.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await worker
+    assert seen == ["run_1"]
+    assert fake.stops == ["run_1"] and fake.statuses["run_1"] == "cancelled"
+    assert gateway.cancelled_during_create == 1
 
 
 async def test_lost_replay_and_endless_disconnects_fail_closed():

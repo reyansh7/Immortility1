@@ -3238,8 +3238,10 @@ def create_app(
                 "inference_closed", "No active inference grant or retry budget exhausted.", 403
             )
         if engine.provider_error:
-            # No automatic retry/fallback is made after a provider rejection in P1.
-            raise engine.provider_error
+            # No automatic retry/fallback is made after a provider rejection in P1. Answer
+            # Hermes' repeat attempts with a non-retryable status: a 5xx/429 here made Hermes
+            # back off and retry until the task deadline (about 90 s) instead of failing fast.
+            raise BrokerError(engine.provider_error.code, engine.provider_error.message, 403)
         request.state.inference_scope = (engine.active, engine.inference_key)
         approved = store.get(engine.active)["input"].get("allowed_capabilities", [])
         visible = approved

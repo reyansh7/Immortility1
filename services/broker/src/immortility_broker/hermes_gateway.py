@@ -5,6 +5,7 @@ On 3.13 the source is installed side by side and this client stays idle.
 """
 
 import asyncio
+import contextlib
 import json
 import os
 import secrets
@@ -119,6 +120,7 @@ class WarmGateway:
         self.duplicates_dropped = 0
         self.reconnects = 0
         self.native_approvals_denied = 0
+        self.cancelled_during_create = 0
 
     def _headers(self) -> dict[str, str]:
         return {"Authorization": "Bearer " + self.key}
@@ -149,12 +151,21 @@ class WarmGateway:
         headers = self._headers()
         if idempotency_key and idempotency_key.isascii() and 1 <= len(idempotency_key) <= 255:
             headers["Idempotency-Key"] = idempotency_key
-        try:
-            opened = await self.client.post(
+        creating = asyncio.ensure_future(
+            self.client.post(
                 self.base_url + "/v1/runs",
                 headers=headers,
                 json={"input": content, "conversation_history": history},
             )
+        )
+        try:
+            opened = await asyncio.shield(creating)
+        except asyncio.CancelledError:
+            # Cancelled while Hermes was creating the run. Hermes may already have started it;
+            # learn its id and stop it, so it cannot keep running and borrow the next task's
+            # inference grant through the shared warm key.
+            await self._stop_run_created_during_cancel(creating, on_run)
+            raise
         except httpx.HTTPError as error:
             raise BrokerError(
                 "hermes_unavailable", "Hermes gateway rejected the run.", 503
@@ -307,6 +318,22 @@ class WarmGateway:
         except ValueError:
             return "unknown"
         return status if isinstance(status, str) else "unknown"
+
+    async def _stop_run_created_during_cancel(self, creating: Any, on_run: Any) -> None:
+        try:
+            opened = await asyncio.wait_for(asyncio.shield(creating), 5.0)
+            run_id = opened.json().get("run_id") if opened.status_code == 202 else None
+        except Exception:
+            creating.cancel()
+            return
+        if not isinstance(run_id, str) or not run_id.startswith("run_"):
+            return
+        self.runs[run_id] = "running"
+        self.cancelled_during_create += 1
+        if on_run is not None:
+            on_run(run_id)
+        with contextlib.suppress(Exception):
+            await self.stop_and_confirm(run_id)
 
     async def stop_and_confirm(self, run_id: str, timeout: float = 5.0) -> str:
         """Ask Hermes to stop one run, then poll until it reports a terminal status.
