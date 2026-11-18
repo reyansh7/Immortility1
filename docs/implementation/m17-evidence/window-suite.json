@@ -2,9 +2,9 @@
     "suite":  "m1.7-window",
     "inference":  "simulated fixture only (not live-model evidence)",
     "executable":  "C:\\Users\\reyan\\AppData\\Local\\Temp\\immortility-canary-build\\release\\immortility-desktop.exe",
-    "exe_sha256":  "958EEAA2E5E3DD685D13A2A472AC6EDEFC4C4D65204567273D2FFB1FFF61F34B",
+    "exe_sha256":  "9E0702AA552B7C7E8E45051C190A7F50BB7AA9170EA5D704359A548C8E3A7F46",
     "canary":  "C:\\Users\\reyan\\AppData\\Local\\Immortility\\canary-0232-m15",
-    "started":  "2026-11-17T17:15:05.5599802+05:30",
+    "started":  "2026-11-18T13:03:32.7225012+05:30",
     "preflight":  {
                       "vite_1420":  false,
                       "gateway_8642_before":  null,
@@ -12,12 +12,12 @@
                   },
     "scenarios":  {
                       "01_plain":  {
-                                       "token":  "w17-01_plain-171504",
-                                       "ui_request_id":  "b822c2aa-edf0-43a9-a4b2-fa19921e7fe4",
-                                       "task_id":  "32683857-5f40-4728-b928-8376156324aa",
-                                       "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                       "token":  "w17-01_plain-130331",
+                                       "ui_request_id":  "362fe3a3-65bb-420d-bb2a-3f7ec07f34b9",
+                                       "task_id":  "bb53e245-b03c-4c3c-a828-064db7598dea",
+                                       "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                        "hermes_run_ids":  [
-                                                              "run_cbe45d20b73443689349bc301ad376df"
+                                                              "run_9f77b2ad49e0447f899f4e174094ea25"
                                                           ],
                                        "tool_calls":  {
 
@@ -35,17 +35,17 @@
                                        "final_state":  "succeeded",
                                        "error_code":  null,
                                        "final_text":  "Simulated reply. This is not a cloud model.",
-                                       "send_to_terminal_ms":  5156,
+                                       "send_to_terminal_ms":  4283,
                                        "ui_confirmed":  true,
                                        "pass":  true
                                    },
                       "02_clock_tool":  {
-                                            "token":  "w17-02_clock_tool-171504",
-                                            "ui_request_id":  "d3aca6f0-af91-458c-999b-208bd462b3d6",
-                                            "task_id":  "4a649ce2-88c7-4b6c-b772-cbc1112298ed",
-                                            "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                            "token":  "w17-02_clock_tool-130331",
+                                            "ui_request_id":  "c47fa274-c62c-4c67-94de-51137c5a05e8",
+                                            "task_id":  "a473b94c-513c-40bd-b066-5c3b58374d75",
+                                            "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                             "hermes_run_ids":  [
-                                                                   "run_6fedc62baa1c424f9cf557e4cb2039c6"
+                                                                   "run_f65acf00ee8542098326266fb201b8c3"
                                                                ],
                                             "tool_calls":  {
                                                                "sim-clock":  {
@@ -53,7 +53,7 @@
                                                                                  "capability":  "clock.now.v1",
                                                                                  "started":  true,
                                                                                  "completed":  "ok",
-                                                                                 "receipt":  "0f84efae03095c89"
+                                                                                 "receipt":  "a1045ab1100bf82f"
                                                                              }
                                                            },
                                             "approvals":  [
@@ -69,17 +69,17 @@
                                             "final_state":  "succeeded",
                                             "error_code":  null,
                                             "final_text":  "\n\nSimulated clock checked.",
-                                            "send_to_terminal_ms":  1109,
+                                            "send_to_terminal_ms":  975,
                                             "ui_confirmed":  true,
                                             "pass":  true
                                         },
                       "03_multistep":  {
-                                           "token":  "w17-03_multistep-171504",
-                                           "ui_request_id":  "c631700f-6aa8-42fa-8374-277f0a8666fa",
-                                           "task_id":  "d1e5316c-9714-413e-9d5f-35f4154c6557",
-                                           "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                           "token":  "w17-03_multistep-130331",
+                                           "ui_request_id":  "eaea1337-c58e-4c32-b64f-2fc04cc059b1",
+                                           "task_id":  "b4f1e691-b36a-4c99-be2e-61fcbb42986a",
+                                           "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                            "hermes_run_ids":  [
-                                                                  "run_19bff4412fb441d398381a566a09e71d"
+                                                                  "run_35f0cb07b27a4ff9b0adddc3156eba35"
                                                               ],
                                            "tool_calls":  {
                                                               "sim-clock":  {
@@ -87,7 +87,7 @@
                                                                                 "capability":  "clock.now.v1",
                                                                                 "started":  true,
                                                                                 "completed":  "ok",
-                                                                                "receipt":  "7b2513a325cc1436"
+                                                                                "receipt":  "06ebdceaaac901f2"
                                                                             },
                                                               "sim-multiply":  {
                                                                                    "authorization":  "allow",
@@ -110,17 +110,17 @@
                                            "final_state":  "succeeded",
                                            "error_code":  null,
                                            "final_text":  "\n\nSimulated steps finished. 8892.",
-                                           "send_to_terminal_ms":  1051,
+                                           "send_to_terminal_ms":  983,
                                            "ui_confirmed":  true,
                                            "pass":  true
                                        },
                       "04_bad_arguments":  {
-                                               "token":  "w17-04_bad_arguments-171504",
-                                               "ui_request_id":  "2e7781fa-f9b7-4d97-a147-333de8a4c749",
-                                               "task_id":  "87180c7a-31e1-4ea9-8533-109834c6eec3",
-                                               "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                               "token":  "w17-04_bad_arguments-130331",
+                                               "ui_request_id":  "755755a9-c831-499f-b69f-4ffe579bf83e",
+                                               "task_id":  "677db1b4-d4d4-4b4f-9dc9-4caf9e2e5755",
+                                               "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                                "hermes_run_ids":  [
-                                                                      "run_581f371405b140e793f46f2f59b09045"
+                                                                      "run_77743c6fa16749c39f7daa2938b49bff"
                                                                   ],
                                                "tool_calls":  {
                                                                   "anon-0":  {
@@ -141,17 +141,17 @@
                                                "final_state":  "blocked",
                                                "error_code":  "tool_denied",
                                                "final_text":  "",
-                                               "send_to_terminal_ms":  1926,
+                                               "send_to_terminal_ms":  1636,
                                                "ui_confirmed":  true,
                                                "pass":  true
                                            },
                       "05_shell_denied":  {
-                                              "token":  "w17-05_shell_denied-171504",
-                                              "ui_request_id":  "3d39a403-9701-4e86-8db2-7a51e9cd65af",
-                                              "task_id":  "5f138e63-1615-4b57-aca1-90c0b90634f4",
-                                              "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                              "token":  "w17-05_shell_denied-130331",
+                                              "ui_request_id":  "dc630640-fbc7-44f4-8d59-8a03c55f0b1f",
+                                              "task_id":  "96a74ed9-2762-4abe-ad73-2e18a127d042",
+                                              "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                               "hermes_run_ids":  [
-                                                                     "run_96e781cd8c554df1a27d3f1fc21863eb"
+                                                                     "run_30116e58a69d47dea05576fc81992a0d"
                                                                  ],
                                               "tool_calls":  {
                                                                  "anon-0":  {
@@ -172,17 +172,17 @@
                                               "final_state":  "blocked",
                                               "error_code":  "tool_denied",
                                               "final_text":  "",
-                                              "send_to_terminal_ms":  1735,
+                                              "send_to_terminal_ms":  1765,
                                               "ui_confirmed":  true,
                                               "pass":  true
                                           },
                       "06_browser_denied":  {
-                                                "token":  "w17-06_browser_denied-171504",
-                                                "ui_request_id":  "a32ddf97-ca62-4295-9dcf-0a639a030678",
-                                                "task_id":  "90a7370d-7d21-4062-bcb3-8bfbe7dd8127",
-                                                "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                                "token":  "w17-06_browser_denied-130331",
+                                                "ui_request_id":  "f0f43a08-398d-48f0-9697-69b899fa84d5",
+                                                "task_id":  "830d01fb-4cab-462d-9db9-0a6181193027",
+                                                "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                                 "hermes_run_ids":  [
-                                                                       "run_e475f9a0469d47928c82fd3d9b0c80bb"
+                                                                       "run_de555a8de801474c9ebc634eb717d7fc"
                                                                    ],
                                                 "tool_calls":  {
                                                                    "anon-0":  {
@@ -203,17 +203,17 @@
                                                 "final_state":  "blocked",
                                                 "error_code":  "tool_denied",
                                                 "final_text":  "",
-                                                "send_to_terminal_ms":  1710,
+                                                "send_to_terminal_ms":  1811,
                                                 "ui_confirmed":  true,
                                                 "pass":  true
                                             },
                       "07_computer_denied":  {
-                                                 "token":  "w17-07_computer_denied-171504",
-                                                 "ui_request_id":  "6325af19-b4c2-450d-94d4-71f49d67053d",
-                                                 "task_id":  "b5e063cc-0aea-498b-a362-d2ecd2b0c890",
-                                                 "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                                 "token":  "w17-07_computer_denied-130331",
+                                                 "ui_request_id":  "d1b9bf62-9d4b-49ab-b887-e978a293596e",
+                                                 "task_id":  "0ba2befe-8281-4bfe-b6a4-2e0f53061567",
+                                                 "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                                  "hermes_run_ids":  [
-                                                                        "run_e435f405ccab4d4f9ca9f0e5476aa55a"
+                                                                        "run_42f2d54ad46d40ffaeddd6595d01efda"
                                                                     ],
                                                  "tool_calls":  {
                                                                     "anon-0":  {
@@ -234,17 +234,17 @@
                                                  "final_state":  "blocked",
                                                  "error_code":  "tool_denied",
                                                  "final_text":  "",
-                                                 "send_to_terminal_ms":  1734,
+                                                 "send_to_terminal_ms":  1778,
                                                  "ui_confirmed":  true,
                                                  "pass":  true
                                              },
                       "08_unknown_tool_denied":  {
-                                                     "token":  "w17-08_unknown_tool_denied-171504",
-                                                     "ui_request_id":  "8d6a6b18-1e95-4abe-8884-282c285e5e97",
-                                                     "task_id":  "382941fc-0971-440d-9ac3-dace6dec74d0",
-                                                     "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                                     "token":  "w17-08_unknown_tool_denied-130331",
+                                                     "ui_request_id":  "a9938d4f-80bc-4cd3-aa93-0c49844e2999",
+                                                     "task_id":  "c0c97841-9088-44e6-8d60-1a943394de06",
+                                                     "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                                      "hermes_run_ids":  [
-                                                                            "run_e790b693fe5a48288fab36709f81e4a8"
+                                                                            "run_8e90b42c6a094228ba65b4c3304b3440"
                                                                         ],
                                                      "tool_calls":  {
                                                                         "anon-0":  {
@@ -265,17 +265,17 @@
                                                      "final_state":  "blocked",
                                                      "error_code":  "tool_denied",
                                                      "final_text":  "",
-                                                     "send_to_terminal_ms":  1738,
+                                                     "send_to_terminal_ms":  1683,
                                                      "ui_confirmed":  true,
                                                      "pass":  true
                                                  },
                       "09_duplicate_stream":  {
-                                                  "token":  "w17-09_duplicate_stream-171504",
-                                                  "ui_request_id":  "86ec38b1-10e8-4be7-a701-8fb9bf87ea82",
-                                                  "task_id":  "c0e310e1-ef03-43ce-b0aa-f85a89314f4f",
-                                                  "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                                  "token":  "w17-09_duplicate_stream-130331",
+                                                  "ui_request_id":  "476f16c8-936f-4939-8eb0-2c2d32be9fa7",
+                                                  "task_id":  "70eb221d-da50-4262-9528-7ff50772622e",
+                                                  "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                                   "hermes_run_ids":  [
-                                                                         "run_bf20bb0e00e54befba64902472a23212"
+                                                                         "run_f057b78f40dc4380b070805b61299a52"
                                                                      ],
                                                   "tool_calls":  {
 
@@ -293,13 +293,13 @@
                                                   "final_state":  "succeeded",
                                                   "error_code":  null,
                                                   "final_text":  "Simulated duplicate.Simulated duplicate.",
-                                                  "send_to_terminal_ms":  1053,
+                                                  "send_to_terminal_ms":  1051,
                                                   "ui_confirmed":  true,
                                                   "pass":  true,
                                                   "window_text_matches_store":  true
                                               },
                       "15_concurrency":  {
-                                             "token":  "w17-15_concurrency-171504",
+                                             "token":  "w17-15_concurrency-130331",
                                              "send_enabled_while_busy":  false,
                                              "second_task_created":  false,
                                              "second_task_status":  null,
@@ -307,12 +307,12 @@
                                              "pass":  true
                                          },
                       "10_slow_cancel":  {
-                                             "token":  "w17-10_slow_cancel-171504",
-                                             "ui_request_id":  "994566a7-9685-4456-a083-095f7de2e171",
-                                             "task_id":  "01030461-9ebf-48df-bf74-e6411e8f0aae",
-                                             "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                             "token":  "w17-10_slow_cancel-130331",
+                                             "ui_request_id":  "f9794354-35d9-4e98-8641-5a9e8a9534f2",
+                                             "task_id":  "d005ceff-65a9-4a28-bce9-e5aa60a9e97f",
+                                             "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                              "hermes_run_ids":  [
-                                                                    "run_533b51f98503471b84cdbe1e143c4dec"
+                                                                    "run_102368c75dc2477c9521a33a36c56b11"
                                                                 ],
                                              "tool_calls":  {
 
@@ -330,19 +330,19 @@
                                              "final_state":  "cancelled",
                                              "error_code":  null,
                                              "final_text":  "",
-                                             "send_to_terminal_ms":  1868,
-                                             "stop_click_to_terminal_ms":  523,
+                                             "send_to_terminal_ms":  1964,
+                                             "stop_click_to_terminal_ms":  527,
                                              "ui_saw_stopping":  true,
                                              "ui_confirmed":  true,
                                              "pass":  true
                                          },
                       "11_approve_once":  {
-                                              "token":  "w17-11_approve_once-171504",
-                                              "ui_request_id":  "004067ec-60ee-4f70-a937-b44e11a74c24",
-                                              "task_id":  "dd0e90d7-6ead-449e-ae64-d59341ccf597",
-                                              "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                              "token":  "w17-11_approve_once-130331",
+                                              "ui_request_id":  "52c77c5e-e480-41a0-911a-fc490ab8c4dc",
+                                              "task_id":  "943ee4c2-8fdf-4f28-ba09-53281243be47",
+                                              "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                               "hermes_run_ids":  [
-                                                                     "run_3e89471b284e467c95e8a71c9178b694"
+                                                                     "run_c93c8c7afadd4eff8a8532c78b68579e"
                                                                  ],
                                               "tool_calls":  {
                                                                  "sim-approve":  {
@@ -350,18 +350,18 @@
                                                                                      "capability":  "clock.now.v1",
                                                                                      "started":  true,
                                                                                      "completed":  "ok",
-                                                                                     "receipt":  "cc7050b24de8565c"
+                                                                                     "receipt":  "411369c5aa4fbe66"
                                                                                  }
                                                              },
                                               "approvals":  [
                                                                 {
-                                                                    "request_id":  "395726e0-866c-446b-bae2-fb7aaa1ab250",
+                                                                    "request_id":  "fc5b36cd-03d6-4429-b812-9980654b105e",
                                                                     "tool_call_id":  "sim-approve",
                                                                     "capability":  "clock.now.v1"
                                                                 },
                                                                 {
                                                                     "resolved":  "approve",
-                                                                    "request_id":  "395726e0-866c-446b-bae2-fb7aaa1ab250"
+                                                                    "request_id":  "fc5b36cd-03d6-4429-b812-9980654b105e"
                                                                 }
                                                             ],
                                               "states":  [
@@ -376,19 +376,18 @@
                                               "final_state":  "succeeded",
                                               "error_code":  null,
                                               "final_text":  "\n\nSimulated approved clock.",
-                                              "send_to_terminal_ms":  1976,
+                                              "send_to_terminal_ms":  1970,
                                               "late_click_possible":  null,
                                               "approval_ui_shown":  true,
-                                              "pass":  false,
-                                              "failure":  "text \n\nSimulated approved clock."
+                                              "pass":  true
                                           },
                       "12_deny":  {
-                                      "token":  "w17-12_deny-171504",
-                                      "ui_request_id":  "e26ee5d2-cd56-4ed6-b666-e0f8a54c7562",
-                                      "task_id":  "4b00e2af-d203-4e86-9308-34427a724daa",
-                                      "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                      "token":  "w17-12_deny-130331",
+                                      "ui_request_id":  "be03434b-4415-4924-a823-7605f57103c0",
+                                      "task_id":  "656d2738-2189-4cec-bf13-91338ad6c421",
+                                      "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                       "hermes_run_ids":  [
-                                                             "run_d4a9c4109b444bdf99903694768c2fba"
+                                                             "run_cda473892be34c11b5bb338d5d34f6f5"
                                                          ],
                                       "tool_calls":  {
                                                          "sim-approve":  {
@@ -398,13 +397,13 @@
                                                      },
                                       "approvals":  [
                                                         {
-                                                            "request_id":  "eca718cd-b4af-450a-8de6-17c53ddc16b2",
+                                                            "request_id":  "338f973f-0df3-4d86-b24a-ba882aa219f0",
                                                             "tool_call_id":  "sim-approve",
                                                             "capability":  "clock.now.v1"
                                                         },
                                                         {
                                                             "resolved":  "deny",
-                                                            "request_id":  "eca718cd-b4af-450a-8de6-17c53ddc16b2"
+                                                            "request_id":  "338f973f-0df3-4d86-b24a-ba882aa219f0"
                                                         }
                                                     ],
                                       "states":  [
@@ -423,28 +422,31 @@
                                       "pass":  true
                                   },
                       "13_expired":  {
-                                         "token":  "w17-13_expired-171504",
-                                         "ui_request_id":  "dbd0b8cb-666a-4e53-89a6-7ae1bc078897",
-                                         "task_id":  "c8c0d78d-301f-4c44-b04d-9dcfa352a7e4",
-                                         "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                         "token":  "w17-13_expired-130331",
+                                         "ui_request_id":  "d6842cf8-099d-416b-96d6-8025ae219d23",
+                                         "task_id":  "c8a40b8a-7505-4e8e-8df3-4a2becbca7ee",
+                                         "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                          "hermes_run_ids":  [
-                                                                "run_0a66c7baab2946d9933723b165963ee8"
+                                                                "run_bf935c957c484a95ac1b4656d279707a"
                                                             ],
                                          "tool_calls":  {
                                                             "sim-approve":  {
                                                                                 "authorization":  "approval",
-                                                                                "capability":  "clock.now.v1"
+                                                                                "capability":  "clock.now.v1",
+                                                                                "started":  true,
+                                                                                "completed":  "ok",
+                                                                                "receipt":  "a7044c7c2fa11cbe"
                                                                             }
                                                         },
                                          "approvals":  [
                                                            {
-                                                               "request_id":  "8afad93e-f70f-4a3b-909c-493934825246",
+                                                               "request_id":  "b7d94325-c5ab-4d8e-8988-51a6aee33fd6",
                                                                "tool_call_id":  "sim-approve",
                                                                "capability":  "clock.now.v1"
                                                            },
                                                            {
-                                                               "resolved":  "expired",
-                                                               "request_id":  "8afad93e-f70f-4a3b-909c-493934825246"
+                                                               "resolved":  "approve",
+                                                               "request_id":  "b7d94325-c5ab-4d8e-8988-51a6aee33fd6"
                                                            }
                                                        ],
                                          "states":  [
@@ -452,23 +454,26 @@
                                                         "queued",
                                                         "running",
                                                         "awaiting_approval",
-                                                        "blocked"
+                                                        "running",
+                                                        "verifying",
+                                                        "succeeded"
                                                     ],
-                                         "final_state":  "blocked",
-                                         "error_code":  "approval_expired",
-                                         "final_text":  "",
-                                         "send_to_terminal_ms":  56233,
+                                         "final_state":  "succeeded",
+                                         "error_code":  null,
+                                         "final_text":  "\n\nSimulated approved clock.",
+                                         "send_to_terminal_ms":  56257,
                                          "late_click_possible":  false,
                                          "approval_ui_shown":  true,
-                                         "pass":  true
+                                         "pass":  false,
+                                         "failure":  "error "
                                      },
                       "14_continuation":  {
-                                              "token":  "w17-14_continuation-171504",
-                                              "ui_request_id":  "16b12cb7-adef-4cec-aa3f-944d4af7aaf9",
-                                              "task_id":  "3f6ef596-684a-45d5-a4b9-838433bc2353",
-                                              "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                              "token":  "w17-14_continuation-130331",
+                                              "ui_request_id":  "a96cb4db-ed34-4933-8a10-de870ef6a84f",
+                                              "task_id":  "1386d2d6-e967-48b4-b25b-5a12d091b08e",
+                                              "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                               "hermes_run_ids":  [
-                                                                     "run_d95101a6e75d4cdb8166bfea772cf36f"
+                                                                     "run_93c1dc806ec74339bd3f9244e3612b89"
                                                                  ],
                                               "tool_calls":  {
 
@@ -486,17 +491,17 @@
                                               "final_state":  "succeeded",
                                               "error_code":  null,
                                               "final_text":  "Simulated reply. This is not a cloud model.",
-                                              "send_to_terminal_ms":  921,
+                                              "send_to_terminal_ms":  1022,
                                               "ui_confirmed":  true,
                                               "pass":  true
                                           },
                       "16_gateway_crash_recover":  {
-                                                       "token":  "w17-16_gateway_crash_recover-171504",
-                                                       "ui_request_id":  "5bedbcd2-f179-4a0f-9464-33e2fc384e5e",
-                                                       "task_id":  "b86a34d8-e0c4-46d0-935e-a55fb30039d8",
-                                                       "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                                       "token":  "w17-16_gateway_crash_recover-130331",
+                                                       "ui_request_id":  "f0eb6ec8-3d6c-4532-89c5-87bc0ec30429",
+                                                       "task_id":  "5b3fa626-a429-4859-b7db-465a082a9114",
+                                                       "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                                        "hermes_run_ids":  [
-                                                                              "run_f034b50a74cb4d20b164d4164c944483"
+                                                                              "run_eaebb00d163842f2abaef47cc5e40bd4"
                                                                           ],
                                                        "tool_calls":  {
 
@@ -514,26 +519,26 @@
                                                        "final_state":  "succeeded",
                                                        "error_code":  null,
                                                        "final_text":  "Simulated reply. This is not a cloud model.",
-                                                       "send_to_terminal_ms":  13176,
+                                                       "send_to_terminal_ms":  12833,
                                                        "ui_confirmed":  true,
                                                        "pass":  true,
                                                        "killed_gateway_pids":  [
-                                                                                   4704,
-                                                                                   25344,
-                                                                                   2020,
-                                                                                   32592,
-                                                                                   26392,
-                                                                                   7796
+                                                                                   7988,
+                                                                                   22532,
+                                                                                   20332,
+                                                                                   8468,
+                                                                                   15072,
+                                                                                   18392
                                                                                ],
-                                                       "new_gateway_pid":  21584
+                                                       "new_gateway_pid":  22988
                                                    },
                       "17_restart_persistence":  {
-                                                     "token":  "w17-17_restart_persistence-171504",
-                                                     "ui_request_id":  "95bbd75a-ee30-44ed-ab64-69de4875e5fe",
-                                                     "task_id":  "6b14cdcd-4c28-4803-b818-41c1bb9edc27",
-                                                     "session_id":  "249ffed3-e8fa-4d45-8281-0f70d46e709a",
+                                                     "token":  "w17-17_restart_persistence-130331",
+                                                     "ui_request_id":  "79358711-c403-4c50-9090-4b8cf863232e",
+                                                     "task_id":  "331f2eea-6d78-4c54-9102-540b024d2c3b",
+                                                     "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
                                                      "hermes_run_ids":  [
-                                                                            "run_f97c77d77305491e8b3dd360c375dfaa"
+                                                                            "run_5103d9de66bd44188076f210dcfd143c"
                                                                         ],
                                                      "tool_calls":  {
 
@@ -551,7 +556,7 @@
                                                      "final_state":  "succeeded",
                                                      "error_code":  null,
                                                      "final_text":  "Simulated reply. This is not a cloud model.",
-                                                     "send_to_terminal_ms":  3427,
+                                                     "send_to_terminal_ms":  3526,
                                                      "ui_confirmed":  true,
                                                      "pass":  true,
                                                      "orphans_after_desktop_exit":  [
@@ -559,9 +564,9 @@
                                                                                     ],
                                                      "history_restored_in_window":  true,
                                                      "relaunch":  {
-                                                                      "pid":  2472,
-                                                                      "window_ms":  8219,
-                                                                      "gateway_pid":  25292
+                                                                      "pid":  11404,
+                                                                      "window_ms":  8424,
+                                                                      "gateway_pid":  25608
                                                                   }
                                                  },
                       "18_production_isolation":  {
@@ -583,9 +588,9 @@
                                                   }
                   },
     "launch":  {
-                   "pid":  3460,
-                   "window_ms":  11845,
-                   "gateway_pid":  2020
+                   "pid":  7784,
+                   "window_ms":  11127,
+                   "gateway_pid":  22532
                },
     "page_url":  "http://tauri.localhost/",
     "vite_listening_during_run":  false,
@@ -595,7 +600,7 @@
 
                       ],
     "gateway_8642_after":  null,
-    "finished":  "2026-11-17T17:19:03.9302599+05:30",
+    "finished":  "2026-11-18T13:06:29.3531924+05:30",
     "summary":  {
                     "scenarios":  18,
                     "passed":  17

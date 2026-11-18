@@ -1,0 +1,342 @@
+﻿{
+    "suite":  "m1.7-window",
+    "inference":  "simulated fixture only (not live-model evidence)",
+    "executable":  "C:\\Users\\reyan\\AppData\\Local\\Temp\\immortility-canary-build\\release\\immortility-desktop.exe",
+    "exe_sha256":  "9E0702AA552B7C7E8E45051C190A7F50BB7AA9170EA5D704359A548C8E3A7F46",
+    "canary":  "C:\\Users\\reyan\\AppData\\Local\\Immortility\\canary-0232-m15",
+    "started":  "2026-11-18T13:08:01.1177021+05:30",
+    "preflight":  {
+                      "vite_1420":  false,
+                      "gateway_8642_before":  null,
+                      "webview2_args_env":  false
+                  },
+    "scenarios":  {
+                      "01_plain":  {
+                                       "token":  "w17-01_plain-130800",
+                                       "ui_request_id":  "ecffd638-c793-47fc-9134-6c170285b749",
+                                       "task_id":  "2317a39d-03cd-4bf0-b2ee-e8caea870a5e",
+                                       "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
+                                       "hermes_run_ids":  [
+                                                              "run_5376a8ce98434907aa6dd4850dc69644"
+                                                          ],
+                                       "tool_calls":  {
+
+                                                      },
+                                       "approvals":  [
+
+                                                     ],
+                                       "states":  [
+                                                      "created",
+                                                      "queued",
+                                                      "running",
+                                                      "verifying",
+                                                      "succeeded"
+                                                  ],
+                                       "final_state":  "succeeded",
+                                       "error_code":  null,
+                                       "final_text":  "Simulated reply. This is not a cloud model.",
+                                       "send_to_terminal_ms":  3587,
+                                       "ui_confirmed":  true,
+                                       "pass":  true
+                                   },
+                      "02_clock_tool":  {
+                                            "token":  "w17-02_clock_tool-130800",
+                                            "ui_request_id":  "66167ed7-3fd8-4685-9e44-addec1ead802",
+                                            "task_id":  "5507df91-9d01-461c-bd94-2fc6f9129e08",
+                                            "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
+                                            "hermes_run_ids":  [
+                                                                   "run_79583e4acdc848c398dfb977a0744a1f"
+                                                               ],
+                                            "tool_calls":  {
+                                                               "sim-clock":  {
+                                                                                 "authorization":  "allow",
+                                                                                 "capability":  "clock.now.v1",
+                                                                                 "started":  true,
+                                                                                 "completed":  "ok",
+                                                                                 "receipt":  "aff476a262ad3717"
+                                                                             }
+                                                           },
+                                            "approvals":  [
+
+                                                          ],
+                                            "states":  [
+                                                           "created",
+                                                           "queued",
+                                                           "running",
+                                                           "verifying",
+                                                           "succeeded"
+                                                       ],
+                                            "final_state":  "succeeded",
+                                            "error_code":  null,
+                                            "final_text":  "\n\nSimulated clock checked.",
+                                            "send_to_terminal_ms":  1062,
+                                            "ui_confirmed":  true,
+                                            "pass":  true
+                                        },
+                      "03_multistep":  {
+                                           "token":  "w17-03_multistep-130800",
+                                           "ui_request_id":  "03302ba1-cc60-42ee-9116-9ff38f26ad63",
+                                           "task_id":  "b8b4ece2-b5b2-43d0-b73d-193f5f03f15d",
+                                           "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
+                                           "hermes_run_ids":  [
+                                                                  "run_046082ea03fc4ee280337295f28e4ed7"
+                                                              ],
+                                           "tool_calls":  {
+                                                              "sim-clock":  {
+                                                                                "authorization":  "allow",
+                                                                                "capability":  "clock.now.v1",
+                                                                                "started":  true,
+                                                                                "completed":  "ok",
+                                                                                "receipt":  "b68283d95e85c699"
+                                                                            },
+                                                              "sim-multiply":  {
+                                                                                   "authorization":  "allow",
+                                                                                   "capability":  "arithmetic.multiply.v1",
+                                                                                   "started":  true,
+                                                                                   "completed":  "ok",
+                                                                                   "receipt":  "5a95653d3cc65f28"
+                                                                               }
+                                                          },
+                                           "approvals":  [
+
+                                                         ],
+                                           "states":  [
+                                                          "created",
+                                                          "queued",
+                                                          "running",
+                                                          "verifying",
+                                                          "succeeded"
+                                                      ],
+                                           "final_state":  "succeeded",
+                                           "error_code":  null,
+                                           "final_text":  "\n\nSimulated steps finished. 8892.",
+                                           "send_to_terminal_ms":  1071,
+                                           "ui_confirmed":  true,
+                                           "pass":  true
+                                       },
+                      "04_bad_arguments":  {
+                                               "token":  "w17-04_bad_arguments-130800",
+                                               "ui_request_id":  "fd832ab7-f728-49ed-99e5-7adfa7c68509",
+                                               "task_id":  "af3dfb42-e958-4e48-9780-8df433ffd063",
+                                               "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
+                                               "hermes_run_ids":  [
+                                                                      "run_1502e89a204548ef96ee869b6b3a5f4a"
+                                                                  ],
+                                               "tool_calls":  {
+                                                                  "anon-0":  {
+                                                                                 "authorization":  "deny",
+                                                                                 "capability":  null,
+                                                                                 "reason":  "capability_arguments:arithmetic.multiply.v1:a,b"
+                                                                             }
+                                                              },
+                                               "approvals":  [
+
+                                                             ],
+                                               "states":  [
+                                                              "created",
+                                                              "queued",
+                                                              "running",
+                                                              "blocked"
+                                                          ],
+                                               "final_state":  "blocked",
+                                               "error_code":  "tool_denied",
+                                               "final_text":  "",
+                                               "send_to_terminal_ms":  1736,
+                                               "ui_confirmed":  true,
+                                               "pass":  true
+                                           },
+                      "05_shell_denied":  {
+                                              "token":  "w17-05_shell_denied-130800",
+                                              "ui_request_id":  "63200ce3-6bda-4453-b846-a4a8eb510445",
+                                              "task_id":  "8a8752e7-d45d-4b12-b4f3-026e2c1f02a8",
+                                              "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
+                                              "hermes_run_ids":  [
+                                                                     "run_b057265080d446c8847036af8684b37e"
+                                                                 ],
+                                              "tool_calls":  {
+                                                                 "anon-0":  {
+                                                                                "authorization":  "deny",
+                                                                                "capability":  null,
+                                                                                "reason":  "no_tools_granted"
+                                                                            }
+                                                             },
+                                              "approvals":  [
+
+                                                            ],
+                                              "states":  [
+                                                             "created",
+                                                             "queued",
+                                                             "running",
+                                                             "blocked"
+                                                         ],
+                                              "final_state":  "blocked",
+                                              "error_code":  "tool_denied",
+                                              "final_text":  "",
+                                              "send_to_terminal_ms":  1690,
+                                              "ui_confirmed":  true,
+                                              "pass":  true
+                                          },
+                      "06_browser_denied":  {
+                                                "token":  "w17-06_browser_denied-130800",
+                                                "ui_request_id":  "5ae702b5-43bf-4978-87b6-4c1ac7b20a40",
+                                                "task_id":  "aca68abc-8c36-4fb4-8bc1-f260aa1a669e",
+                                                "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
+                                                "hermes_run_ids":  [
+                                                                       "run_5cfa2cd93a0a456db8891a700237995c"
+                                                                   ],
+                                                "tool_calls":  {
+                                                                   "anon-0":  {
+                                                                                  "authorization":  "deny",
+                                                                                  "capability":  null,
+                                                                                  "reason":  "no_tools_granted"
+                                                                              }
+                                                               },
+                                                "approvals":  [
+
+                                                              ],
+                                                "states":  [
+                                                               "created",
+                                                               "queued",
+                                                               "running",
+                                                               "blocked"
+                                                           ],
+                                                "final_state":  "blocked",
+                                                "error_code":  "tool_denied",
+                                                "final_text":  "",
+                                                "send_to_terminal_ms":  1712,
+                                                "ui_confirmed":  true,
+                                                "pass":  true
+                                            },
+                      "07_computer_denied":  {
+                                                 "token":  "w17-07_computer_denied-130800",
+                                                 "ui_request_id":  "0f691f5d-23d7-47df-8a6f-3751d16e2c40",
+                                                 "task_id":  "58b81737-945a-4516-86b7-38175cf9f42c",
+                                                 "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
+                                                 "hermes_run_ids":  [
+                                                                        "run_83f3cda711ab47fa945c0c6c7c3506f6"
+                                                                    ],
+                                                 "tool_calls":  {
+                                                                    "anon-0":  {
+                                                                                   "authorization":  "deny",
+                                                                                   "capability":  null,
+                                                                                   "reason":  "no_tools_granted"
+                                                                               }
+                                                                },
+                                                 "approvals":  [
+
+                                                               ],
+                                                 "states":  [
+                                                                "created",
+                                                                "queued",
+                                                                "running",
+                                                                "blocked"
+                                                            ],
+                                                 "final_state":  "blocked",
+                                                 "error_code":  "tool_denied",
+                                                 "final_text":  "",
+                                                 "send_to_terminal_ms":  1904,
+                                                 "ui_confirmed":  true,
+                                                 "pass":  true
+                                             },
+                      "08_unknown_tool_denied":  {
+                                                     "token":  "w17-08_unknown_tool_denied-130800",
+                                                     "ui_request_id":  "d3ee6476-45cc-46cc-9a08-43cd2dbb9c59",
+                                                     "task_id":  "94f23194-8163-4aa3-ad9b-479e82475c76",
+                                                     "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
+                                                     "hermes_run_ids":  [
+                                                                            "run_5d45be3eebb04e599d7dc977232b07cf"
+                                                                        ],
+                                                     "tool_calls":  {
+                                                                        "anon-0":  {
+                                                                                       "authorization":  "deny",
+                                                                                       "capability":  null,
+                                                                                       "reason":  "no_tools_granted"
+                                                                                   }
+                                                                    },
+                                                     "approvals":  [
+
+                                                                   ],
+                                                     "states":  [
+                                                                    "created",
+                                                                    "queued",
+                                                                    "running",
+                                                                    "blocked"
+                                                                ],
+                                                     "final_state":  "blocked",
+                                                     "error_code":  "tool_denied",
+                                                     "final_text":  "",
+                                                     "send_to_terminal_ms":  1796,
+                                                     "ui_confirmed":  true,
+                                                     "pass":  true
+                                                 },
+                      "09_duplicate_stream":  {
+                                                  "token":  "w17-09_duplicate_stream-130800",
+                                                  "ui_request_id":  "1d5b034a-6dcc-4ef9-aee0-b33f55cabffd",
+                                                  "task_id":  "362d1b7e-5749-4085-b2f8-910cf2940a90",
+                                                  "session_id":  "434eb7d5-ebff-493b-9384-190041160dfa",
+                                                  "hermes_run_ids":  [
+                                                                         "run_abb2bb9a29ba48b98981914e63830e16"
+                                                                     ],
+                                                  "tool_calls":  {
+
+                                                                 },
+                                                  "approvals":  [
+
+                                                                ],
+                                                  "states":  [
+                                                                 "created",
+                                                                 "queued",
+                                                                 "running",
+                                                                 "verifying",
+                                                                 "succeeded"
+                                                             ],
+                                                  "final_state":  "succeeded",
+                                                  "error_code":  null,
+                                                  "final_text":  "Simulated duplicate.Simulated duplicate.",
+                                                  "send_to_terminal_ms":  1117,
+                                                  "ui_confirmed":  true,
+                                                  "pass":  true,
+                                                  "window_text_matches_store":  false
+                                              },
+                      "10_slow_cancel":  {
+                                             "token":  "w17-10_slow_cancel-130800",
+                                             "pass":  false,
+                                             "failure":  "Message box disappeared. Names: Immortility | Immortility - Web content | Immortility | Immortility · Thinking. Click for chat, double-click for the command center, right-click for more. | Drag companion | Thinking | Open quick chat | Stop the active task | Open command center"
+                                         },
+                      "18_production_isolation":  {
+                                                      "before":  {
+                                                                     "C:\\Users\\reyan\\AppData\\Local\\Immortility\\state.sqlite3":  "2026-11-16T15:35:44.3732246Z|540672",
+                                                                     "C:\\Users\\reyan\\AppData\\Local\\Immortility\\state.sqlite3-wal":  "2026-11-16T16:55:57.2671131Z|4124152",
+                                                                     "C:\\Users\\reyan\\AppData\\Local\\Immortility\\broker.log":  "2026-11-16T17:24:32.5087570Z|354036",
+                                                                     "C:\\Users\\reyan\\AppData\\Local\\Immortility\\hermes-gateway.json":  "absent",
+                                                                     "C:\\Users\\reyan\\AppData\\Local\\hermes":  "2026-11-13T08:14:00.2765910Z|dir"
+                                                                 },
+                                                      "after":  {
+                                                                    "C:\\Users\\reyan\\AppData\\Local\\Immortility\\state.sqlite3":  "2026-11-16T15:35:44.3732246Z|540672",
+                                                                    "C:\\Users\\reyan\\AppData\\Local\\Immortility\\state.sqlite3-wal":  "2026-11-16T16:55:57.2671131Z|4124152",
+                                                                    "C:\\Users\\reyan\\AppData\\Local\\Immortility\\broker.log":  "2026-11-16T17:24:32.5087570Z|354036",
+                                                                    "C:\\Users\\reyan\\AppData\\Local\\Immortility\\hermes-gateway.json":  "absent",
+                                                                    "C:\\Users\\reyan\\AppData\\Local\\hermes":  "2026-11-13T08:14:00.2765910Z|dir"
+                                                                },
+                                                      "pass":  true
+                                                  }
+                  },
+    "launch":  {
+                   "pid":  27232,
+                   "window_ms":  8818,
+                   "gateway_pid":  21324
+               },
+    "page_url":  "http://tauri.localhost/",
+    "vite_listening_during_run":  false,
+    "webview2_processes":  6,
+    "webview2_no_proxy_flag":  false,
+    "final_orphans":  [
+
+                      ],
+    "gateway_8642_after":  null,
+    "finished":  "2026-11-18T13:09:13.5069182+05:30",
+    "summary":  {
+                    "scenarios":  11,
+                    "passed":  10
+                }
+}

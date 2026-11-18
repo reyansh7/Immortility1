@@ -1,9 +1,9 @@
 ﻿{
-    "built":  "2026-11-17T16:57:05.7418732+05:30",
+    "built":  "2026-11-18T13:03:31.3800217+05:30",
     "release_exe":  "C:\\Users\\reyan\\AppData\\Local\\Temp\\immortility-canary-build\\release\\immortility-desktop.exe",
     "release_bytes":  13326336,
-    "release_sha256":  "958EEAA2E5E3DD685D13A2A472AC6EDEFC4C4D65204567273D2FFB1FFF61F34B",
-    "release_build_seconds":  157.4,
+    "release_sha256":  "9E0702AA552B7C7E8E45051C190A7F50BB7AA9170EA5D704359A548C8E3A7F46",
+    "release_build_seconds":  41.2,
     "dist_assets":  4,
     "release_embedded_assets":  4,
     "debug_no_feature_embedded_assets":  0,
