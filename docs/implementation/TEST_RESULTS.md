@@ -135,6 +135,18 @@ All inference below is **LIVE local** (Ollama on 127.0.0.1, RTX 4060 Laptop) unl
 | window suite on RC canary `B7DFB074` | **18/18 CLEAN** (04:07–04:10 IST) — `m2-evidence/window-suite-rc-B7DFB074.json` |
 | backup + restore drill | `%LOCALAPPDATA%\Immortility-backups\20261122-041221`: bundle verified, integrity ok, counts match (36/622/13/0) |
 
+**Local merge into `main` (owner t14s1), 04:14 IST** — preconditions: `main` = edafc64, `m2/build..main` = 0 commits, merge-base edafc64. `git merge --no-ff m2/build` → **fa0da22** (parents edafc64 + 1eeb0a9); tree identical to m2/build; not pushed. Re-run on `main`: pytest **689 passed**, vitest **95/95**, cargo test **13/13**, `pnpm check` **FAIL — line endings only** (K27: the switch re-checked files out as CRLF; `prettier --end-of-line auto` on the same file list passes). Fixed on m2/build (9f9a785); `main` intentionally not re-merged. Switched back to `m2/build`; production exe `7A131F97…` unchanged; m1.7 still acf13fb.
+
+**D23 memory embeddings (04:30–04:50 IST, LIVE local GPU)** — `m2-evidence/memory-embeddings.json`, `scripts/benchmark-memory-embeddings.py` (synthetic memories, in-memory DB).
+| | lexical v1 | hybrid (nomic-embed-text) |
+|---|---|---|
+| direct questions recall@1 | 4/4 | 4/4 |
+| paraphrases recall@1 / @3 (tuning set) | 3/16 / 3/16 | **11/16 / 14/16** |
+| held-out paraphrases recall@1 / @3 | 7/10 / 7/10 | **9/10 / 10/10** |
+| unrelated questions with any recall | 0/8 | **0/8** |
+| search median | 0.1 ms | 11 ms |
+Query embedding 39 ms warm (Ollama 40 ms server-side, 100% GPU, 335 MB); first version created an HTTP client per call (266 ms) → reused client. pytest `test_m2_memory_embed.py` 17/17; full PC pytest **705 passed**.
+
 **Window suite** — HUD build (canary `18DC95A2…`): `WINDOW_SUITE_DONE 18/18 CLEAN` (04:0x IST) — `m2-evidence/window-suite-hud-18DC95A2.json`.
 
 ## Not run (by rule)
