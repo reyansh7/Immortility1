@@ -2606,3 +2606,11 @@ button.node:hover:not(:disabled) {
   overflow-wrap: anywhere;
   user-select: text;
 }
+
+.screen-indicator {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 50;
+  pointer-events: none;
+}

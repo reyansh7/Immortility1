@@ -86,6 +86,7 @@ from .capabilities import (
 )
 from .standard_mcp import sdk_request
 from .workflows import WorkflowJournal, WorkflowRequest
+from .screen_target import TargetRequest as ScreenTargetRequest
 from .windows_observer import (
     ObservationBegin,
     ObservationLease,
@@ -390,6 +391,9 @@ class Engine:
         self.warmup_error: str | None = None
         self.warmup_task: Any = None
         self.memory: Any = None  # memory_v1.MemoryStore when enabled (P3)
+        from .screen_target import ScreenAccess
+
+        self.screen_access = ScreenAccess()  # P4 privacy indicator state (counts only)
         self.approval_ttl = 45.0
         self.gateway = Gateway(store)
         self.workflows = WorkflowJournal(store)
@@ -2374,7 +2378,17 @@ def create_app(
             "revision": engine.runtime_changes.revision,
             "health": await ready(),
             "voice_state": voice.state,
+            "screen_access": engine.screen_access.snapshot(),
         }
+
+    @app.post("/v1/screen/target")
+    async def screen_target(body: ScreenTargetRequest) -> dict[str, Any]:
+        """User-initiated hover/selection read (session token only; not a model tool)."""
+        from .screen_target import read_target
+
+        if engine.screen_access.active:
+            raise BrokerError("screen_busy", "A screen read is already in progress.", 409)
+        return await read_target(body, engine.screen_access, engine.runtime_changes.notify)
 
     @app.post("/v1/observations")
     async def observation_prepare(body: ObservationBegin) -> dict[str, Any]:

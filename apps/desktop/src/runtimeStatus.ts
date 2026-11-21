@@ -2,10 +2,29 @@ import { api } from "./transport";
 import type { Health } from "./SettingsPanel";
 import type { VoiceState } from "./useVoice";
 
+export interface ScreenAccess {
+  active: boolean;
+  kind: string;
+  reads: number;
+  last_ms: number | null;
+  last_source: string;
+  cloud: false;
+}
+
 export interface RuntimeStatus {
   revision: number;
   health: Health;
   voice_state: VoiceState;
+  screen_access?: ScreenAccess;
+}
+
+/** Privacy indicator text while the broker is reading the screen (local only), else null. */
+export function screenIndicator(value: RuntimeStatus): string | null {
+  const access = value.screen_access;
+  if (!access?.active) return null;
+  return access.kind === "hover_target"
+    ? "● Reading text under cursor (on this PC)"
+    : "● Reading screen (on this PC)";
 }
 
 function pause(signal: AbortSignal): Promise<void> {

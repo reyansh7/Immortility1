@@ -11,7 +11,7 @@ import {
 import { createRoot } from "react-dom/client";
 import { listen } from "@tauri-apps/api/event";
 import { api, connect, stream, windowAction } from "./transport";
-import { followRuntimeStatus } from "./runtimeStatus";
+import { followRuntimeStatus, screenIndicator } from "./runtimeStatus";
 import { reduceEvent, terminal, type Task, type Transcript } from "./state";
 import "./style.css";
 import { useVoice } from "./useVoice";
@@ -130,6 +130,8 @@ const start = devStart();
 
 function App() {
   const [screenEpoch, setScreenEpoch] = useState(0);
+  const [screenReading, setScreenReading] = useState<string | null>(null);
+  const screenHold = useRef<number | undefined>(undefined);
   const [mode, setMode] = useState<Mode>(start.mode),
     [settings, setSettings] = useState(false),
     [view, setView] = useState<View>(start.view),
@@ -440,6 +442,11 @@ function App() {
           setArtifactConsent(false);
         }
         runtimeModelChoice.current = selected;
+        const reading = screenIndicator(snapshot);
+        window.clearTimeout(screenHold.current);
+        if (reading) setScreenReading(reading);
+        // Keep the indicator visible briefly so even a fast read is noticeable.
+        else screenHold.current = window.setTimeout(() => setScreenReading(null), 1500);
         setHealth({ ...snapshot.health, voice_state: snapshot.voice_state });
         setConnected(true);
         setReconnecting(false);
@@ -732,6 +739,11 @@ function App() {
             void changeMode("compact");
         }}
       >
+        {screenReading && (
+          <span className="live-indicator screen-indicator" role="status">
+            {screenReading}
+          </span>
+        )}
         {mode === "compact" && (
           <div className={`companion ${face} ${active ? "busy" : ""}`}>
             <span className="relic-shell" aria-hidden="true" />
