@@ -222,7 +222,8 @@ def read(request: dict) -> dict:
             exact = contains(word.GetBoundingRectangles(), x, y)
             line = at.Clone()
             line.ExpandToEnclosingUnit(mod.TextUnit_Line)
-            if text and exact:
+            # Embedded objects (canvas, images) come back as U+FFFC: not text.
+            if text.replace("\ufffc", "").strip() and exact:
                 result.update(
                     source="uia_text",
                     target=text,

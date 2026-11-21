@@ -151,13 +151,22 @@ def main() -> int:
     edge_cmd = None
 
     def record(name, app, result, ok, expected):
+        # Identity confirmation: the product's own report of the window under the point
+        # must be this benchmark's window, else the case is contaminated (never a pass).
+        marker = {"notepad": "ImmScreenBench-notes", "edge-html": "ImmScreenBench Page", "edge-pdf": "ImmScreenBench"}[app]
+        title = (result.get("window") or {}).get("title", "")
+        contaminated = bool(result.get("source")) and result.get("source") not in {"skipped_occluded", "no_ground_truth"} and marker.casefold() not in title.casefold()
+        if contaminated:
+            ok = False
+        if result.get("source") == "uia_name" and expected not in {"Submit / Submit order"}:
+            ok = False  # a title/name-only answer is never screen-understanding success
         cases.append(
             {
                 "name": name,
                 "app": app,
                 "passed": bool(ok),
                 "expected": expected,
-                "got": result.get("target", ""),
+                "got": result.get("target", ""), "contaminated": contaminated if "contaminated" in dir() else False,
                 "source": result.get("source"),
                 "denied": result.get("denied"),
                 "exact": result.get("exact"),
@@ -232,7 +241,7 @@ def main() -> int:
                 ["Photosynthesis", "Serendipity", "brown", "lazy", "chemical", "benchmark"],
                 unit_line="converts",
             )
-            gt = truth("ImmScreenBench-notes", select="Serendipity")
+            gt = truth("ImmScreenBench-notes", find=["Photosynthesis"], select="Serendipity")
             usage["idle_ms_samples"].append(idle_ms())
             result = (
                 asyncio.run(
@@ -338,7 +347,8 @@ def main() -> int:
                 "edge-html: button label",
                 "edge-html",
                 result,
-                "submit" in result.get("target", "").casefold(),
+                result.get("target", "").casefold() in {"submit", "order", "submit order"}
+                and "Submit order" in result.get("line", "") + " " + result.get("target", ""),
                 "Submit / Submit order",
             )
             # PDF in the same isolated instance

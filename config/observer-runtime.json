@@ -854,7 +854,7 @@
     "integrations/windows-observer/native_picker.py": "cc26875d1ac4c64ff15fa5589aa71b5341a35753a5680d05ebd1225150ea7d0d",
     "integrations/windows-observer/scratch_window.py": "f09b3b10edac2af8ff4d186602340ff0628a2e5c81a28a29d457762838de3496",
     "integrations/windows-observer/ocr_crop.ps1": "9a4b3878435da36b4cd9dc28162b85a722c26172ba7054a2ce361031469e6013",
-    "integrations/windows-observer/screen_target.py": "8558b87e9352f9ab09c5ae54455bcb5c157ce5254934f56f674b93f076a216b8"
+    "integrations/windows-observer/screen_target.py": "45f3eeb3fc1a8138f8bb633f987ff37adb00d49dd8043f2412f8dc3ad3169e4f"
   },
   "excluded": [
     "bytecode",
