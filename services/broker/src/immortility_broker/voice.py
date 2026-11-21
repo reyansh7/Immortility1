@@ -99,6 +99,10 @@ class RecordRequest(VoiceOptions):
         return value
 
 
+# K25: keep a warm INFERNAL (Kokoro, CPU) worker for 10 minutes after use instead of 60 s;
+# a cold start costs ~19 s, an idle worker ~1 GB RAM and no CPU.
+INFERNAL_KEEP_SECONDS = 600
+
 ERRORS = {
     "speech_recognition_unavailable": "Local speech recognition failed. CPU mode needs no CUDA; check the installed Whisper model. Audio was not uploaded.",
     "audio_capture_unavailable": "Microphone capture failed. Check the selected input device and Windows microphone permission. Capture does not use CUDA.",
@@ -140,6 +144,8 @@ class VoiceService:
         self.infernal_owner: ProcessOwner | None = None
         self.infernal_process: asyncio.subprocess.Process | None = None
         self.infernal_used_at = 0.0
+        self.infernal_lock = asyncio.Lock()
+        self.infernal_warm: asyncio.Task[None] | None = None
         self.worker_lock = asyncio.Lock()
         self.job: asyncio.Task[None] | None = None
         self.stop_requested = False
@@ -239,7 +245,8 @@ class VoiceService:
         if (
             self.infernal_process
             and self.state == "IDLE"
-            and time.monotonic() - self.infernal_used_at > 60
+            and time.monotonic() - self.infernal_used_at > INFERNAL_KEEP_SECONDS
+            and not self.infernal_lock.locked()
         ):
             idle_process, self.infernal_process = self.infernal_process, None
             idle_owner, self.infernal_owner = self.infernal_owner, None
@@ -374,6 +381,37 @@ class VoiceService:
                 self.diagnostic["exit_code"] = finished_process.returncode
 
     async def _infernal_worker(self, operation: str, options: dict[str, Any]) -> dict[str, Any]:
+        # One exchange at a time on the long-lived INFERNAL process: a background warm-up
+        # (K25) and a real "speak" never interleave frames on the same pipe.
+        async with self.infernal_lock:
+            return await self._infernal_exchange(operation, options)
+
+    def prewarm_infernal(self) -> None:
+        """K25: start loading the INFERNAL voice while the user is still talking, so the
+        reply's first audio does not pay the ~19 s cold start. Silent: nothing is played."""
+        if (
+            self.options.voice != "infernal"
+            or not self.options.voice_output
+            or not self.settings.infernal_voice_enabled
+            or (self.infernal_process is not None and self.infernal_process.returncode is None)
+            or (self.infernal_warm is not None and not self.infernal_warm.done())
+        ):
+            return
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return
+        options = {**self.options.model_dump(), "text": "Ready."}
+
+        async def warm() -> None:
+            started = time.monotonic()
+            with contextlib.suppress(Exception):
+                await self._infernal_worker("warm", options)
+                self.latency["tts_warm"] = 1000 * (time.monotonic() - started)
+
+        self.infernal_warm = loop.create_task(warm())
+
+    async def _infernal_exchange(self, operation: str, options: dict[str, Any]) -> dict[str, Any]:
         if not self.settings.infernal_voice_enabled:
             raise BrokerError(
                 "infernal_disabled", "Enable the optional INFERNAL voice feature first."
@@ -481,6 +519,10 @@ class VoiceService:
             self.level = 0.0
 
     async def stop_worker(self) -> None:
+        if self.infernal_warm and not self.infernal_warm.done():
+            self.infernal_warm.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await self.infernal_warm
         if self.reference_warm and not self.reference_warm.done():
             self.reference_warm.cancel()
             with contextlib.suppress(asyncio.CancelledError):
@@ -546,6 +588,7 @@ class VoiceService:
         self.stop_requested = False
         self.latency = {}
         self.transition("LISTENING")
+        self.prewarm_infernal()
         self.job = asyncio.create_task(self.conversation(request))
         return self.snapshot()
 

@@ -275,6 +275,18 @@ def speak(options: dict[str, Any], render: bool = False) -> None:
         emit("meter", level=0.0)
 
 
+def warm(options: dict[str, Any]) -> None:
+    """K25: load and run the INFERNAL pipeline once on a short phrase; the audio is
+    discarded (no output device is opened), so warming never makes a sound."""
+    if options.get("infernal_authorized") is not True:
+        raise ValueError("infernal_disabled")
+    from .infernal_tts import chunks as infernal_chunks
+
+    for _ in infernal_chunks(Path(options["models"]) / "infernal", "Ready.", options):
+        pass
+    emit("done", warmed=True)
+
+
 def handle(options: dict[str, Any]) -> None:
     mode = options.get("operation")
     stage = {
@@ -284,6 +296,7 @@ def handle(options: dict[str, Any]) -> None:
         "transcribe": "speech_recognition",
         "speak": "speech_playback",
         "render": "speech_synthesis",
+        "warm": "speech_warmup",
     }.get(str(mode), "operation_validation")
     try:
         emit("stage", stage=stage)
@@ -300,6 +313,8 @@ def handle(options: dict[str, Any]) -> None:
             emit("done", text=text)
         elif mode in {"speak", "render"}:
             speak(options, mode == "render")
+        elif mode == "warm" and options.get("voice") == "infernal":
+            warm(options)
         else:
             emit("error", code="operation_denied")
     except Exception as issue:
@@ -311,6 +326,7 @@ def handle(options: dict[str, Any]) -> None:
                 "record": "audio_capture_unavailable",
                 "render": "speech_synthesis_unavailable",
                 "speak": "audio_playback_unavailable",
+                "warm": "speech_synthesis_unavailable",
             }.get(str(mode), "audio_device_or_engine_unavailable"),
             stage=stage,
             error_type="os_error" if isinstance(issue, OSError) else "runtime_error",

@@ -1,0 +1,22 @@
+{
+  "note": "render-to-file; no audio played",
+  "cold": {
+    "render_after_request_ms": 16039,
+    "render_frame": {
+      "kind": "done"
+    },
+    "wav_bytes": 250124
+  },
+  "warm": {
+    "warm_ms": 13301,
+    "warm_frame": {
+      "kind": "done",
+      "warmed": true
+    },
+    "render_after_request_ms": 2964,
+    "render_frame": {
+      "kind": "done"
+    },
+    "wav_bytes": 250124
+  }
+}
