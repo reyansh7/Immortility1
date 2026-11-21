@@ -74,6 +74,19 @@ def intent(content: str) -> tuple[str, dict[str, str]] | None:
         for phrase in ("most ram", "most memory", "using the most memory", "consuming the most")
     ):
         return "laptop.resources.v1", {}
+    if re.search(
+        r"\b(defender|antivirus|virus protection|security status|pc guardian)\b", text
+    ) and set(re.findall(r"[a-z]+", text)) & {
+        "status",
+        "check",
+        "is",
+        "enabled",
+        "show",
+        "how",
+        "running",
+        "working",
+    }:
+        return "laptop.security.v1", {}
     if any(
         phrase in text
         for phrase in (
@@ -229,9 +242,7 @@ def scan(
     for item in shown:
         key = (str(item["name"]).casefold(), int(item["bytes"]))
         if key in seen and int(item["bytes"]) > 0:
-            duplicates.append(
-                {"name": item["name"], "bytes": item["bytes"], "also": seen[key]}
-            )
+            duplicates.append({"name": item["name"], "bytes": item["bytes"], "also": seen[key]})
         else:
             seen[key] = str(item["path"])
     reclaimable = sum(
@@ -269,7 +280,9 @@ def render(report: dict[str, Any]) -> str:
         "Largest items:",
     ]
     if not report["items"]:
-        lines.append("No readable items were found in Downloads, Documents, Desktop, Videos, or Pictures.")
+        lines.append(
+            "No readable items were found in Downloads, Documents, Desktop, Videos, or Pictures."
+        )
     for item in report["items"]:
         lines.append(
             f"- {item['parent']}\\{item['name']} — {amount(int(item['bytes']))} — "
@@ -286,7 +299,9 @@ def render(report: dict[str, Any]) -> str:
     )
     duplicates = report.get("duplicates") or []
     if duplicates:
-        lines.append("Duplicate candidates have the same name and size. Contents were not compared.")
+        lines.append(
+            "Duplicate candidates have the same name and size. Contents were not compared."
+        )
         for item in duplicates:
             lines.append(f"- {item['name']} — {amount(int(item['bytes']))}")
     lines.append(
@@ -556,3 +571,89 @@ def _process_memory() -> list[tuple[str, int]]:
         if label and isinstance(working, int) and working >= 0:
             result.append((label, working))
     return result
+
+
+DEFENDER_FIELDS = (
+    "AMServiceEnabled",
+    "AntivirusEnabled",
+    "RealTimeProtectionEnabled",
+    "BehaviorMonitorEnabled",
+    "IoavProtectionEnabled",
+    "NISEnabled",
+    "AntivirusSignatureAge",
+    "QuickScanAge",
+    "FullScanAge",
+    "IsTamperProtected",
+)
+
+
+def defender_status(sample: Callable[[], dict[str, object]] | None = None) -> str:
+    """PC Guardian (M2): read-only Microsoft Defender status. Changes nothing, no admin."""
+    data = sample() if sample is not None else _defender_sample()
+    if not data:
+        return (
+            "Microsoft Defender status is not available to this account "
+            "(another antivirus may be active). Nothing was changed."
+        )
+
+    def flag(key: str) -> str:
+        value = data.get(key)
+        return "on" if value is True else "OFF" if value is False else "unknown"
+
+    def age(key: str) -> str:
+        value = data.get(key)
+        if not isinstance(value, int) or value < 0 or value > 100000:
+            return "unknown"
+        return "today" if value == 0 else f"{value} day{'s' if value != 1 else ''} ago"
+
+    problems = [
+        label
+        for key, label in (
+            ("AntivirusEnabled", "antivirus"),
+            ("RealTimeProtectionEnabled", "real-time protection"),
+        )
+        if data.get(key) is False
+    ]
+    signature_age = data.get("AntivirusSignatureAge")
+    if isinstance(signature_age, int) and signature_age > 3:
+        problems.append("virus definitions are old")
+    lines = [
+        "Microsoft Defender (read-only check; nothing was changed):",
+        f"- Antivirus: {flag('AntivirusEnabled')} · Real-time protection: "
+        f"{flag('RealTimeProtectionEnabled')} · Tamper protection: {flag('IsTamperProtected')}",
+        f"- Behaviour monitoring: {flag('BehaviorMonitorEnabled')} · Download scanning: "
+        f"{flag('IoavProtectionEnabled')}",
+        f"- Definitions updated: {age('AntivirusSignatureAge')} · Last quick scan: "
+        f"{age('QuickScanAge')} · Last full scan: {age('FullScanAge')}",
+    ]
+    lines.append(
+        "Attention: " + ", ".join(problems) + ". Open Windows Security to fix it."
+        if problems
+        else "Looks healthy."
+    )
+    return "\n".join(lines)
+
+
+def _defender_sample() -> dict[str, object]:
+    fields = ",".join(DEFENDER_FIELDS)
+    completed = subprocess.run(
+        [
+            "powershell",
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            f"Get-MpComputerStatus | Select-Object -Property {fields} | ConvertTo-Json -Compress",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=15,
+        check=False,
+        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+    )
+    try:
+        payload = json.loads(completed.stdout or "{}")
+    except json.JSONDecodeError:
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    return {key: payload.get(key) for key in DEFENDER_FIELDS if key in payload}

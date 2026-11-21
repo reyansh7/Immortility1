@@ -30,7 +30,7 @@ from .contracts import BrokerError, TERMINAL, TaskRequest, uid
 from .delegation import apply_delegation_file, orchestrate, project_notes, save_delegation_file
 from .hermes import Hermes, runtime_check
 from .local_tools import AUTHORIZED, apply_local_tools_file, call_local_tool, save_local_tools_file
-from .storage_audit import apply_laptop_file, intent as laptop_intent
+from .storage_audit import apply_laptop_file, defender_status, intent as laptop_intent
 from .storage_audit import render as render_storage
 from .storage_audit import resource_summary
 from .storage_audit import reveal as reveal_folder
@@ -1222,7 +1222,12 @@ class Engine:
                 if name == "pointer.move.v1":
                     await self.pointer_move(task_id, task, arguments)
                     return
-                if name in {"laptop.storage.v1", "desktop.reveal.v1", "laptop.resources.v1"}:
+                if name in {
+                    "laptop.storage.v1",
+                    "desktop.reveal.v1",
+                    "laptop.resources.v1",
+                    "laptop.security.v1",
+                }:
                     if govern(name, "observer") != "allow":
                         raise BrokerError(
                             "tool_denied", "Operation is outside the permission policy.", 403
@@ -1239,6 +1244,8 @@ class Engine:
                         text = render_storage(report)
                     elif name == "laptop.resources.v1":
                         text = await asyncio.to_thread(resource_summary)
+                    elif name == "laptop.security.v1":
+                        text = await asyncio.to_thread(defender_status)
                     else:
                         text = reveal_folder(
                             Path.home(),
