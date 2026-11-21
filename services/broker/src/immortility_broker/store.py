@@ -258,6 +258,7 @@ class Store:
                 "allowed_capabilities": request.allowed_capabilities,
                 "requested_artifacts": request.requested_artifacts,
                 "model_selection": model_selection or {"mode": "auto_cloud", "route_id": None},
+                **({"origin": "screen"} if request.origin == "screen" else {}),
             },
             "capabilities": ["chat.respond", *request.allowed_capabilities],
             "budget": {"max_paid_usd": 0, "timeout_ms": 90000, "max_tokens": 2048},
@@ -684,7 +685,13 @@ class Store:
     def history(self, session_id: str) -> list[dict[str, str]]:
         history = []
         for task in self.tasks(session_id):
-            if task["status"] == "succeeded" and not task.get("recall_excluded"):
+            if (
+                task["status"] == "succeeded"
+                and not task.get("recall_excluded")
+                # Explain-this screen text stays in its own local turn: later (possibly
+                # cloud) turns never receive it as history.
+                and task["input"].get("origin") != "screen"
+            ):
                 history.extend(
                     [
                         {"role": "user", "content": task["input"]["content"]},

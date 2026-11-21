@@ -2734,3 +2734,66 @@ button.node:hover:not(:disabled) {
     display: none;
   }
 }
+
+/* Explain this (D24): one-shot, previewed, local-only screen text explanation. */
+.explain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+}
+.explain-start {
+  border: 1px solid rgba(255, 70, 70, 0.35);
+  background: rgba(20, 12, 14, 0.7);
+  border-radius: 999px;
+  padding: 4px 12px;
+  letter-spacing: 0.02em;
+}
+.explain-start:disabled {
+  opacity: 0.45;
+}
+.explain-hint {
+  color: var(--muted, #9a9aa2);
+  font-size: 0.78rem;
+}
+.explain-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--text, #eee);
+}
+.explain-preview {
+  width: 100%;
+  border: 1px solid rgba(255, 70, 70, 0.4);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(16, 10, 12, 0.85);
+}
+.explain-preview blockquote {
+  margin: 6px 0 10px;
+  padding-left: 10px;
+  border-left: 2px solid rgba(255, 70, 70, 0.6);
+  max-height: 7.5em;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.explain-label {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted, #9a9aa2);
+}
+.explain-actions {
+  display: flex;
+  gap: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .explain * {
+    transition: none !important;
+  }
+}

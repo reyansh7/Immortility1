@@ -447,6 +447,7 @@ enum Operation {
     CreateWorkflow,
     GetWorkflow,
     StartObservation,
+    ScreenTarget,
     ObservationResult,
     ShutdownBackground,
     Cancel,
@@ -520,6 +521,8 @@ fn endpoint(operation: Operation, id: Option<String>) -> Result<(reqwest::Method
         Operation::CreateWorkflow => (Method::POST, "/v1/workflows".into()),
         Operation::GetWorkflow => (Method::GET, format!("/v1/workflows/{}", valid_id(id)?)),
         Operation::StartObservation => (Method::POST, "/v1/observations".into()),
+        // Explain this: one user-initiated read of the text under the cursor (D24).
+        Operation::ScreenTarget => (Method::POST, "/v1/screen/target".into()),
         Operation::ShutdownBackground => (Method::POST, "/v1/runtime/shutdown".into()),
         Operation::ObservationResult => {
             (Method::GET, format!("/v1/observations/{}", valid_id(id)?))
@@ -647,6 +650,7 @@ async fn broker_request(
     let seconds = match operation {
         Operation::RuntimeStatus => 28,
         Operation::ObservationResult => 85,
+        Operation::ScreenTarget => 25,
         Operation::ResolveApproval | Operation::CallMcp => 30,
         _ => 8,
     };

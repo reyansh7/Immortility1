@@ -36,6 +36,7 @@ import {
 import { FlatFace } from "./face/FlatFace";
 import { MotionProvider } from "./ui/motion";
 import { Icon } from "./ui/Icon";
+import { ExplainThis } from "./explain/ExplainThis";
 import { StatusHud } from "./ui/StatusHud";
 import { Overlay } from "./companion/Overlay";
 import type { View } from "./command/CommandCenter";
@@ -662,27 +663,46 @@ function App() {
       localOnly={localOnly}
     />
   );
-  const composer = (quick: boolean) => (
-    <Composer
-      input={input}
-      setInput={setInput}
-      running={!!active}
-      canSend={canSend}
-      blockedReason={blockedReason}
-      onSend={() => void send()}
-      onStop={stop}
-      quickActions={quick}
-      localOnly={localOnly}
-      pace={
-        prefs.pace === "fast" || prefs.pace === "deep" ? prefs.pace : "auto"
-      }
-      onPace={(value) => setPrefs({ pace: value })}
-      toolsAvailable={
-        health?.local_tools_enabled === true ||
-        health?.standard_mcp_enabled === true ||
-        health?.web_research_enabled === true
-      }
+  const explain = (
+    <ExplainThis
+      connected={connected}
+      mode={health?.model_selection?.mode}
+      session={session}
+      busy={!!active || sending}
+      onTask={(task) => {
+        setTasks((previous) =>
+          previous.some((t) => t.task_id === task.task_id)
+            ? previous
+            : [...previous, task],
+        );
+        if (!terminal.has(task.status)) void watch(task);
+      }}
     />
+  );
+  const composer = (quick: boolean) => (
+    <>
+      {explain}
+      <Composer
+        input={input}
+        setInput={setInput}
+        running={!!active}
+        canSend={canSend}
+        blockedReason={blockedReason}
+        onSend={() => void send()}
+        onStop={stop}
+        quickActions={quick}
+        localOnly={localOnly}
+        pace={
+          prefs.pace === "fast" || prefs.pace === "deep" ? prefs.pace : "auto"
+        }
+        onPace={(value) => setPrefs({ pace: value })}
+        toolsAvailable={
+          health?.local_tools_enabled === true ||
+          health?.standard_mcp_enabled === true ||
+          health?.web_research_enabled === true
+        }
+      />
+    </>
   );
   const settingsPanel = (
     <SettingsPanel

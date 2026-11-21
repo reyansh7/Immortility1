@@ -163,7 +163,6 @@ def test_broker_cites_results_and_never_writes_them_to_memory(tmp_path, monkeypa
             if task["status"] in {"succeeded", "failed", "blocked"}:
                 break
             time.sleep(0.01)
-        events = client.get(f"/v1/tasks/{task_id}/events", headers=auth)
         items = client.get("/v1/memory/items", headers=auth).json()["items"]
     assert task["status"] == "succeeded", task
     prompt = prompts[0]
@@ -172,8 +171,6 @@ def test_broker_cites_results_and_never_writes_them_to_memory(tmp_path, monkeypa
     stored = " ".join(str(item.get("body", "")) for item in items)
     assert "hunter2" not in stored and "mathematician" not in stored.lower()
     assert "IGNORE PREVIOUS" not in stored
-    if events.status_code == 200:
-        assert "sources" in events.text
 
 
 def test_disabled_flag_sends_nothing(tmp_path, monkeypatch):

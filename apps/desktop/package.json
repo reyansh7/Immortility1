@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 1420 --strictPort",
     "build": "tsc --noEmit && vite build",
-    "check": "tsc --noEmit && eslint src && prettier --check src/*.tsx src/command/*.ts src/command/*.tsx src/face/*.ts src/face/*.tsx src/companion/*.tsx src/ui/*.tsx src/ui/*.ts src/voice.test.ts src/state.ts src/transport.ts src/state.test.ts src/style.css",
+    "check": "tsc --noEmit && eslint src && prettier --check src/*.tsx src/command/*.ts src/command/*.tsx src/face/*.ts src/face/*.tsx src/companion/*.tsx src/ui/*.tsx src/ui/*.ts src/explain/*.ts src/explain/*.tsx src/voice.test.ts src/state.ts src/transport.ts src/state.test.ts src/style.css",
     "test": "vitest run",
     "tauri": "tauri"
   },

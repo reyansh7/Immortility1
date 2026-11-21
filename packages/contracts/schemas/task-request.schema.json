@@ -13,6 +13,7 @@
     "privacy_class": {"enum":["public", "personal"]},
     "cloud_consent": {"const":true},
     "source": {"enum":["text","voice"],"default":"text"},
+    "origin": {"enum":["typed","screen"],"default":"typed"},
     "response_length": {"enum":["brief","normal","detailed"],"default":"normal"}
   }
 }

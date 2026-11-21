@@ -39,6 +39,8 @@ export function operation(
   if (path === "/v1/tasks" && post) return { operation: "create_task" };
   if (path === "/v1/observations" && post)
     return { operation: "start_observation" };
+  if (path === "/v1/screen/target" && post)
+    return { operation: "screen_target" };
   const observation = /^\/v1\/observations\/([a-f0-9-]{36})$/.exec(path);
   if (observation && !post)
     return { operation: "observation_result", id: observation[1] };
