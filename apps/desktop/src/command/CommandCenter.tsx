@@ -473,7 +473,11 @@ function Permissions({
     ["Cloud model", consent, consent ? "allowed" : "off"],
     ["Microphone", micLive, micLive ? "live now" : "off"],
     ["Specialist agents", health?.delegation_enabled === true, "no tools"],
-    ["Web research", health?.web_research_enabled === true, "Wikipedia only"],
+    [
+      "Web research",
+      health?.web_research_enabled === true,
+      "DuckDuckGo + Wikipedia",
+    ],
     ["Local MCP", health?.mcp_enabled === true, "arithmetic only"],
     [
       "Workspace edits",

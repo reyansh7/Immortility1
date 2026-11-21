@@ -41,7 +41,7 @@ Legend: [x] done with evidence · [~] partial · [ ] not started · [B] blocked 
 - [x] Status HUD (system/mic/screen/cursor/model) + ModelHub local option (D22).
 - [~] P5 voice: synthetic E2E voice→broker→local Qwen→Ultron TTS 3/3; streaming TTS + playback cancel existed and re-verified; D20 local DirectChat for voice. Open: live mic procedure (PENDING), Smart Turn v3 (not added), TTS cold start (K25), wake word (not planned).
 - [~] P6 PC Guardian: read-only Defender status `laptop.security.v1` (D21). Open: event log, scan history.
-- [x] P7a bounded pointer move `pointer.move.v1` (D18), real desktop 8/8. [ ] clicks/typing (separate tier, not started). [ ] P8 web research. [ ] P9 evolution engine. [ ] P10 release.
+- [x] P7a bounded pointer move `pointer.move.v1` (D18), real desktop 8/8. [ ] clicks/typing (separate tier, not started). [x] P8 web research (free: DuckDuckGo IA + Wikipedia with owner contact; D25). [x] Explain this, real window 10/10 (D24). [ ] P9 evolution engine. [ ] P10 release.
 
 ## Audit claims (research report) re-verified against the repo — 21 Nov 2026
 | Claim | Verdict | Evidence |

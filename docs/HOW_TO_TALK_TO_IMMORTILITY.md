@@ -54,10 +54,29 @@ Immortility asks **Approve / Deny** every time. It only moves — it never click
 Stop it instantly: press **Esc**, press **Stop**, grab the mouse, or push the pointer into any
 screen corner. Text read from the screen can never trigger a move.
 
-## 6. Ask about what's on screen
-The broker can read the word/line under your cursor on request (Screen chip lights while it
-reads; password fields and sign-in/credential windows are refused). A one-click "Explain this"
-button in the chat is **not wired yet** (next step); today this is exercised by the test tools.
+## 6. "Explain this" — point at any text on screen
+1. Select **Local Qwen** in the Model hub (the button is greyed out otherwise: screen text never
+   goes to the cloud).
+2. Click **Explain this** above the message box. You have 3 seconds to point the mouse at the
+   text you mean (a selected passage wins over the line under the pointer). **Esc** or
+   **Cancel** stops it.
+3. Immortility reads that one line once (Screen chip lights; password and sign-in windows are
+   refused) and shows it in a preview: **Read from your screen · stays on this PC**.
+4. Click **Explain** to get a short plain-words explanation, or **Discard**.
+The text is treated as data, not instructions: it cannot run tools, move the mouse, search the
+web, or be remembered, and it does not see your earlier chat.
+
+## 6b. Look something up on the web (free sources)
+Turn on **Web research** in Settings, then ask "search the web for …", "look up …" or a plain research question. Immortility asks
+DuckDuckGo Instant Answers (and Wikipedia once you set a contact) and cites results as [1], [2].
+Web text is never saved to memory. Questions that contain secrets or e-mail addresses are refused
+before anything is sent. **Owner step for Wikipedia:** create
+`%LOCALAPPDATA%\Immortility\web-contact.json` containing `{"contact": "you@example.com"}`
+(Wikimedia requires a contact in the User-Agent); without it only DuckDuckGo is used.
+
+### Clock
+"What time is it?" answers in your local time with the zone, e.g. "Local time: 5:10 AM on
+Sunday 22 November 2026 (IST, UTC+05:30)".
 
 ## 7. If something is wrong
 - **Model: Local** but no answer → Ollama is not running (step 1.1).

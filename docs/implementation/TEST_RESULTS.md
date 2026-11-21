@@ -149,6 +149,18 @@ Query embedding 39 ms warm (Ollama 40 ms server-side, 100% GPU, 335 MB); first v
 
 **Window suite** — HUD build (canary `18DC95A2…`): `WINDOW_SUITE_DONE 18/18 CLEAN` (04:0x IST) — `m2-evidence/window-suite-hud-18DC95A2.json`.
 
+## M2 continuation after the merge (22 Nov, 04:31–05:20 IST, PC idle, owner away)
+**K23 clock** — `clock.now.v1` returns local ISO time with offset + `utc` + display string; deterministic answer "Local time: 4:55 AM on Sunday 22 November 2026 (IST, UTC+05:30)". `test_m2_clock_local.py` 5/5; the old `test_registry` clock test asserted UTC and was updated to assert the local reading (8cd0ac9).
+
+**K25 voice warm-up (D26), LIVE CPU** — `m2-evidence/infernal-warm.json`: cold render 16.0 s, warm 3.0 s; warm-up 13.3 s runs while the user talks. `test_m2_voice_warm.py` 5/5.
+
+**Free web research (D25), LIVE public endpoints** — `m2-evidence/web-research-live.json`: DuckDuckGo Instant Answers answered 3/5 factual queries in ≈340–440 ms; a nonsense query correctly returned nothing; Wikipedia skipped without an owner contact (Wikimedia UA policy → 403). One diagnostic request used a made-up contact URL in the User-Agent (`https://github.com/reyansh/immortility`); not repeated. `test_m2_web_search.py` 9/9.
+
+**Hermes 0.23.3 extended rerun — SIMULATED model (not live evidence)** — `m2-evidence/bench-0233-extended-warmup-on.json`: deterministic **50/50**, adversarial **27/27** (0 prohibited tools), cancels **5/5** (client p50 178 ms, broker p50 141 ms). Warm chat e2e p50 316 ms / first delta p50 216 ms; all warm e2e p50 435 ms, p95 632 ms; warm-up 4.3 s, gateway cold start 13.3 s, broker start 13.8 s.
+
+**Explain this (D24), real window, LIVE local model** — `scripts/explain-window-test.ps1` on canary `6547B63A…` (built 05:02 IST; production exe `7A131F97…` before = after), PC idle 6324 s, foreground "Grok Bot", 0 outside-input events. Pointed only at Immortility's own composer hint. Result **10/10** — `m2-evidence/explain-window-real.json`: button enabled with Local Qwen; preview showed the pointed line + "stays on this PC"; screen read 4.0 s (incl. 3 s countdown); answer 1.4 s from `immortility-qwen3.5-4b` ("…press Enter to send and hold Shift+Enter to create a new line"); usage by provider `{"local": 1}`; 0 tool events; privacy `personal`; relaunched in cloud mode → button disabled with the explanation. (Memory v1 is off in that canary copy, so "no memory written" there is trivially true; the memory/history exclusions are covered by `test_m2_explain_this.py` 7/7.)
+Earlier attempts found real defects, all fixed before the passing run: (1) K29 observer pins broken by CRLF → screen read 503; (2) in the simulated canary the screen turn ran on the Hermes fixture → screen turns now go only to tool-free local DirectChat, agent runtimes refused (a46af22); (3) the session's earlier chat leaked into the explanation → screen turns get no history/notes/recall/facts/memory (01984e3). Test-harness fixes: aim at static visible text and the bottom-most composer hint.
+
 ## Not run (by rule)
 
 - 18/18 desktop window suite: waiting for an owner-scheduled ~10 min uninterrupted session (`WINDOW_SUITE_PROCEDURE.md`).

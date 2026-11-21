@@ -513,7 +513,7 @@ export function SettingsPanel({
         )}
         {toggle(
           "/v1/settings/web-research",
-          "Public Wikipedia context and task-approved MCP security source retrieval. Pages are untrusted data; general web search is unavailable.",
+          "Free public lookups (DuckDuckGo Instant Answers; Wikipedia once web-contact.json names a contact) and task-approved MCP security sources. Results are untrusted data, cited as [n], never saved to memory.",
           "web_research_enabled",
         )}
         {toggle(
