@@ -146,7 +146,7 @@ function Launch {
     while ((Get-Date) -lt $deadline) {
         if ($script:proc.HasExited) { throw "Desktop exited ($($script:proc.ExitCode)) before the window was ready." }
         $w = $root.FindFirst($Scope::Children, $class)
-        if ($w -and (Find-Named "Message")) {
+        if ($w -and (Find-Named "Message" -NoDrift)) {  # startup: absence is not drift
             $gw = $null
             while ((Get-Date) -lt $deadline -and -not $gw) { $gw = Listener 8642; if (-not $gw) { Start-Sleep -Milliseconds 300 } }
             return [ordered]@{ pid = $script:proc.Id; window_ms = [math]::Round(((Get-Date) - $t0).TotalMilliseconds); gateway_pid = $gw }
@@ -156,11 +156,11 @@ function Launch {
     throw "Packaged window did not show the message box."
 }
 function Window { return $root.FindFirst($Scope::Children, $class) }
-function Find-Named($name) {
+function Find-Named($name, [switch]$NoDrift) {
     $w = Window; if (-not $w) { return $null }
     $cond = New-Object System.Windows.Automation.PropertyCondition($AE::NameProperty, $name)
     $found = $w.FindFirst($Scope::Descendants, $cond)
-    if (-not $found -and $name -eq "Message") {
+    if (-not $found -and $name -eq "Message" -and -not $NoDrift) {
         # The window left chat mode (compact companion, e.g. a stray Escape or collapse
         # click). Record the drift, then reopen quick chat with the app's own control and
         # wait for the resize to finish. A drift marks the run attended (never clean).
