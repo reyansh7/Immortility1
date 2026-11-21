@@ -30,3 +30,6 @@ Started M2/P0, 21 Nov 2026. Status: OPEN / FIXED / ACCEPTED. Times are IST.
 | K24 | Tool turns on the local route take ≈8.5–10.5 s | Medium (UX) | OPEN | ≈6.7 s is the per-task Hermes 0.21.1 spawn before the first model call; model time is ≈1–2 s. The warm 0.23.x gateway (canary) removes the spawn; not yet wired to the local route. |
 | K25 | INFERNAL/Ultron TTS cold start ≈19 s; render-to-file ≈14–15 s for 2–3 s of audio | Medium (UX) | OPEN | Streaming playback first audio is ≈1.4 s once the worker is warm (keep-alive). Kokoro runs on CPU (`torch 2.15.0+cpu`). Pre-warm on app start or a CUDA torch build would help. |
 | K26 | Denied pointer approval ends `cancelled` rather than `blocked` | Low | OPEN | No move happens (verified on the real desktop); only the final status label differs from tool approvals. |
+
+## K27 — `pnpm check` failed after `git switch` on Windows (line endings) — FIXED on m2/build
+With `core.autocrlf=true` a fresh checkout writes CRLF; prettier's default `endOfLine: lf` then flags 19 files although the committed content is identical (`git diff main m2/build` empty, `--end-of-line auto` passes). Seen in the post-merge run on `main` (fa0da22). Fix: `apps/desktop/.prettierrc.json` `{ endOfLine: auto }` — no other formatting rule changes. `main` does not have the fix yet (no second merge without the owner).
