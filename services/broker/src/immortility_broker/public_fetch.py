@@ -60,27 +60,37 @@ class PublicBackend(httpcore.AsyncNetworkBackend):
         )
 
 
-async def fetch_json(url: str, pool: httpcore.AsyncConnectionPool | None = None) -> Any:
-    validate_url(url)
+async def fetch_json(
+    url: str,
+    pool: httpcore.AsyncConnectionPool | None = None,
+    *,
+    hosts: frozenset[str] = ALLOWED_HOSTS,
+    statuses: tuple[int, ...] = (200,),
+    types: tuple[bytes, ...] = (b"application/json",),
+    user_agent: str = "Immortility/0.1 public lookup",
+) -> Any:
+    validate_url(url, allowed_hosts=hosts)
     if pool is None:
         async with httpcore.AsyncConnectionPool(
-            network_backend=PublicBackend(), max_connections=1, retries=0
+            network_backend=PublicBackend(hosts), max_connections=1, retries=0
         ) as owned:
-            return await fetch_json(url, owned)
+            return await fetch_json(
+                url, owned, hosts=hosts, statuses=statuses, types=types, user_agent=user_agent
+            )
     try:
         async with asyncio.timeout(8):
             async with pool.stream(
                 "GET",
                 url,
                 headers={
-                    "User-Agent": "Immortility/0.1 public lookup",
+                    "User-Agent": user_agent,
                     "Accept": "application/json",
                     "Accept-Encoding": "identity",
                 },
                 extensions={"timeout": {"connect": 3, "read": 5, "write": 3, "pool": 3}},
             ) as response:
                 headers = {k.lower(): v.lower() for k, v in response.headers}
-                if response.status != 200:
+                if response.status not in statuses:
                     raise BrokerError(
                         "source_unavailable",
                         "The public source refused or redirected the request.",
@@ -92,7 +102,7 @@ async def fetch_json(url: str, pool: httpcore.AsyncConnectionPool | None = None)
                         "Compressed response was not requested and is refused.",
                         503,
                     )
-                if not headers.get(b"content-type", b"").startswith(b"application/json"):
+                if not headers.get(b"content-type", b"").startswith(types):
                     raise BrokerError("source_unavailable", "Expected a JSON public source.", 503)
                 body = bytearray()
                 async for chunk in response.aiter_stream():

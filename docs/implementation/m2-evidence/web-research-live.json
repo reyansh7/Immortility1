@@ -1,0 +1,56 @@
+[
+  {
+    "wikipedia_contact_configured": false
+  },
+  {
+    "question": "search the web for Alan Turing",
+    "query_sent": "Alan Turing",
+    "ms": 438,
+    "results": [
+      {
+        "source": "duckduckgo",
+        "title": "Alan Turing (Wikipedia)",
+        "url": "https://en.wikipedia.org/wiki/Alan_Turing",
+        "snippet_chars": 700
+      }
+    ]
+  },
+  {
+    "question": "look up the Rust programming language",
+    "query_sent": "the Rust programming language",
+    "ms": 336,
+    "results": []
+  },
+  {
+    "question": "search the web for Pune",
+    "query_sent": "Pune",
+    "ms": 349,
+    "results": [
+      {
+        "source": "duckduckgo",
+        "title": "Pune (Wikipedia)",
+        "url": "https://en.wikipedia.org/wiki/Pune",
+        "snippet_chars": 700
+      }
+    ]
+  },
+  {
+    "question": "web search photosynthesis",
+    "query_sent": "photosynthesis",
+    "ms": 341,
+    "results": [
+      {
+        "source": "duckduckgo",
+        "title": "Photosynthesis (Wikipedia)",
+        "url": "https://en.wikipedia.org/wiki/Photosynthesis",
+        "snippet_chars": 700
+      }
+    ]
+  },
+  {
+    "question": "search the web for xqzv-no-such-topic-2026",
+    "query_sent": "xqzv-no-such-topic-2026",
+    "ms": 389,
+    "results": []
+  }
+]
