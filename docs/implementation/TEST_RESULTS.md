@@ -54,6 +54,25 @@ the labelled `simulated_model` fixture. Evidence JSON in `docs/implementation/m2
 - Absolute latency is higher than M1.7's 167.9 ms because the PC was in active use during the runs.
 - Port 8642 closed after each run; every process started was cleaned up.
 
+## P1 finish — 0.23.3 canary, K7 warm-up, typed schemas (21 Nov, ~22:45–23:00 IST)
+
+pytest on the PC after the change: **571 passed**, 0 failed (+6 in `test_m2_p1_finish.py`), 177 s.
+
+Offline gateway benchmark — **SIMULATED MODEL, not live evidence**. `scripts/benchmark-m17-offline.py
+--canary <dir> --hermes-version <v> --warmup on|off`; typed tool schemas on in all four runs.
+**The PC was in active use during these runs** (last-input idle 0–31 ms at start), so absolute
+latencies carry desktop load.
+
+| Hermes | Warm-up | Det. | Adv. | Gateway ready | Warm-up run | First user turn first-delta / e2e | Warm first-delta p50/p95 | Warm e2e p50/p95 | Cancel ack p50 |
+|---|---|---|---|---|---|---|---|---|---|
+| 0.23.2 | off | 50/50 | 27/27 | 12631 ms | — | **4409.5 / 4550.7 ms** | 213.6 / 235.1 | 441.7 / 623.3 | 146 ms (5/5) |
+| 0.23.2 | on | 50/50 | 27/27 | 6861 ms | 3955 ms (local answer) | **230.7 / 315.3 ms** | 213.0 / 231.4 | 436.8 / 622.2 | 150 ms (5/5) |
+| 0.23.3 | off | 50/50 | 27/27 | 26892 ms (first start, fresh home) | — | **9051.2 / 9527.0 ms** | 221.7 / 234.0 | 445.4 / 640.6 | 202 ms (5/5) |
+| 0.23.3 | on | 50/50 | 27/27 | 10056 ms | 4313 ms (local answer) | **226.2 / 332.5 ms** | 226.8 / 259.3 | 448.3 / 630.3 | 212 ms (5/5) |
+
+Prohibited tools started: 0 in every run. Port 8642 closed after every run.
+Evidence: `m2-evidence/bench-0232-typed-warmup-{off,on}.json`, `bench-0233-typed-warmup-{off,on}.json`.
+
 ## Not run (by rule)
 
 - 18/18 desktop window suite: waiting for an owner-scheduled ~10 min uninterrupted session (`WINDOW_SUITE_PROCEDURE.md`).

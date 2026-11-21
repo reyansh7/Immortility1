@@ -99,6 +99,7 @@ def main() -> None:
                 {
                     "data_dir": str(settings.data_dir),
                     "hermes_0232_gateway": settings.hermes_0232_gateway,
+                    "hermes_gateway_version": settings.hermes_gateway_version,
                     "simulated_inference": settings.simulated_inference,
                 }
             ),

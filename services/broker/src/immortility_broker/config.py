@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     hermes_source: Path = Path.home() / "AppData/Local/hermes/hermes-agent"
     # Off until the 0.23.2 gateway passes the live tool-selection gate.
     hermes_0232_gateway: bool = False
+    # Which reviewed gateway pin to run. Only the canary flag file may select a candidate pin,
+    # and only inside a canary-* data directory (see hermes_gateway.GATEWAY_PINS).
+    hermes_gateway_version: str = "0.23.2"
     # Environment cannot enable this. Only the canary file, applied after load, may.
     simulated_inference: bool = False
     # A reviewed, tested release. Never silently follow upstream main.
@@ -49,6 +52,8 @@ class Settings(BaseSettings):
     artifact_tools_enabled: bool = False
     # Experimental provider schema export; native MCP identity/grants are unchanged.
     typed_tool_schemas_enabled: bool = False
+    # Gateway path only: one locally answered warm-up run after readiness (K7).
+    gateway_warmup_enabled: bool = True
     # No autorun/service install. Only explicit, local read workflows may recover.
     durable_workflows_enabled: bool = False
     local_only_mode: bool = False

@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import copy
 import hmac
 import json
 import logging
@@ -367,6 +368,15 @@ class Engine:
         # M2/P1: one fresh binding per broker turn on the shared warm gateway.
         self.run_bindings: dict[str, str] = {}
         self.run_binding_secret = run_binding.new_secret()
+        # K7: one broker-issued warm-up run after gateway readiness. Its model request is
+        # answered locally (never a provider, never the simulated fixture) and only while the
+        # warm-up is in flight; it is identified by a fresh binding no task can hold.
+        self.warmup_binding: str | None = None
+        self.warmup_calls = 0
+        self.warmup_state = "off"
+        self.warmup_ms: float | None = None
+        self.warmup_error: str | None = None
+        self.warmup_task: Any = None
         self.approval_ttl = 45.0
         self.gateway = Gateway(store)
         self.workflows = WorkflowJournal(store)
@@ -1874,8 +1884,23 @@ def apply_gateway_flag(settings: Settings) -> None:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError, UnicodeError):
         return
-    if isinstance(data, dict) and data.get("enabled") is True:
-        settings.hermes_0232_gateway = True
+    if not isinstance(data, dict) or data.get("enabled") is not True:
+        return
+    version = data.get("version", "0.23.2")
+    from .hermes_gateway import GATEWAY_PINS
+
+    pin = GATEWAY_PINS.get(version) if isinstance(version, str) else None
+    if pin is None or (pin["canary_only"] and not settings.data_dir.name.startswith("canary-")):
+        # An unknown or out-of-canary candidate pin leaves the default runtime in place.
+        return
+    settings.hermes_gateway_version = version
+    settings.hermes_0232_gateway = True
+    # M2/P1: the warm gateway path uses typed (per-capability, strict) tool schemas by
+    # default. The 0.21.1 desktop default never reads this file, so it is unchanged.
+    typed = data.get("typed_tool_schemas", True)
+    settings.typed_tool_schemas_enabled = typed is not False
+    warmup = data.get("warmup", True)
+    settings.gateway_warmup_enabled = warmup is not False
 
 
 def apply_capability_flags(settings: Settings) -> None:
@@ -1911,6 +1936,61 @@ def save_capability_flags(settings: Settings) -> None:
         + "\n",
         encoding="utf-8",
     )
+
+
+async def warmup_completion() -> AsyncIterator[str]:
+    """Fixed local answer for the K7 warm-up run. Not a model; never billed or counted."""
+    for delta, finish in [({"role": "assistant", "content": "ready"}, None), ({}, "stop")]:
+        yield (
+            "data: "
+            + json.dumps(
+                {
+                    "id": "broker-warmup",
+                    "object": "chat.completion.chunk",
+                    "model": "immortility/local-warmup",
+                    "choices": [{"index": 0, "delta": delta, "finish_reason": finish}],
+                    "usage": {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+                }
+            )
+            + "\n\n"
+        )
+    yield "data: [DONE]\n\n"
+
+
+async def warm_gateway(engine: Any, supervisor: Any, timeout: float = 45.0) -> None:
+    """K7: one throwaway Hermes run so the first user turn does not pay agent init.
+
+    The run's model request is answered by the broker itself (``warmup_completion``); no
+    provider, fixture, grant, ledger row or task is involved. Failure only leaves the first
+    turn cold; it never blocks or fails startup.
+    """
+    gateway = getattr(supervisor, "gateway", None)
+    if gateway is None:
+        engine.warmup_state = "skipped"
+        return
+    engine.warmup_binding = run_binding.new_binding()
+    engine.warmup_calls = 0
+    engine.warmup_state = "running"
+    started = time.perf_counter()
+    try:
+
+        async def drain() -> None:
+            async for _piece in gateway.run(
+                "Warm-up check. Reply with the single word: ready.",
+                [],
+                None,
+                instructions=run_binding.marker(engine.warmup_binding),
+            ):
+                pass
+
+        await asyncio.wait_for(drain(), timeout)
+        engine.warmup_state = "done" if engine.warmup_calls >= 1 else "no_model_call"
+    except Exception as error:  # noqa: BLE001 - warm-up is best effort
+        engine.warmup_state = "failed"
+        engine.warmup_error = type(error).__name__
+    finally:
+        engine.warmup_binding = None
+        engine.warmup_ms = round((time.perf_counter() - started) * 1000, 1)
 
 
 def create_app(
@@ -1976,12 +2056,20 @@ def create_app(
                     ) as handle:
                         handle.write(type(error).__name__ + ": " + str(error)[:300] + "\n")
                 raise
+            if settings.gateway_warmup_enabled:
+                engine.warmup_state = "pending"
+                engine.warmup_task = asyncio.create_task(warm_gateway(engine, supervisor))
         try:
             yield
         finally:
             # Stop the active task first so its Hermes run is confirmed stopped while the
             # gateway is still up, then stop the gateway itself.
             # Only for the Hermes gateway path; local workflows keep their resumable state.
+            warmup_task = getattr(engine, "warmup_task", None)
+            if warmup_task is not None and not warmup_task.done():
+                warmup_task.cancel()
+                with contextlib.suppress(BaseException):
+                    await warmup_task
             if supervisor is not None and engine.active:
                 with contextlib.suppress(Exception):
                     await engine.cancel(engine.active)
@@ -2080,9 +2168,16 @@ def create_app(
                 not authorized
                 and request.url.path.startswith("/inference/")
                 and engine.warm_inference_key
-                and engine.inference_allowed
-                and engine.active is not None
                 and peer in {"127.0.0.1", "::1"}
+                and (
+                    (engine.inference_allowed and engine.active is not None)
+                    # K7 warm-up: only the chat endpoint, only while the warm-up is in flight;
+                    # the handler answers it locally and only for the warm-up binding.
+                    or (
+                        engine.warmup_binding is not None
+                        and request.url.path == "/inference/v1/chat/completions"
+                    )
+                )
             ):
                 authorized = hmac.compare_digest(presented, "Bearer " + engine.warm_inference_key)
                 # Warm-key requests are shared across runs; handlers bind them to a run.
@@ -3200,6 +3295,13 @@ def create_app(
     @app.post("/inference/v1/chat/completions")
     async def inference(request: Request) -> StreamingResponse:
         received = time.perf_counter()
+        if getattr(request.state, "warm_key", False) and engine.warmup_binding is not None:
+            probe = copy.deepcopy(await request.json())
+            if run_binding.extract_and_strip(probe) == {engine.warmup_binding}:
+                engine.warmup_calls += 1
+                if engine.warmup_calls > 2:
+                    raise BrokerError("run_binding_mismatch", "Warm-up run is over.", 403)
+                return StreamingResponse(warmup_completion(), media_type="text/event-stream")
         if (
             engine.inference_allowed
             and engine.active

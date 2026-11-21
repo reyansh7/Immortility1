@@ -46,3 +46,10 @@ restore drill). Keys are not exported (they live in Windows Credential Manager).
 
 **D8 · 21 Nov · Tests that need live inference are not substituted by simulations.** Simulated
 results are labelled "simulated fixture" everywhere and are never counted toward the ≥90% gate.
+
+**D9 · 21 Nov · Hermes 0.23.3 canary layout.** Source `%LOCALAPPDATA%\Immortility\canary-0233-src` (official tag v0.23.3, commit caafe538, verified), HERMES_HOME files in `%LOCALAPPDATA%\Immortility\canary-0233-home`, broker data in `canary-0233-m2`. Installed with Hermes' own `python -m pm.cli install --without chromium --without cua-driver` using the existing isolated Python 3.14.9, with HERMES_HOME/USERPROFILE/LOCALAPPDATA/APPDATA all pointed inside the canary home (production `%LOCALAPPDATA%\hermes` last written 17 Nov — untouched). The deepest workspace file is ≈215 chars below HERMES_HOME, so HERMES_HOME is the short directory junction `%LOCALAPPDATA%\h0233` (same reason `h0232` exists). The pin is `canary_only` in `hermes_gateway.GATEWAY_PINS`: `apply_gateway_flag` ignores it and `GatewaySupervisor` refuses it unless the data dir is `canary-*`.
+
+**D10 · 21 Nov · K7 warm-up is a real Hermes run answered by the broker.** Hermes already pre-builds tool schemas at boot, but the first `/v1/runs` still spent ≈4–9 s before its first model request. The broker now issues one warm-up run after readiness with a fresh binding (not a task binding). The inference endpoint answers that binding locally with a fixed `ready` (model `immortility/local-warmup`, 0 tokens, ≤2 calls) and only while the warm-up is in flight; the warm key is otherwise accepted only with an active task grant, as before. No provider, fixture, ledger row, task or approval is involved. Opt-out: `"warmup": false` in the canary flag file.
+
+**D11 · 21 Nov · Typed tool schemas default on the gateway path only.** `typed_tool_schemas_enabled` becomes true when the gateway flag is applied (opt-out `"typed_tool_schemas": false`). The global default stays false so the 0.21.1 desktop default, which the production exe runs from this working tree (K5), is unchanged.
+

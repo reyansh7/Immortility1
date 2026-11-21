@@ -24,6 +24,40 @@ GATEWAY_VERSION = "0.23.2"
 GATEWAY_REVISION = "ae2a81ccc00e9b7c06301523e5bb09608397149c"
 REQUIRED_PYTHON = (3, 14)
 
+# Reviewed gateway pins. ``home`` is the HERMES_HOME under %LOCALAPPDATA% (kept short because
+# the Hermes package workspace exceeds MAX_PATH under longer roots); ``source`` is the checkout
+# under %LOCALAPPDATA%. A ``canary_only`` pin is refused unless the broker data directory is an
+# isolated ``canary-*`` directory, so a candidate can never become the desktop runtime by a flag.
+GATEWAY_PINS: dict[str, dict[str, Any]] = {
+    "0.23.2": {
+        "revision": GATEWAY_REVISION,
+        "home": "h0232",
+        "source": "Immortility/hermes-0.23.2",
+        "canary_only": False,
+    },
+    "0.23.3": {
+        "revision": "caafe5389ae585ef77387a962aee05b1bcf17029",
+        # Junction to %LOCALAPPDATA%\Immortility\canary-0233-home (files live in the canary dir).
+        "home": "h0233",
+        "source": "Immortility/canary-0233-src",
+        "canary_only": True,
+    },
+}
+
+
+def gateway_pin(version: str, data_dir: Path) -> dict[str, Any]:
+    """The reviewed pin for ``version``; candidate pins only inside a canary data dir."""
+    pin = GATEWAY_PINS.get(version)
+    if pin is None:
+        raise BrokerError("hermes_incompatible", "No reviewed pin for that Hermes version.", 503)
+    if pin["canary_only"] and not Path(data_dir).name.startswith("canary-"):
+        raise BrokerError(
+            "hermes_incompatible",
+            "Hermes " + version + " is a canary candidate and cannot run outside a canary.",
+            503,
+        )
+    return pin
+
 
 def run_phase(status: str) -> str:
     """A stop acknowledgement is still in progress. It is not a finished cancellation."""
@@ -466,13 +500,22 @@ def _broker_already_in_job() -> bool:
 
 
 class GatewaySupervisor:
-    """One loopback Hermes 0.23.2 API server, owned by a Windows job."""
+    """One loopback Hermes gateway API server (reviewed pin), owned by a Windows job."""
+
+    # Class defaults keep the reviewed 0.23.2 pin for callers that bypass __init__.
+    version = GATEWAY_VERSION
+    revision = GATEWAY_REVISION
+    settings: Any = None
 
     def __init__(self, settings: Any, broker_url: str):
         self.data_dir = settings.data_dir
+        self.settings = settings
+        self.version = str(getattr(settings, "hermes_gateway_version", GATEWAY_VERSION))
+        pin = gateway_pin(self.version, self.data_dir)
+        self.revision = str(pin["revision"])
         local = os.environ.get("LOCALAPPDATA", "")
-        self.home = Path(local) / "h0232"
-        self.source = Path(local) / "Immortility" / "hermes-0.23.2"
+        self.home = Path(local) / str(pin["home"])
+        self.source = Path(local) / str(pin["source"])
         self.broker_url = broker_url.rstrip("/")
         self.url = "http://127.0.0.1:8642"
         self.api_key = secrets.token_hex(32)
@@ -511,7 +554,7 @@ class GatewaySupervisor:
         if len(matches) != 1:
             raise BrokerError(
                 "hermes_unavailable",
-                "The isolated Hermes 0.23.2 interpreter is not installed.",
+                "The isolated Hermes " + self.version + " interpreter is not installed.",
                 503,
             )
         return matches[0]
@@ -525,42 +568,59 @@ class GatewaySupervisor:
                 revision = head
         except OSError as error:
             raise BrokerError(
-                "hermes_unavailable", "Cannot confirm the Hermes 0.23.2 checkout.", 503
+                "hermes_unavailable",
+                "Cannot confirm the Hermes " + self.version + " checkout.",
+                503,
             ) from error
-        if revision != GATEWAY_REVISION:
+        if revision != self.revision:
             raise BrokerError(
-                "hermes_incompatible", "Hermes 0.23.2 revision differs from the reviewed pin.", 503
+                "hermes_incompatible",
+                "Hermes " + self.version + " revision differs from the reviewed pin.",
+                503,
             )
 
     def _write_config(self) -> None:
         from .hermes import isolated_config
 
-        schemas = [
-            {
-                "manifest": {"name": "clock.now.v1"},
-                "input_schema": {"properties": {}, "required": [], "$defs": {}},
-                "output_schema": {"properties": {"timestamp": {}}},
-            },
-            {
-                "manifest": {"name": "arithmetic.multiply.v1"},
-                "input_schema": {
-                    "properties": {"a": {}, "b": {}},
-                    "required": ["a", "b"],
+        typed = bool(getattr(self.settings, "typed_tool_schemas_enabled", False))
+        outputs = {
+            "clock.now.v1": {"timestamp": {}},
+            "arithmetic.multiply.v1": {"result": {}},
+            "project.outline.v1": {},
+        }
+        schemas = []
+        for name, output in outputs.items():
+            if typed:
+                # Exact strict input schemas from the broker's Pydantic models (the same
+                # models that validate every proposal), not hand-written placeholders.
+                from .agent_bridge import capability_input
+
+                full = capability_input(name).model_json_schema()
+                input_schema = {
+                    "properties": full.get("properties", {}),
+                    "required": full.get("required", []),
+                    "$defs": full.get("$defs", {}),
+                }
+            else:
+                fields = ["a", "b"] if name == "arithmetic.multiply.v1" else []
+                input_schema = {
+                    "properties": {field: {} for field in fields},
+                    "required": fields,
                     "$defs": {},
-                },
-                "output_schema": {"properties": {"result": {}}},
-            },
-            {
-                "manifest": {"name": "project.outline.v1"},
-                "input_schema": {"properties": {}, "required": [], "$defs": {}},
-                "output_schema": {"properties": {}},
-            },
-        ]
+                }
+            schemas.append(
+                {
+                    "manifest": {"name": name},
+                    "input_schema": input_schema,
+                    "output_schema": {"properties": output},
+                }
+            )
         config = isolated_config(
             self.source,
             self.broker_url + "/inference/v1",
             self.inference_key,
             broker_schemas=schemas,
+            typed_tools=typed,
         )
         config["agent"]["max_turns"] = 8
         config["approvals"] = {

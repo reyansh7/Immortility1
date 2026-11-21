@@ -59,13 +59,18 @@ def main() -> int:
         type=Path,
         default=Path(os.environ["LOCALAPPDATA"]) / "Immortility" / "canary-0232-m15",
     )
+    parser.add_argument("--hermes-version", default="0.23.2",
+                        help="reviewed gateway pin (candidates only run in a canary- dir)")
+    parser.add_argument("--warmup", choices=["default", "on", "off"], default="default",
+                        help="broker warm-up turn after gateway readiness (K7 A/B)")
     args = parser.parse_args()
     data: Path = args.canary
     if not data.name.startswith("canary-"):
         raise SystemExit("Refusing: the benchmark only runs in a canary- directory.")
     data.mkdir(parents=True, exist_ok=True)
     for name, body in {
-        "hermes-gateway.json": {"enabled": True},
+        "hermes-gateway.json": {"enabled": True, "version": args.hermes_version,
+                                **({} if args.warmup == "default" else {"warmup": args.warmup == "on"})},
         "simulated-inference.json": {"enabled": True, "category": "simulated_model"},
         "local-tools.json": {"enabled": True},
         "workspace.json": {"enabled": False, "root": str(ROOT), "project_read_enabled": True},
@@ -96,6 +101,15 @@ def main() -> int:
     while not server.started and time.perf_counter() - t0 < 150:
         time.sleep(0.05)
     broker_start_ms = round((time.perf_counter() - t0) * 1000, 1)
+    # K7: a warm-up run (if enabled) starts after readiness. Wait for it so the first
+    # benchmark turn measures "first user turn after warm-up"; record its own cost.
+    while engine.warmup_state in {"pending", "running"} and time.perf_counter() - t0 < 210:
+        time.sleep(0.05)
+    warmup = {"state": engine.warmup_state, "ms": engine.warmup_ms, "error": engine.warmup_error,
+              "calls_answered_locally": engine.warmup_calls,
+              "ready_after_start_ms": round((time.perf_counter() - t0) * 1000, 1)}
+    meta = {"hermes_version": settings.hermes_gateway_version,
+            "typed_tool_schemas": settings.typed_tool_schemas_enabled, "warmup": warmup}
     headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json"}
 
     def call(method: str, path: str, body: dict | None = None) -> tuple[int, dict]:
@@ -118,14 +132,14 @@ def main() -> int:
                 "SELECT body FROM events WHERE task_id=? ORDER BY sequence", (task_id,))]
 
     try:
-        return run(call, events, engine, data, server, thread, broker_start_ms)
+        return run(call, events, engine, data, server, thread, broker_start_ms, meta)
     finally:
         # Always stop the in-process broker so its gateway is shut down (no orphan on 8642).
         server.should_exit = True
         thread.join(timeout=30)
 
 
-def run(call, events, engine, data, server, thread, broker_start_ms) -> int:  # noqa: C901
+def run(call, events, engine, data, server, thread, broker_start_ms, meta) -> int:  # noqa: C901
     session = call("POST", "/v1/sessions")[1]["id"]
 
     busy_retries = [0]
@@ -348,7 +362,8 @@ def run(call, events, engine, data, server, thread, broker_start_ms) -> int:  # 
                          "preflight_ms": stats(field(rows, "preflight_ms"))}
     report = {
         "benchmark": "m1.7-offline", "inference": "simulated_model fixture; no provider contacted; not live-model evidence",
-        "hermes": "0.23.2 gateway (real), isolated canary", "canary": str(data),
+        "hermes": meta["hermes_version"] + " gateway (real), isolated canary", "canary": str(data),
+        "typed_tool_schemas": meta["typed_tool_schemas"], "warmup": meta["warmup"],
         "finished": datetime.now().astimezone().isoformat(),
         "broker_start_ms": broker_start_ms,
         "cold_first_turn": det_results[0],
@@ -366,7 +381,7 @@ def run(call, events, engine, data, server, thread, broker_start_ms) -> int:  # 
         "deterministic_cases": det_results,
     }
     (data / "benchmark-m17.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
-    summary = {k: report[k] for k in ("broker_start_ms", "port_8642_open_after_stop", "process")}
+    summary = {k: report[k] for k in ("hermes", "typed_tool_schemas", "warmup", "broker_start_ms", "port_8642_open_after_stop", "process")}
     summary["cold_first_turn"] = {k: det_results[0].get(k) for k in ("e2e_ms", "run_started_ms", "model_route_ms", "preflight_ms", "first_delta_ms", "gateway_cold_start_ms")}
     summary["deterministic"] = {k: v for k, v in report["deterministic"].items()}
     summary["adversarial"] = {k: report["adversarial"][k] for k in ("passed", "total", "prohibited_tool_started")}

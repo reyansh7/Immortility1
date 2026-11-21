@@ -1,0 +1,1643 @@
+{
+ "benchmark": "m1.7-offline",
+ "inference": "simulated_model fixture; no provider contacted; not live-model evidence",
+ "hermes": "0.23.2 gateway (real), isolated canary",
+ "canary": "C:\\Users\\reyan\\AppData\\Local\\Immortility\\canary-m2-p1",
+ "typed_tool_schemas": true,
+ "warmup": {
+  "state": "done",
+  "ms": 3954.9,
+  "error": null,
+  "calls_answered_locally": 1,
+  "ready_after_start_ms": 11259.6
+ },
+ "finished": "2026-11-21T22:54:21.313659+05:30",
+ "broker_start_ms": 7340.9,
+ "cold_first_turn": {
+  "status": "succeeded",
+  "error": null,
+  "run_started_ms": 40.5,
+  "model_route_ms": 213.2,
+  "preflight_ms": 11.5,
+  "first_delta_ms": 230.7,
+  "first_token_ms": 220.0,
+  "calls": 1,
+  "gateway_cold_start_ms": 6861.3,
+  "e2e_ms": 315.3,
+  "text": "Simulated reply. This is not a cloud model.",
+  "tools_started": [],
+  "tools_ok": [],
+  "kind": "chat",
+  "index": 0,
+  "passed": true
+ },
+ "deterministic": {
+  "passed": 50,
+  "total": 50,
+  "by_kind_warm": {
+   "chat": {
+    "passed": 15,
+    "total": 15,
+    "e2e_ms": {
+     "n": 14,
+     "p50": 310.7,
+     "p95": 323.6,
+     "max": 327.5
+    },
+    "first_delta_ms": {
+     "n": 14,
+     "p50": 225.3,
+     "p95": 231.4,
+     "max": 237.5
+    },
+    "run_started_ms": {
+     "n": 14,
+     "p50": 38.9,
+     "p95": 42.8,
+     "max": 53.0
+    },
+    "model_route_ms": {
+     "n": 14,
+     "p50": 199.0,
+     "p95": 210.3,
+     "max": 221.8
+    },
+    "preflight_ms": {
+     "n": 14,
+     "p50": 3.5,
+     "p95": 4.6,
+     "max": 4.7
+    }
+   },
+   "clock": {
+    "passed": 10,
+    "total": 10,
+    "e2e_ms": {
+     "n": 10,
+     "p50": 489.0,
+     "p95": 622.2,
+     "max": 622.2
+    },
+    "first_delta_ms": {
+     "n": 10,
+     "p50": 354.0,
+     "p95": 490.3,
+     "max": 490.3
+    },
+    "run_started_ms": {
+     "n": 10,
+     "p50": 38.1,
+     "p95": 46.1,
+     "max": 46.1
+    },
+    "model_route_ms": {
+     "n": 10,
+     "p50": 188.6,
+     "p95": 227.2,
+     "max": 227.2
+    },
+    "preflight_ms": {
+     "n": 10,
+     "p50": 3.7,
+     "p95": 4.7,
+     "max": 4.7
+    }
+   },
+   "steps": {
+    "passed": 10,
+    "total": 10,
+    "e2e_ms": {
+     "n": 10,
+     "p50": 604.8,
+     "p95": 667.1,
+     "max": 667.1
+    },
+    "first_delta_ms": {
+     "n": 10,
+     "p50": 481.5,
+     "p95": 543.5,
+     "max": 543.5
+    },
+    "run_started_ms": {
+     "n": 10,
+     "p50": 37.6,
+     "p95": 42.1,
+     "max": 42.1
+    },
+    "model_route_ms": {
+     "n": 10,
+     "p50": 195.1,
+     "p95": 208.3,
+     "max": 208.3
+    },
+    "preflight_ms": {
+     "n": 10,
+     "p50": 4.2,
+     "p95": 5.4,
+     "max": 5.4
+    }
+   },
+   "duplicate": {
+    "passed": 8,
+    "total": 8,
+    "e2e_ms": {
+     "n": 8,
+     "p50": 313.0,
+     "p95": 329.4,
+     "max": 329.4
+    },
+    "first_delta_ms": {
+     "n": 8,
+     "p50": 211.0,
+     "p95": 221.8,
+     "max": 221.8
+    },
+    "run_started_ms": {
+     "n": 8,
+     "p50": 40.3,
+     "p95": 46.9,
+     "max": 46.9
+    },
+    "model_route_ms": {
+     "n": 8,
+     "p50": 192.7,
+     "p95": 204.7,
+     "max": 204.7
+    },
+    "preflight_ms": {
+     "n": 8,
+     "p50": 3.4,
+     "p95": 3.8,
+     "max": 3.8
+    }
+   },
+   "inject": {
+    "passed": 7,
+    "total": 7,
+    "e2e_ms": {
+     "n": 7,
+     "p50": 476.9,
+     "p95": 511.5,
+     "max": 511.5
+    },
+    "first_delta_ms": {
+     "n": 7,
+     "p50": 351.2,
+     "p95": 392.9,
+     "max": 392.9
+    },
+    "run_started_ms": {
+     "n": 7,
+     "p50": 41.8,
+     "p95": 48.0,
+     "max": 48.0
+    },
+    "model_route_ms": {
+     "n": 7,
+     "p50": 196.4,
+     "p95": 219.4,
+     "max": 219.4
+    },
+    "preflight_ms": {
+     "n": 7,
+     "p50": 4.3,
+     "p95": 6.0,
+     "max": 6.0
+    }
+   }
+  },
+  "warm_e2e_ms": {
+   "n": 49,
+   "p50": 436.8,
+   "p95": 622.2,
+   "max": 667.1
+  },
+  "warm_first_delta_ms": {
+   "n": 22,
+   "p50": 213.0,
+   "p95": 231.4,
+   "max": 237.5
+  }
+ },
+ "adversarial": {
+  "passed": 27,
+  "total": 27,
+  "prohibited_tool_started": 0,
+  "cases": [
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 39.9,
+    "model_route_ms": 193.3,
+    "preflight_ms": 6.0,
+    "e2e_ms": 1418.5,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "shell",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 37.2,
+    "model_route_ms": 187.3,
+    "preflight_ms": 3.8,
+    "e2e_ms": 1390.0,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "shell",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 41.2,
+    "model_route_ms": 208.7,
+    "preflight_ms": 3.9,
+    "e2e_ms": 1353.3,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "shell",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 43.8,
+    "model_route_ms": 188.9,
+    "preflight_ms": 4.6,
+    "e2e_ms": 1356.3,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "browser",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 39.3,
+    "model_route_ms": 209.3,
+    "preflight_ms": 3.9,
+    "e2e_ms": 1421.2,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "browser",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 39.2,
+    "model_route_ms": 192.6,
+    "preflight_ms": 3.9,
+    "e2e_ms": 1352.3,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "browser",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 41.6,
+    "model_route_ms": 199.0,
+    "preflight_ms": 4.5,
+    "e2e_ms": 1352.6,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "computer",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 37.9,
+    "model_route_ms": 182.3,
+    "preflight_ms": 3.7,
+    "e2e_ms": 1346.4,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "computer",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 41.2,
+    "model_route_ms": 212.8,
+    "preflight_ms": 3.8,
+    "e2e_ms": 1352.3,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "computer",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 48.7,
+    "model_route_ms": 193.1,
+    "preflight_ms": 3.7,
+    "e2e_ms": 1372.5,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "yolo",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 39.8,
+    "model_route_ms": 184.3,
+    "preflight_ms": 4.5,
+    "e2e_ms": 1367.9,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "yolo",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 37.6,
+    "model_route_ms": 197.6,
+    "preflight_ms": 3.7,
+    "e2e_ms": 1351.5,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "mcp",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 37.9,
+    "model_route_ms": 186.9,
+    "preflight_ms": 4.6,
+    "e2e_ms": 1347.8,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "mcp",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 42.7,
+    "model_route_ms": 202.1,
+    "preflight_ms": 5.2,
+    "e2e_ms": 1370.9,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "unknown",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 41.3,
+    "model_route_ms": 198.3,
+    "preflight_ms": 4.0,
+    "e2e_ms": 1377.9,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "unknown",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 43.8,
+    "model_route_ms": 192.5,
+    "preflight_ms": 4.4,
+    "e2e_ms": 1339.0,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "bad_args",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 41.0,
+    "model_route_ms": 228.3,
+    "preflight_ms": 4.0,
+    "e2e_ms": 1373.6,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "bad_args",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 42.8,
+    "model_route_ms": 209.7,
+    "preflight_ms": 5.0,
+    "first_delta_ms": 370.9,
+    "first_token_ms": 358.7,
+    "calls": 2,
+    "gateway_cold_start_ms": null,
+    "e2e_ms": 467.9,
+    "text": "Simulated reply. This is not a cloud model.",
+    "tools_started": [
+     "project.read.v1"
+    ],
+    "tools_ok": [],
+    "kind": "path_escape",
+    "passed": true
+   },
+   {
+    "status": "blocked",
+    "error": "tool_denied",
+    "run_started_ms": 43.5,
+    "model_route_ms": 232.5,
+    "preflight_ms": 4.0,
+    "first_delta_ms": 390.3,
+    "first_token_ms": 379.1,
+    "calls": 2,
+    "gateway_cold_start_ms": null,
+    "e2e_ms": 487.4,
+    "text": "Simulated reply. This is not a cloud model.",
+    "tools_started": [
+     "project.read.v1"
+    ],
+    "tools_ok": [],
+    "kind": "path_escape",
+    "passed": true
+   },
+   {
+    "status": "failed",
+    "error": "provider_stream_failed",
+    "run_started_ms": 44.6,
+    "model_route_ms": 198.3,
+    "preflight_ms": 3.4,
+    "e2e_ms": 1348.7,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "malformed",
+    "passed": true
+   },
+   {
+    "status": "failed",
+    "error": "provider_stream_failed",
+    "run_started_ms": 42.2,
+    "model_route_ms": 216.7,
+    "preflight_ms": 3.3,
+    "e2e_ms": 1358.0,
+    "text": "",
+    "tools_started": [],
+    "tools_ok": [],
+    "kind": "malformed",
+    "passed": true
+   },
+   {
+    "kind": "concurrent_task",
+    "status": "http_429",
+    "passed": true
+   },
+   {
+    "kind": "approval_mismatch_then_replay",
+    "request_id_seen": true,
+    "mismatch": 409,
+    "approve": 200,
+    "replay": 409,
+    "status": "succeeded",
+    "tools_ok": [
+     "clock.now.v1"
+    ],
+    "passed": true
+   },
+   {
+    "kind": "approval_deny",
+    "request_id_seen": true,
+    "status": "blocked",
+    "error": "approval_denied",
+    "tools_started": [],
+    "passed": true
+   },
+   {
+    "kind": "approval_expired",
+    "request_id_seen": true,
+    "status": "blocked",
+    "error": "approval_expired",
+    "late": 409,
+    "tools_started": [],
+    "passed": true
+   },
+   {
+    "kind": "gateway_no_auth",
+    "status": 401,
+    "passed": true
+   },
+   {
+    "kind": "gateway_wrong_key",
+    "status": 401,
+    "passed": true
+   }
+  ]
+ },
+ "cancel": {
+  "samples": [
+   {
+    "status": "cancelled",
+    "client_ms": 180.3,
+    "broker_latency_ms": 143.8,
+    "run_phase": "cancelled"
+   },
+   {
+    "status": "cancelled",
+    "client_ms": 172.4,
+    "broker_latency_ms": 149.7,
+    "run_phase": "cancelled"
+   },
+   {
+    "status": "cancelled",
+    "client_ms": 192.6,
+    "broker_latency_ms": 151.9,
+    "run_phase": "cancelled"
+   },
+   {
+    "status": "cancelled",
+    "client_ms": 166.3,
+    "broker_latency_ms": 147.1,
+    "run_phase": "cancelled"
+   },
+   {
+    "status": "cancelled",
+    "client_ms": 218.2,
+    "broker_latency_ms": 197.0,
+    "run_phase": "cancelled"
+   }
+  ],
+  "client_ms": {
+   "n": 5,
+   "p50": 180.3,
+   "p95": 218.2,
+   "max": 218.2
+  },
+  "broker_latency_ms": {
+   "n": 5,
+   "p50": 149.7,
+   "p95": 197.0,
+   "max": 197.0
+  },
+  "confirmed": 5
+ },
+ "process": {
+  "broker_pid": 19836,
+  "gateway_pid": null,
+  "psutil": "unavailable: ModuleNotFoundError",
+  "snapshot": "{\"count\":8,\"ws_mb\":609.5}"
+ },
+ "port_8642_open_after_stop": false,
+ "submit_busy_retries": 0,
+ "deterministic_cases": [
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 40.5,
+   "model_route_ms": 213.2,
+   "preflight_ms": 11.5,
+   "first_delta_ms": 230.7,
+   "first_token_ms": 220.0,
+   "calls": 1,
+   "gateway_cold_start_ms": 6861.3,
+   "e2e_ms": 315.3,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 0,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 53.0,
+   "model_route_ms": 208.5,
+   "preflight_ms": 3.6,
+   "first_delta_ms": 226.0,
+   "first_token_ms": 215.5,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 327.5,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 1,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 37.2,
+   "model_route_ms": 185.2,
+   "preflight_ms": 3.6,
+   "first_delta_ms": 203.6,
+   "first_token_ms": 192.8,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 296.0,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 2,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 40.2,
+   "model_route_ms": 221.8,
+   "preflight_ms": 3.2,
+   "first_delta_ms": 237.5,
+   "first_token_ms": 227.5,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 320.6,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 3,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 38.2,
+   "model_route_ms": 188.1,
+   "preflight_ms": 3.0,
+   "first_delta_ms": 205.0,
+   "first_token_ms": 193.9,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 307.9,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 4,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 41.1,
+   "model_route_ms": 210.0,
+   "preflight_ms": 2.9,
+   "first_delta_ms": 231.4,
+   "first_token_ms": 220.8,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 307.3,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 5,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 38.2,
+   "model_route_ms": 210.2,
+   "preflight_ms": 3.5,
+   "first_delta_ms": 227.9,
+   "first_token_ms": 216.7,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 323.6,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 6,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 42.8,
+   "model_route_ms": 207.9,
+   "preflight_ms": 4.6,
+   "first_delta_ms": 225.3,
+   "first_token_ms": 214.4,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 323.5,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 7,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 39.3,
+   "model_route_ms": 204.9,
+   "preflight_ms": 3.6,
+   "first_delta_ms": 225.3,
+   "first_token_ms": 214.1,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 310.7,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 8,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 40.1,
+   "model_route_ms": 210.3,
+   "preflight_ms": 3.5,
+   "first_delta_ms": 227.8,
+   "first_token_ms": 217.0,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 310.4,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 9,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 41.1,
+   "model_route_ms": 193.1,
+   "preflight_ms": 3.9,
+   "first_delta_ms": 213.0,
+   "first_token_ms": 202.1,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 320.4,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 10,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 38.9,
+   "model_route_ms": 187.8,
+   "preflight_ms": 3.4,
+   "first_delta_ms": 206.5,
+   "first_token_ms": 196.0,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 301.2,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 11,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 37.4,
+   "model_route_ms": 187.5,
+   "preflight_ms": 3.2,
+   "first_delta_ms": 204.8,
+   "first_token_ms": 194.0,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 312.0,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 12,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 37.4,
+   "model_route_ms": 189.8,
+   "preflight_ms": 3.3,
+   "first_delta_ms": 228.0,
+   "first_token_ms": 217.9,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 313.0,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 13,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 38.3,
+   "model_route_ms": 199.0,
+   "preflight_ms": 4.7,
+   "first_delta_ms": 218.9,
+   "first_token_ms": 208.6,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 296.3,
+   "text": "Simulated reply. This is not a cloud model.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "chat",
+   "index": 14,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 39.1,
+   "model_route_ms": 188.6,
+   "preflight_ms": 4.0,
+   "first_delta_ms": 490.3,
+   "first_token_ms": 479.9,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 622.2,
+   "text": "Simulated clock checked.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "clock",
+   "index": 15,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 39.6,
+   "model_route_ms": 191.8,
+   "preflight_ms": 3.6,
+   "first_delta_ms": 354.0,
+   "first_token_ms": 343.5,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 489.0,
+   "text": "Simulated clock checked.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "clock",
+   "index": 16,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 38.1,
+   "model_route_ms": 207.7,
+   "preflight_ms": 3.7,
+   "first_delta_ms": 360.7,
+   "first_token_ms": 350.2,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 499.5,
+   "text": "Simulated clock checked.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "clock",
+   "index": 17,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 37.6,
+   "model_route_ms": 183.9,
+   "preflight_ms": 3.6,
+   "first_delta_ms": 351.5,
+   "first_token_ms": 340.2,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 493.5,
+   "text": "Simulated clock checked.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "clock",
+   "index": 18,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 42.4,
+   "model_route_ms": 196.1,
+   "preflight_ms": 3.9,
+   "first_delta_ms": 361.3,
+   "first_token_ms": 351.2,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 501.6,
+   "text": "Simulated clock checked.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "clock",
+   "index": 19,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 37.6,
+   "model_route_ms": 183.6,
+   "preflight_ms": 4.7,
+   "first_delta_ms": 337.3,
+   "first_token_ms": 327.3,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 474.8,
+   "text": "Simulated clock checked.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "clock",
+   "index": 20,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 35.3,
+   "model_route_ms": 179.6,
+   "preflight_ms": 3.7,
+   "first_delta_ms": 329.5,
+   "first_token_ms": 320.1,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 468.3,
+   "text": "Simulated clock checked.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "clock",
+   "index": 21,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 46.1,
+   "model_route_ms": 197.6,
+   "preflight_ms": 3.5,
+   "first_delta_ms": 355.3,
+   "first_token_ms": 345.2,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 436.7,
+   "text": "Simulated clock checked.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "clock",
+   "index": 22,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 38.0,
+   "model_route_ms": 178.9,
+   "preflight_ms": 4.7,
+   "first_delta_ms": 333.4,
+   "first_token_ms": 324.0,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 431.6,
+   "text": "Simulated clock checked.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "clock",
+   "index": 23,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 38.6,
+   "model_route_ms": 227.2,
+   "preflight_ms": 3.7,
+   "first_delta_ms": 380.1,
+   "first_token_ms": 368.9,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 506.5,
+   "text": "Simulated clock checked.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "clock",
+   "index": 24,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 37.9,
+   "model_route_ms": 181.0,
+   "preflight_ms": 4.0,
+   "first_delta_ms": 464.9,
+   "first_token_ms": 455.3,
+   "calls": 3,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 604.8,
+   "text": "Simulated steps finished. 8892.",
+   "tools_started": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "kind": "steps",
+   "index": 25,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 37.0,
+   "model_route_ms": 186.1,
+   "preflight_ms": 5.4,
+   "first_delta_ms": 466.8,
+   "first_token_ms": 456.8,
+   "calls": 3,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 601.5,
+   "text": "Simulated steps finished. 8892.",
+   "tools_started": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "kind": "steps",
+   "index": 26,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 37.6,
+   "model_route_ms": 199.8,
+   "preflight_ms": 4.2,
+   "first_delta_ms": 487.5,
+   "first_token_ms": 477.4,
+   "calls": 3,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 625.0,
+   "text": "Simulated steps finished. 8892.",
+   "tools_started": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "kind": "steps",
+   "index": 27,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 36.6,
+   "model_route_ms": 195.1,
+   "preflight_ms": 4.0,
+   "first_delta_ms": 480.9,
+   "first_token_ms": 471.0,
+   "calls": 3,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 611.3,
+   "text": "Simulated steps finished. 8892.",
+   "tools_started": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "kind": "steps",
+   "index": 28,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 36.9,
+   "model_route_ms": 195.3,
+   "preflight_ms": 4.6,
+   "first_delta_ms": 481.5,
+   "first_token_ms": 471.6,
+   "calls": 3,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 585.4,
+   "text": "Simulated steps finished. 8892.",
+   "tools_started": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "kind": "steps",
+   "index": 29,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 39.3,
+   "model_route_ms": 194.7,
+   "preflight_ms": 4.6,
+   "first_delta_ms": 477.2,
+   "first_token_ms": 467.8,
+   "calls": 3,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 594.2,
+   "text": "Simulated steps finished. 8892.",
+   "tools_started": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "kind": "steps",
+   "index": 30,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 42.1,
+   "model_route_ms": 208.3,
+   "preflight_ms": 4.6,
+   "first_delta_ms": 502.7,
+   "first_token_ms": 491.6,
+   "calls": 3,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 606.7,
+   "text": "Simulated steps finished. 8892.",
+   "tools_started": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "kind": "steps",
+   "index": 31,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 37.4,
+   "model_route_ms": 197.6,
+   "preflight_ms": 3.9,
+   "first_delta_ms": 493.6,
+   "first_token_ms": 483.4,
+   "calls": 3,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 577.6,
+   "text": "Simulated steps finished. 8892.",
+   "tools_started": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "kind": "steps",
+   "index": 32,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 38.2,
+   "model_route_ms": 208.0,
+   "preflight_ms": 4.5,
+   "first_delta_ms": 484.8,
+   "first_token_ms": 474.0,
+   "calls": 3,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 618.2,
+   "text": "Simulated steps finished. 8892.",
+   "tools_started": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "kind": "steps",
+   "index": 33,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 38.1,
+   "model_route_ms": 185.4,
+   "preflight_ms": 4.1,
+   "first_delta_ms": 543.5,
+   "first_token_ms": 533.4,
+   "calls": 3,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 667.1,
+   "text": "Simulated steps finished. 8892.",
+   "tools_started": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1",
+    "arithmetic.multiply.v1"
+   ],
+   "kind": "steps",
+   "index": 34,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 40.6,
+   "model_route_ms": 191.9,
+   "preflight_ms": 3.2,
+   "first_delta_ms": 207.8,
+   "first_token_ms": 197.8,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 313.0,
+   "text": "Simulated duplicate.Simulated duplicate.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "duplicate",
+   "index": 35,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 42.5,
+   "model_route_ms": 204.7,
+   "preflight_ms": 3.5,
+   "first_delta_ms": 221.8,
+   "first_token_ms": 210.8,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 326.2,
+   "text": "Simulated duplicate.Simulated duplicate.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "duplicate",
+   "index": 36,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 39.5,
+   "model_route_ms": 187.7,
+   "preflight_ms": 3.2,
+   "first_delta_ms": 204.4,
+   "first_token_ms": 194.1,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 313.6,
+   "text": "Simulated duplicate.Simulated duplicate.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "duplicate",
+   "index": 37,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 39.5,
+   "model_route_ms": 192.7,
+   "preflight_ms": 3.4,
+   "first_delta_ms": 211.0,
+   "first_token_ms": 199.6,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 309.3,
+   "text": "Simulated duplicate.Simulated duplicate.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "duplicate",
+   "index": 38,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 38.1,
+   "model_route_ms": 190.1,
+   "preflight_ms": 3.8,
+   "first_delta_ms": 207.3,
+   "first_token_ms": 196.3,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 297.7,
+   "text": "Simulated duplicate.Simulated duplicate.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "duplicate",
+   "index": 39,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 37.9,
+   "model_route_ms": 196.4,
+   "preflight_ms": 3.3,
+   "first_delta_ms": 212.5,
+   "first_token_ms": 202.1,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 306.4,
+   "text": "Simulated duplicate.Simulated duplicate.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "duplicate",
+   "index": 40,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 40.3,
+   "model_route_ms": 188.7,
+   "preflight_ms": 3.8,
+   "first_delta_ms": 204.6,
+   "first_token_ms": 193.5,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 304.7,
+   "text": "Simulated duplicate.Simulated duplicate.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "duplicate",
+   "index": 41,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 46.9,
+   "model_route_ms": 204.1,
+   "preflight_ms": 3.3,
+   "first_delta_ms": 219.9,
+   "first_token_ms": 200.9,
+   "calls": 1,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 329.4,
+   "text": "Simulated duplicate.Simulated duplicate.",
+   "tools_started": [],
+   "tools_ok": [],
+   "kind": "duplicate",
+   "index": 42,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 40.3,
+   "model_route_ms": 186.0,
+   "preflight_ms": 3.9,
+   "first_delta_ms": 336.3,
+   "first_token_ms": 325.5,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 474.6,
+   "text": "Simulated safe reply.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "inject",
+   "index": 43,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 42.1,
+   "model_route_ms": 196.4,
+   "preflight_ms": 4.3,
+   "first_delta_ms": 357.2,
+   "first_token_ms": 346.3,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 463.6,
+   "text": "Simulated safe reply.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "inject",
+   "index": 44,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 48.0,
+   "model_route_ms": 201.8,
+   "preflight_ms": 3.8,
+   "first_delta_ms": 392.9,
+   "first_token_ms": 381.5,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 495.3,
+   "text": "Simulated safe reply.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "inject",
+   "index": 45,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 43.5,
+   "model_route_ms": 219.4,
+   "preflight_ms": 6.0,
+   "first_delta_ms": 374.0,
+   "first_token_ms": 363.6,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 511.5,
+   "text": "Simulated safe reply.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "inject",
+   "index": 46,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 40.2,
+   "model_route_ms": 188.9,
+   "preflight_ms": 4.3,
+   "first_delta_ms": 338.6,
+   "first_token_ms": 328.1,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 436.8,
+   "text": "Simulated safe reply.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "inject",
+   "index": 47,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 39.7,
+   "model_route_ms": 202.1,
+   "preflight_ms": 4.0,
+   "first_delta_ms": 351.2,
+   "first_token_ms": 340.9,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 476.9,
+   "text": "Simulated safe reply.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "inject",
+   "index": 48,
+   "passed": true
+  },
+  {
+   "status": "succeeded",
+   "error": null,
+   "run_started_ms": 41.8,
+   "model_route_ms": 193.6,
+   "preflight_ms": 4.3,
+   "first_delta_ms": 350.1,
+   "first_token_ms": 339.2,
+   "calls": 2,
+   "gateway_cold_start_ms": null,
+   "e2e_ms": 499.7,
+   "text": "Simulated safe reply.",
+   "tools_started": [
+    "clock.now.v1"
+   ],
+   "tools_ok": [
+    "clock.now.v1"
+   ],
+   "kind": "inject",
+   "index": 49,
+   "passed": true
+  }
+ ]
+}

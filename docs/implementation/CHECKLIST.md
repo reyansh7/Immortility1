@@ -6,7 +6,7 @@ Legend: [x] done with evidence · [~] partial · [ ] not started · [B] blocked 
 
 ## P0 — Safe baseline and release preparation
 - [x] Branch/git verified: m1.7 @acf13fb clean, 7 M1.7 commits present, checkpoint `checkpoint/m1-2026-11-17` @133df63 untouched, nothing pushed (main tracks origin/main @edafc64).
-- [x] Rollback point: m1.7 untouched; work on `m2/build` (616299c P0, 2365310 P1).
+- [x] Rollback point: m1.7 untouched; work on `m2/build` (616299c P0, 2365310 P1, 8370dc6 docs, then P1-finish/P3/P4 commits — see TEST_RESULTS).
 - [x] Verified backup + restore drill: `scripts/backup-immortility.ps1` → `%LOCALAPPDATA%\Immortility-backups\20261121-221731` (bundle verified; SQLite snapshot integrity ok; restored counts 36 tasks / 622 events / 13 memory / 0 facts match source).
 - [x] Baselines reproduced (see `TEST_RESULTS.md`).
 - [x] Broken-pipe failure diagnosed (real defect in `reap()`), fixed without weakening the test; 557/557 pytest.
@@ -21,13 +21,13 @@ Legend: [x] done with evidence · [~] partial · [ ] not started · [B] blocked 
 - [x] Verified Hermes releases: latest stable v0.23.3 (`caafe538`, 20 Nov), latest canary v0.23.3+canary.20261120 (`32dbc1dc`). Prod 0.21.1 @04b88a4c, canary 0.23.2 @ae2a81cc confirmed on disk.
 - [x] Run-scoped authorization for the shared warm gateway key (K8): per-task binding via Hermes ephemeral `instructions`, stripped before any provider; warm-key tool calls must match a broker-relayed proposal. 8 unit/integration tests; offline gateway benchmark 50/50 + 27/27 with 0 binding refusals on legitimate runs.
 - [x] Provider readiness report with exact owner checks (`PROVIDER_READINESS_M2.md`), no calls.
-- [ ] Hermes 0.23.3 isolated canary (`canary-0233-*`), rerun M1.7/M2 regression (offline).
-- [ ] Broker warm-up turn after gateway readiness to remove the ≈3.9–5.5 s cold first turn (K7).
+- [x] Hermes 0.23.3 isolated canary: source `canary-0233-src` @caafe538 (= official v0.23.3), HERMES_HOME `canary-0233-home` (via short junction `%LOCALAPPDATA%\h0233`, D9), data `canary-0233-m2`. Reviewed pin is `canary_only`: refused outside a `canary-*` data dir. Offline regression 50/50 + 27/27, 5/5 cancels, same as 0.23.2 (TEST_RESULTS). Not promoted.
+- [x] Broker warm-up run after gateway readiness (K7): answered locally by the broker (no provider, no fixture, no ledger), only while in flight. First user turn first-delta 4409→231 ms (0.23.2) and 9051→226 ms (0.23.3), simulated model.
 - [ ] Persistent task-state/trace review for retries (idempotency across restart with the binding).
 - [B] Capped live pilot with ledger evidence — owner approval + quota budget.
 
 ## P2 — Real intelligence
-- [~] Warm gateway, streaming, cancellation, approvals (M1.7, canary). [ ] Typed per-capability tool schemas as default; [ ] modes INSTANT/DEEP/EXECUTE/BOTS; [ ] Gemini allowlist fix; [ ] remove OpenRouter legacy path; [ ] Heretic chat-only profile.
+- [~] Warm gateway, streaming, cancellation, approvals (M1.7, canary). [x] Typed per-capability tool schemas default on the gateway path (strict Pydantic `extra=forbid, strict=True` models drive both the provider schema and the Hermes manifest; 0.21.1 desktop default unchanged); [ ] modes INSTANT/DEEP/EXECUTE/BOTS; [ ] Gemini allowlist fix; [ ] remove OpenRouter legacy path; [ ] Heretic chat-only profile.
 - [B] ≥90% verified tool success on ≥50 live tool tasks — needs live pilot.
 
 ## P3–P10
