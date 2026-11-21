@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     typed_tool_schemas_enabled: bool = False
     # Gateway path only: one locally answered warm-up run after readiness (K7).
     gateway_warmup_enabled: bool = True
+    # P3 memory v1: only the data dir's memory-v1.json can enable it (additive tables).
+    memory_v1_enabled: bool = False
     # No autorun/service install. Only explicit, local read workflows may recover.
     durable_workflows_enabled: bool = False
     local_only_mode: bool = False

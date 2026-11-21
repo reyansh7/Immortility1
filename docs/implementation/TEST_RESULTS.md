@@ -73,6 +73,14 @@ latencies carry desktop load.
 Prohibited tools started: 0 in every run. Port 8642 closed after every run.
 Evidence: `m2-evidence/bench-0232-typed-warmup-{off,on}.json`, `bench-0233-typed-warmup-{off,on}.json`.
 
+## P3 memory v1 (21 Nov, ~23:05 IST, PC in use)
+
+- pytest on the PC: **581 passed**, 0 failed (+10 in `test_m2_memory_v1.py`), 308 s (slower run; desktop in use).
+- `scripts/benchmark-memory.py` (deterministic, no model, real broker `Store` in `canary-memory-m2`, removed afterwards): **40/40**.
+  recall 10/10 · project scope 3/3 · contradiction 4/4 · duplicate 3/3 · correction 2/2 · deletion 3/3 · gating 7/7 · working 3/3 · **cross-restart 5/5**.
+  Paraphrase-without-shared-words (known lexical gap, scored separately): 1/4.
+  Search latency over 3,000+ items: p50 1.69 ms, p95 1.91 ms, max 6.08 ms; DB 2.16 MB. Evidence: `m2-evidence/benchmark-memory-v1.json`.
+
 ## Not run (by rule)
 
 - 18/18 desktop window suite: waiting for an owner-scheduled ~10 min uninterrupted session (`WINDOW_SUITE_PROCEDURE.md`).

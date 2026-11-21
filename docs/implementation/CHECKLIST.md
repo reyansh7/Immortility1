@@ -31,7 +31,9 @@ Legend: [x] done with evidence · [~] partial · [ ] not started · [B] blocked 
 - [B] ≥90% verified tool success on ≥50 live tool tasks — needs live pilot.
 
 ## P3–P10
-- [ ] P3 memory v1 (provenance, confidence, categories, hybrid retrieval, inspector) + daily briefing (Gmail/Calendar read-only, owner connects).
+- [x] P3 memory v1 core (offline): `memory_v1.py` on the existing broker SQLite DB (additive `memory_items` + FTS5 porter; `user_version` stays 4; created only when `memory-v1.json` enables it). Categories working/episodic/semantic/procedural/profile; provenance JSON (task/url/via), confidence, created/updated/last_used/expires, project scope; slot-based contradiction detection with trust ranking; duplicate merge; correction (supersede chain); deletion that blanks content and also excludes the source task from legacy recall; untrusted-source gating (external → pending/quarantined, inferred durable → pending, verified → episodic only, secrets redacted). Engine captures the user's own statements, injects recalled memory labelled as data, writes episodic receipts. API `/v1/memory/items*`. Benchmark 40/40 incl. 5 cross-restart cases.
+- [ ] P3 embeddings (sqlite-vec + local model) — deferred (D12); paraphrase gap measured 1/4.
+- [ ] P3 memory dashboard UI; daily briefing; Gmail/Calendar read-only (owner connects).
 - [ ] P4 perception (UIA ElementFromPoint → TextPattern.RangeFromPoint → WGC crop + Windows.Media.Ocr → RapidOCR → consented vision).
 - [ ] P5 voice (Smart Turn v3, streaming TTS, barge-in, wake word opt-in).
 - [ ] P6 PC Guardian (Defender status/events/scans, read-only first).
