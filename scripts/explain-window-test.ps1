@@ -163,7 +163,8 @@ try {
         $n = $t.Current.Name; $r = $t.Current.BoundingRectangle
         if ($t.Current.IsOffscreen -or $r.IsEmpty -or $r.Width -lt 40 -or $n -match "Explain|Point at") { continue }
         if ($r.Left -lt $wr.Left -or $r.Right -gt $wr.Right -or $r.Top -lt $wr.Top -or $r.Bottom -gt $wr.Bottom) { continue }
-        if ($n -like "Enter to send*") { $target = $t; break }
+        # The composer hint is the bottom-most match (earlier Explain turns echo it in the log).
+        if ($n -like "Enter to send*" -and (-not $target -or $r.Top -gt $target.Current.BoundingRectangle.Top)) { $target = $t; continue }
         if (-not $fallback -and $n.Length -ge 20 -and $n.Length -le 160) { $fallback = $t }
     }
     if (-not $target) { $target = $fallback }
