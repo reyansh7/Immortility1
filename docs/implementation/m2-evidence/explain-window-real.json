@@ -1,0 +1,140 @@
+﻿{
+    "test":  "explain-this real window (D24)",
+    "executable":  "C:\\Users\\reyan\\AppData\\Local\\Temp\\immortility-canary-build\\release\\immortility-desktop.exe",
+    "exe_sha256":  "6547B63A0E44EC12FD177B2E7E32F2FDA738CA4D4DB301B8ED4766CDBD347529",
+    "canary":  "C:\\Users\\reyan\\AppData\\Local\\Immortility\\canary-explain-m2",
+    "inference":  "live local model (Ollama loopback); no cloud",
+    "started":  "2026-11-22T05:16:33.6462865+05:30",
+    "checks":  {
+                   "button_enabled_local":  {
+                                                "pass":  true,
+                                                "detail":  "Explain this enabled with Local Qwen"
+                                            },
+                   "preview_shows_pointed_text":  {
+                                                      "pass":  true,
+                                                      "detail":  "preview contains \u0027Enter\u0027"
+                                                  },
+                   "preview_says_local":  {
+                                              "pass":  true,
+                                              "detail":  "label present"
+                                          },
+                   "task_succeeded":  {
+                                          "pass":  true,
+                                          "detail":  "succeeded"
+                                      },
+                   "local_model":  {
+                                       "pass":  true,
+                                       "detail":  "immortility-qwen3.5-4b"
+                                   },
+                   "no_cloud_usage":  {
+                                          "pass":  true,
+                                          "detail":  "by provider: {\"local\":1}"
+                                      },
+                   "no_tools":  {
+                                    "pass":  true,
+                                    "detail":  "0 tool events"
+                                },
+                   "no_memory_written":  {
+                                             "pass":  true,
+                                             "detail":  "memory  -\u003e "
+                                         },
+                   "personal":  {
+                                    "pass":  true,
+                                    "detail":  "personal"
+                                },
+                   "button_disabled_cloud":  {
+                                                 "pass":  true,
+                                                 "detail":  "help text: Explain this runs only on the local model. Choose Local Qwen in the Model hub."
+                                             }
+               },
+    "outside_input":  [
+
+                      ],
+    "preflight":  {
+                      "idle_seconds":  6323.7,
+                      "foreground":  "Grok Bot",
+                      "desktop_running":  false
+                  },
+    "cursor_before":  "1919,0",
+    "launch_local":  {
+                         "pid":  17376,
+                         "window_ms":  4265
+                     },
+    "target":  {
+                   "name":  "Enter to send · Shift+Enter for a new line",
+                   "point":  "1681,787",
+                   "window":  "1362,62,550x950",
+                   "point_after_layout":  "1681,787"
+               },
+    "read_ms":  3997,
+    "preview":  "READ FROM YOUR SCREEN ( | LINE | ) · STAYS ON THIS PC | Enter to send - Shift*Enter for a new line | Explain | Discard",
+    "answer_ms":  1377,
+    "screen_task":  {
+                        "task_id":  "6edaac4a-e3eb-4998-a387-9bfac6563805",
+                        "status":  "succeeded",
+                        "content_chars":  42,
+                        "privacy":  "personal",
+                        "model":  "immortility-qwen3.5-4b",
+                        "answer":  "That text explains how to submit your message: press Enter to send and hold Shift+Enter to create a new line.",
+                        "error":  null,
+                        "event_types":  [
+                                            "task.state",
+                                            "task.state",
+                                            "task.state",
+                                            "audit.notice",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "audit.notice",
+                                            "audit.notice",
+                                            "task.state",
+                                            "task.state"
+                                        ],
+                        "tool_events":  0,
+                        "usage_by_provider":  {
+                                                  "local":  1
+                                              },
+                        "cloud_usage_calls":  0
+                    },
+    "counts_before":  {
+                          "tasks":  435,
+                          "memory_items":  null,
+                          "confirmed_facts":  0,
+                          "usage_calls":  547
+                      },
+    "counts_after":  {
+                         "tasks":  436,
+                         "memory_items":  null,
+                         "confirmed_facts":  0,
+                         "usage_calls":  548
+                     },
+    "launch_cloud":  {
+                         "pid":  20236,
+                         "window_ms":  4167
+                     },
+    "finished":  "2026-11-22T05:16:55.6461406+05:30",
+    "passed":  10,
+    "total":  10,
+    "attended":  false
+}
