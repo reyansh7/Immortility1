@@ -24,7 +24,7 @@ from .config import Settings
 from .contracts import BrokerError
 from .policy import MODEL
 
-ProviderId = Literal["groq", "gemini", "nvidia", "openrouter"]
+ProviderId = Literal["groq", "gemini", "nvidia", "openrouter", "local"]
 ModelMode = Literal["auto_cloud", "manual_cloud", "local_qwen", "local_heretic"]
 TaskClass = Literal[
     "FAST_CHAT",
@@ -36,6 +36,9 @@ TaskClass = Literal[
     "TOOL_EXECUTION",
     "MULTIMODAL",
 ]
+
+
+LOCAL_CONTEXT_TOKENS = 4096  # Modelfile num_ctx for the local route (D17)
 
 
 @dataclass(frozen=True)
@@ -65,6 +68,13 @@ PROVIDERS = MappingProxyType(
             "https://integrate.api.nvidia.com/v1",
             "nvidia_api_key",
             "https://docs.api.nvidia.com/nim/reference/llm-apis",
+        ),
+        # Loopback only: the broker never accepts another host for the local model.
+        "local": Provider(
+            "local",
+            "http://127.0.0.1:11434/v1",
+            "local_model_key",
+            "https://github.com/ollama/ollama/blob/main/docs/openai.md",
         ),
         "openrouter": Provider(
             "openrouter",
@@ -213,7 +223,8 @@ CANDIDATES = (GROQ_FAST, GEMINI_REASONING, NVIDIA_DEEP, LOCAL_HERETIC)
 
 
 def free_tier(provider: str, model_id: str) -> bool:
-    return (provider, model_id) in FREE_TIER
+    # The local loopback model costs nothing and never leaves the PC.
+    return provider == "local" or (provider, model_id) in FREE_TIER
 
 
 def quota_evidence() -> dict[str, dict[str, str]]:
@@ -377,6 +388,22 @@ class ModelRegistry:
                 available=True,
             )
 
+        local = "local/" + self.settings.local_model_id
+        if self.settings.local_model_enabled and credential_identity(self.settings, "local"):
+            self.models[local] = ModelOffer(
+                route_id=local,
+                provider="local",
+                model_id=self.settings.local_model_id,
+                context_tokens=LOCAL_CONTEXT_TOKENS,
+                tools_qualified=True,
+                structured_qualified=True,
+                qualification="offline",
+                privacy=("public", "personal"),
+                available=True,
+            )
+        else:
+            self.models.pop(local, None)
+
     def selection(self) -> ModelSelection:
         row = self.db.execute("SELECT body FROM model_preferences WHERE id=1").fetchone()
         return ModelSelection.model_validate_json(row[0]) if row else ModelSelection()
@@ -482,6 +509,16 @@ class ModelRegistry:
         )
 
     def choose(self, selection: ModelSelection, need: Requirements) -> ModelOffer:
+        local_route = "local/" + self.settings.local_model_id
+        if selection.mode == "local_qwen" and local_route in self.models:
+            offer = self.models[local_route]
+            if self.rejection(offer, need) is None:
+                return offer
+            raise BrokerError(
+                "local_model_unavailable",
+                "The local model cannot serve this request (context, capability or health). No cloud request was sent.",
+                503,
+            )
         if selection.mode.startswith("local_") or self.settings.local_only_mode:
             raise BrokerError(
                 "local_model_unavailable",
@@ -502,7 +539,12 @@ class ModelRegistry:
         def ranking(offer: ModelOffer) -> tuple[Any, ...]:
             count, success, latency = self.statistics(offer, need.task_class)
             measured = count >= 3
-            if need.task_class in {"DEEP_REASONING", "CODING"} and not need.tools:
+            if (
+                need.privacy == "personal"
+                and ("local/" + self.settings.local_model_id) in self.models
+            ):
+                preferred_provider = "local"  # private context stays on the PC when possible
+            elif need.task_class in {"DEEP_REASONING", "CODING"} and not need.tools:
                 preferred_provider = "nvidia"
             elif need.task_class in {"FAST_CHAT", "TOOL_EXECUTION"} or need.tools:
                 preferred_provider = "groq"
@@ -633,6 +675,7 @@ class ModelRegistry:
                         "groq": "free-tier allowlist openai/gpt-oss-120b; provider quota is not read",
                         "gemini": "free-tier allowlist gemini-3.8-flash; provider quota is not read",
                         "nvidia": "free prototype allowlist nvidia/nemotron-3-ultra-550b-a55b; account quota is not read",
+                        "local": "loopback Ollama model; opt-in per data directory; never leaves this PC",
                     }[provider.id],
                     "docs": provider.docs,
                 }
@@ -669,6 +712,9 @@ def compatible_request(
     body.update(model=offer.model_id, n=1)
     if offer.provider == "openrouter":
         body["provider"] = {"max_price": {"prompt": 0, "completion": 0}, "allow_fallbacks": False}
+    if offer.provider == "local":
+        # Qwen3.5 thinks by default; measured 16 s vs 0.4 s for a short reply (D17).
+        body["reasoning_effort"] = "none"
     key = getattr(settings, PROVIDERS[offer.provider].credential_field).get_secret_value()
     if not key:
         raise BrokerError("missing_key", "Selected provider credential is unavailable.", 403)

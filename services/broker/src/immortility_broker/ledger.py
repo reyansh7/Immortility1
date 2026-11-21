@@ -86,7 +86,12 @@ class Ledger:
                         (day + timedelta(days=1)).isoformat(),
                     ),
                 ).fetchone()
-                if requests >= 50 or charged + input_tokens + output_tokens > 100000:
+                # D19: the loopback model has no provider quota or price, but keeps a
+                # higher daily runaway guard of its own. Cloud caps are unchanged.
+                max_requests, max_tokens = (
+                    (2000, 4_000_000) if scope["provider"] == "local" else (50, 100000)
+                )
+                if requests >= max_requests or charged + input_tokens + output_tokens > max_tokens:
                     raise BrokerError(
                         "shared_budget_exhausted",
                         "The shared local daily request/token ceiling is exhausted. No fallback sent.",
@@ -298,7 +303,11 @@ def billing_view(summary: dict[str, Any]) -> dict[str, Any]:
     """Provider-reported tokens are not a verified charge. Missing usage stays unknown."""
     if summary.get("dispatch_attempts", 0) == 0 and summary.get("unknown_calls", 0) == 0:
         return local_billing()
-    status = "unknown" if summary.get("unknown_calls") or summary.get("prompt_tokens") is None else "reported"
+    status = (
+        "unknown"
+        if summary.get("unknown_calls") or summary.get("prompt_tokens") is None
+        else "reported"
+    )
     return {
         "billing_status": "unknown" if status == "unknown" else "reported_unverified",
         "verified_billed_usd": None,

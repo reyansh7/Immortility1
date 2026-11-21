@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import dataclasses
 import copy
 import hmac
 import json
@@ -45,6 +46,9 @@ from .memory import (
 )
 from .dialogue import asks_identity, ground_project_answer, identity_text, prepare_history
 from .direct_chat import DirectChat
+from .pointer import MoveCursorRequest, move_cursor, parse_pointer_command
+from .pointer import describe as describe_pointer
+from .providers import LOCAL_CONTEXT_TOKENS
 from .hermes_gateway import authorize_call
 from .permission_policy import govern
 from .policy import MODEL, guard_secret_egress, inference_payload
@@ -356,6 +360,7 @@ class Engine:
         self.provider_error: BrokerError | None = None
         self.inference_allowed = False
         self.laptop_stop = threading.Event()
+        self.pointer_stop = threading.Event()
         self.tool_evidence: list[str] = []
         self.direct_simple_chat = False
         self.answer_complete = False
@@ -996,6 +1001,10 @@ class Engine:
             "utc time",
         }:
             return "clock.now.v1", {}
+        if self.settings.pointer_control_enabled:
+            pointer = parse_pointer_command(content)
+            if pointer is not None:
+                return "pointer.move.v1", pointer.model_dump()
         if self.settings.laptop_tools_enabled:
             requested = laptop_intent(content)
             if requested is not None:
@@ -1208,6 +1217,9 @@ class Engine:
             if local_choice is not None:
                 self.inference_allowed = False
                 name, arguments = local_choice
+                if name == "pointer.move.v1":
+                    await self.pointer_move(task_id, task, arguments)
+                    return
                 if name in {"laptop.storage.v1", "desktop.reveal.v1", "laptop.resources.v1"}:
                     if govern(name, "observer") != "allow":
                         raise BrokerError(
@@ -1867,10 +1879,73 @@ class Engine:
                 self.store.state(task_id, "running")
         return outcome
 
+    async def pointer_move(self, task_id: str, task: dict[str, Any], arguments: Any) -> None:
+        """D18: one approved, logged, clamped move. Never a click, never model-initiated."""
+        request = MoveCursorRequest.model_validate(arguments)
+        observed = {"attachments", "observation", "screen_target", "image"} & set(task["input"])
+        if observed or task["input"].get("source", "text") not in {"text", "voice"}:
+            raise BrokerError(
+                "pointer_untrusted_origin",
+                "Pointer moves need your own typed or spoken command, not screen content.",
+                403,
+            )
+        if govern("pointer.move.v1", "assisted") != "approval":
+            raise BrokerError("tool_denied", "Operation is outside the permission policy.", 403)
+        call_id = "pointer-" + uid()[:12]
+        pending = self.open_tool_approval(
+            task_id, call_id, "pointer.move.v1", self.call_digest("pointer.move.v1", arguments)
+        )
+        outcome = None
+        while outcome is None:
+            outcome = await self.wait_tool_approval(task_id, pending)
+        if outcome == "cancelled":
+            raise asyncio.CancelledError
+        if outcome != "approve":
+            raise BrokerError("approval_denied", "The pointer move was not approved.", 403)
+        if self.store.get(task_id)["status"] != "running":
+            self.store.state(task_id, "running")
+        self.pointer_stop.clear()
+        self.store.event(
+            task_id, "tool.started", {"name": "pointer.move.v1", "tool_call_id": call_id}
+        )
+        self.store.event(task_id, "audit.notice", {"name": "pointer.control", "state": "moving"})
+        try:
+            result = await asyncio.to_thread(move_cursor, request, self.pointer_stop.is_set)
+        finally:
+            self.store.event(task_id, "audit.notice", {"name": "pointer.control", "state": "idle"})
+        self.store.event(
+            task_id,
+            "audit.notice",
+            {"name": "pointer.move", **{k: result.get(k) for k in POINTER_AUDIT_FIELDS}},
+        )
+        self.store.event(
+            task_id,
+            "tool.completed",
+            {
+                "name": "pointer.move.v1",
+                "tool_call_id": call_id,
+                "status": "ok" if result.get("reached") else "cancelled",
+            },
+        )
+        text = describe_pointer(result)
+        self.store.event(task_id, "message.delta", {"text": text})
+        self.store.state(task_id, "verifying")
+        self.store.state(
+            task_id,
+            "succeeded",
+            result={
+                "text": text,
+                "provider": "local",
+                "model": "pointer.move.v1",
+                **local_billing(),
+            },
+        )
+
     async def cancel(self, task_id: str) -> None:
         """Cancel requested is not cancelled. The task stays `stopping` until the executor
         has exited and, for Hermes 0.23.2, the gateway reports the run terminal."""
         self.laptop_stop.set()
+        self.pointer_stop.set()
         if self.active == task_id:
             self.inference_allowed = False
         pending = self.tool_approvals.get(task_id)
@@ -1990,6 +2065,48 @@ def apply_memory_flag(settings: Settings) -> None:
         settings.memory_v1_enabled = True
 
 
+POINTER_AUDIT_FIELDS = (
+    "requested",
+    "target",
+    "clamped",
+    "start",
+    "final",
+    "reached",
+    "aborted",
+    "duration_ms",
+    "elapsed_ms",
+    "virtual_screen",
+)
+
+
+def apply_pointer_flag(settings: Settings) -> None:
+    """D18 pointer moves are opt-in per data directory (pointer-control.json)."""
+    try:
+        data = json.loads((settings.data_dir / "pointer-control.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeError):
+        return
+    if isinstance(data, dict) and data.get("enabled") is True:
+        settings.pointer_control_enabled = True
+
+
+def apply_local_model_flag(settings: Settings) -> None:
+    """M2 local model (Ollama loopback) is opt-in per data directory (local-model.json)."""
+    from pydantic import SecretStr
+
+    try:
+        data = json.loads((settings.data_dir / "local-model.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeError):
+        return
+    if not isinstance(data, dict) or data.get("enabled") is not True:
+        return
+    model = data.get("model", settings.local_model_id)
+    if not isinstance(model, str) or not re.fullmatch(r"[A-Za-z0-9._:-]{1,64}", model):
+        return
+    settings.local_model_enabled = True
+    settings.local_model_id = model
+    settings.local_model_key = SecretStr("ollama-loopback")  # marker, not a secret
+
+
 def apply_capability_flags(settings: Settings) -> None:
     path = settings.data_dir / "capability-flags.json"
     try:
@@ -2096,6 +2213,8 @@ def create_app(
     apply_capability_flags(settings)
     apply_gateway_flag(settings)
     apply_memory_flag(settings)
+    apply_local_model_flag(settings)
+    apply_pointer_flag(settings)
     apply_simulated_flag(settings)
     apply_delegation_file(settings)
     apply_local_tools_file(settings)
@@ -2131,6 +2250,7 @@ def create_app(
 
         engine.memory = MemoryStore(store.db)
         engine.memory.import_confirmed_facts()
+    engine.supervisor = supervisor  # diagnostics/benchmarks only; not an authority
     if supervisor is not None:
         engine.warm_inference_key = supervisor.inference_key
     engine.direct_simple_chat = factory is None
@@ -2522,9 +2642,9 @@ def create_app(
             raise BrokerError("voice_busy", "Stop the current voice turn before sending text.", 429)
         task, _ = store.create(request, model_selection=engine.registry.selection().model_dump())
         local = engine.local_choice(request.content) is not None
-        if not local and ModelSelection.model_validate(
-            task["input"]["model_selection"]
-        ).mode.startswith("local_"):
+        selected_mode = ModelSelection.model_validate(task["input"]["model_selection"]).mode
+        local_model_ready = selected_mode == "local_qwen" and settings.local_model_enabled
+        if not local and not local_model_ready and selected_mode.startswith("local_"):
             store.state(
                 task["task_id"],
                 "blocked",
@@ -3622,6 +3742,22 @@ def create_app(
             input_tokens = estimate_input_tokens(components)
             available = max(128, engine.token_cap - used - input_tokens)
         payload["max_tokens"] = min(payload["max_tokens"], available)
+        local_reserved = False
+
+        def reserve_local_template() -> None:
+            # Ollama renders the model's own chat/tool template around the prompt; the
+            # byte estimate under-counts it (measured +84..+113 tokens, D17). Reserve more
+            # rather than loosen the overrun check, and stay inside num_ctx.
+            nonlocal input_tokens, local_reserved
+            if local_reserved:
+                return
+            local_reserved = True
+            input_tokens += 256 + components.get("tool_schema_bytes", 0) // 4
+            room = min(LOCAL_CONTEXT_TOKENS, engine.token_cap - used) - input_tokens
+            payload["max_tokens"] = max(64, min(payload["max_tokens"], room))
+
+        if engine.model_selection.mode == "local_qwen" and not settings.simulated_inference:
+            reserve_local_template()
         task = store.get(task_id)
         need = Requirements(
             task_class=route_class(
@@ -3691,6 +3827,9 @@ def create_app(
                 },
             )
         route = engine.model_route
+        if route.provider == "local" and not local_reserved:
+            reserve_local_template()
+            need = dataclasses.replace(need, context_tokens=input_tokens + payload["max_tokens"])
         dispatch_identity = engine.route_identity
         if (
             not settings.simulated_inference

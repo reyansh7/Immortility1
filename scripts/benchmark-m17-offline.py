@@ -63,6 +63,8 @@ def main() -> int:
                         help="reviewed gateway pin (candidates only run in a canary- dir)")
     parser.add_argument("--warmup", choices=["default", "on", "off"], default="default",
                         help="broker warm-up turn after gateway readiness (K7 A/B)")
+    parser.add_argument("--extended", action="store_true",
+                        help="M2 canary eval: sessions, memory v1, crash recovery, warm-key binding, shutdown")
     args = parser.parse_args()
     data: Path = args.canary
     if not data.name.startswith("canary-"):
@@ -74,6 +76,7 @@ def main() -> int:
         "simulated-inference.json": {"enabled": True, "category": "simulated_model"},
         "local-tools.json": {"enabled": True},
         "workspace.json": {"enabled": False, "root": str(ROOT), "project_read_enabled": True},
+        **({"memory-v1.json": {"enabled": True}} if args.extended else {}),
     }.items():
         (data / name).write_text(json.dumps(body) + "\n", encoding="utf-8")
     try:
@@ -109,7 +112,8 @@ def main() -> int:
               "calls_answered_locally": engine.warmup_calls,
               "ready_after_start_ms": round((time.perf_counter() - t0) * 1000, 1)}
     meta = {"hermes_version": settings.hermes_gateway_version,
-            "typed_tool_schemas": settings.typed_tool_schemas_enabled, "warmup": warmup}
+            "typed_tool_schemas": settings.typed_tool_schemas_enabled, "warmup": warmup,
+            "extended": args.extended, "url": url}
     headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json"}
 
     def call(method: str, path: str, body: dict | None = None) -> tuple[int, dict]:
@@ -316,6 +320,8 @@ def run(call, events, engine, data, server, thread, broker_start_ms, meta) -> in
         cancels.append({"status": final["status"], "client_ms": round((time.perf_counter() - began) * 1000, 1),
                         "broker_latency_ms": notice.get("latency_ms"), "run_phase": notice.get("run_phase")})
 
+    extended = extended_checks(call, events, engine, submit, wait, session, meta) if meta.get("extended") else None
+
     process = {"broker_pid": os.getpid(),
                "gateway_pid": getattr(getattr(engine, "supervisor", None), "process", None) and engine.supervisor.process.pid}
     try:
@@ -339,8 +345,10 @@ def run(call, events, engine, data, server, thread, broker_start_ms, meta) -> in
                              capture_output=True, text=True, timeout=30, check=False)
         process["snapshot"] = out.stdout.strip()
 
+    stop_began = time.perf_counter()
     server.should_exit = True
     thread.join(timeout=30)
+    shutdown_ms = round((time.perf_counter() - stop_began) * 1000, 1)
     time.sleep(1)
     try:
         urllib.request.urlopen("http://127.0.0.1:8642/health", timeout=2)
@@ -376,7 +384,8 @@ def run(call, events, engine, data, server, thread, broker_start_ms, meta) -> in
         "cancel": {"samples": cancels, "client_ms": stats(field(cancels, "client_ms")),
                    "broker_latency_ms": stats(field(cancels, "broker_latency_ms")),
                    "confirmed": sum(c["status"] == "cancelled" for c in cancels)},
-        "process": process, "port_8642_open_after_stop": port_open,
+        "process": process, "port_8642_open_after_stop": port_open, "shutdown_ms": shutdown_ms,
+        "extended": extended,
         "submit_busy_retries": busy_retries[0],
         "deterministic_cases": det_results,
     }
@@ -389,9 +398,85 @@ def run(call, events, engine, data, server, thread, broker_start_ms, meta) -> in
     summary["deterministic_failures"] = [{k: r.get(k) for k in ("kind", "index", "status", "error", "text")} for r in det_results if not r["passed"]]
     summary["cancel"] = {k: report["cancel"][k] for k in ("client_ms", "broker_latency_ms", "confirmed")}
     print(json.dumps(summary, indent=1))
+    summary["shutdown_ms"] = shutdown_ms
+    if extended is not None:
+        summary["extended"] = {k: {"passed": v["passed"]} for k, v in extended.items()}
     ok = (report["deterministic"]["passed"] == len(det_results) and report["adversarial"]["passed"] == len(adv_results)
-          and not port_open)
+          and not port_open and (extended is None or all(v["passed"] for v in extended.values())))
     return 0 if ok else 1
+
+
+def extended_checks(call, events, engine, submit, wait, session, meta) -> dict:  # noqa: C901
+    """M2 canary evaluation beyond the M1.7 matrix (simulated model; real Hermes gateway)."""
+    out: dict[str, dict] = {}
+
+    # Sessions: two turns in one session both complete and are stored under that session.
+    first = submit("SIM:chat session turn one", [])[1]
+    wait(first["task_id"], TERMINAL)
+    second = submit("SIM:chat session turn two", [])[1]
+    done = wait(second["task_id"], TERMINAL)
+    one = call("GET", f"/v1/tasks/{first['task_id']}")[1]
+    out["session_continuity"] = {
+        "statuses": [one.get("status"), done.get("status")],
+        "same_session": one.get("session_id") == done.get("session_id") == session,
+        "passed": one.get("status") == done.get("status") == "succeeded"
+        and one.get("session_id") == done.get("session_id") == session,
+    }
+
+    # Memory v1 integration: capture on the user turn, recall by search, delete removes it.
+    status, task = submit("remember that my favourite editor is Neovim SIM:chat", [])
+    final = wait(task["task_id"], TERMINAL) if status == 200 else {}
+    captured = [e["data"] for e in events(task["task_id"])
+                if e["type"] == "audit.notice" and e["data"].get("name") == "memory.captured"] if status == 200 else []
+    found = call("POST", "/v1/memory/items/search", {"query": "favourite editor"})[1].get("matches", [])
+    hit = next((m for m in found if "Neovim" in m.get("body", "")), None)
+    deleted = call("POST", f"/v1/memory/items/{hit['id']}/delete")[0] if hit else None
+    after = call("POST", "/v1/memory/items/search", {"query": "favourite editor"})[1].get("matches", [])
+    out["memory_integration"] = {
+        "task_status": final.get("status"), "captured_events": len(captured), "recalled": bool(hit),
+        "delete_status": deleted, "gone_after_delete": not any("Neovim" in m.get("body", "") for m in after),
+        "passed": final.get("status") == "succeeded" and bool(captured) and bool(hit)
+        and deleted == 200 and not any("Neovim" in m.get("body", "") for m in after),
+    }
+
+    # Warm gateway key without an active task binding is refused by the broker.
+    supervisor = getattr(engine, "supervisor", None)
+    key = getattr(engine, "warm_inference_key", "") or ""  # the real warm key Hermes uses
+    request = urllib.request.Request(
+        meta["url"] + "/inference/v1/chat/completions", method="POST",
+        data=json.dumps({"model": "x", "messages": [{"role": "user", "content": "hi"}]}).encode(),
+        headers={"Authorization": "Bearer " + key, "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            code = response.status
+    except urllib.error.HTTPError as error:
+        code = error.code
+    out["warm_key_without_binding"] = {"status": code, "key_present": bool(key),
+                                       "passed": bool(key) and code in {401, 403}}
+
+    # Error recovery: kill the gateway between turns; the next turn restarts it and succeeds.
+    process = getattr(supervisor, "process", None)
+    old_pid = getattr(process, "pid", None)
+    restarts_before = getattr(supervisor, "crash_restarts", 0)
+    if old_pid:
+        subprocess.run(["taskkill", "/T", "/F", "/PID", str(old_pid)], capture_output=True, check=False)
+        end = time.monotonic() + 15
+        while time.monotonic() < end and getattr(getattr(supervisor, "process", None), "returncode", None) is None:
+            time.sleep(0.1)
+    began = time.perf_counter()
+    status, task = submit("SIM:chat after gateway crash", [])
+    final = wait(task["task_id"], TERMINAL, 180) if status == 200 else {}
+    new_pid = getattr(getattr(supervisor, "process", None), "pid", None)
+    out["gateway_crash_recovery"] = {
+        "killed_pid": old_pid, "new_pid": new_pid, "status": final.get("status"),
+        "recovery_e2e_ms": round((time.perf_counter() - began) * 1000, 1),
+        "crash_restarts": getattr(supervisor, "crash_restarts", 0) - restarts_before,
+        "passed": bool(old_pid) and final.get("status") == "succeeded" and new_pid not in {None, old_pid},
+    }
+    follow = submit("SIM:clock after recovery", ["clock.now.v1"])[1]
+    final = wait(follow["task_id"], TERMINAL)
+    out["tools_after_recovery"] = {"status": final.get("status"), "passed": final.get("status") == "succeeded"}
+    return out
 
 
 if __name__ == "__main__":

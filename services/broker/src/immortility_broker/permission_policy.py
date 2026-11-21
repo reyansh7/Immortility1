@@ -17,6 +17,7 @@ _ACTIONS = {
     "laptop.storage.v1": "read_permitted_files",
     "laptop.resources.v1": "local_resources",
     "desktop.reveal.v1": "reveal_authorized_path",
+    "pointer.move.v1": "move_pointer",
 }
 
 

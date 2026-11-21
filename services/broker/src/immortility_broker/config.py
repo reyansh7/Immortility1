@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     local_tools_enabled: bool = False
     # Read-only profile scan and File Explorer reveal. Deletion stays off.
     laptop_tools_enabled: bool = False
+    pointer_control_enabled: bool = False
     workspace_tools_enabled: bool = False
     project_read_enabled: bool = False
     workspace_root: Path | None = None
@@ -56,6 +57,11 @@ class Settings(BaseSettings):
     gateway_warmup_enabled: bool = True
     # P3 memory v1: only the data dir's memory-v1.json can enable it (additive tables).
     memory_v1_enabled: bool = False
+    # M2 local model (Ollama on loopback). Opt-in per data dir (local-model.json); the
+    # "credential" is a fixed loopback marker, not a secret (Ollama has no auth).
+    local_model_enabled: bool = False
+    local_model_id: str = "immortility-qwen3.5-4b"
+    local_model_key: SecretStr = SecretStr("")
     # No autorun/service install. Only explicit, local read workflows may recover.
     durable_workflows_enabled: bool = False
     local_only_mode: bool = False

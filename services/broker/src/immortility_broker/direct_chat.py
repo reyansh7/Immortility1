@@ -30,7 +30,10 @@ class DirectChat:
         del role
         messages = fit_prompt(
             [
-                {"role": "system", "content": chat_system(self.offer.provider, self.offer.model_id)},
+                {
+                    "role": "system",
+                    "content": chat_system(self.offer.provider, self.offer.model_id),
+                },
                 *history,
                 {"role": "user", "content": content},
             ],
@@ -45,7 +48,8 @@ class DirectChat:
         }
         async with httpx.AsyncClient(timeout=httpx.Timeout(20.0, read=40.0)) as client:
             request = compatible_request(client, self.settings, self.offer, payload)
-            async with client.send(request, stream=True) as response:
+            response = await client.send(request, stream=True)
+            try:
                 if response.status_code != 200:
                     code = "quota_exhausted" if response.status_code == 429 else "provider_rejected"
                     message = (
@@ -82,3 +86,5 @@ class DirectChat:
                         text = delta.get("content")
                         if isinstance(text, str) and text:
                             yield text
+            finally:
+                await response.aclose()
