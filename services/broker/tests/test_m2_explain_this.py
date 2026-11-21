@@ -199,3 +199,30 @@ def test_screen_turn_uses_tool_free_local_direct_chat(tmp_path, monkeypatch):
         task = settle(client, created.json()["task_id"])
     assert task["status"] == "succeeded", task
     assert seen == ["local"] and len(prompts) == 1 and "pointed text" in prompts[0]
+
+
+def test_screen_turn_gets_no_history_or_memory_context(tmp_path, monkeypatch):
+    app, prompts, _ = make(tmp_path, monkeypatch)
+    engine = app.state.engine
+    engine.direct_simple_chat = False
+    histories = []
+
+    class Recorder:
+        async def run(self, content, history):
+            prompts.append(content)
+            histories.append(list(history))
+            yield "Plain answer."
+
+        async def stop(self):
+            pass
+
+    engine.factory = lambda: Recorder()
+    with TestClient(app) as client:
+        _local_mode(client)
+        session = client.post("/v1/sessions", headers=AUTH).json()["id"]
+        typed = ask(client, session, "my secret project is Bluebird", "t1")
+        settle(client, typed.json()["task_id"])
+        created = ask(client, session, "pointed text", "s7", origin="screen")
+        task = settle(client, created.json()["task_id"])
+    assert task["status"] == "succeeded", task
+    assert histories[-1] == [] and "Bluebird" not in prompts[-1]

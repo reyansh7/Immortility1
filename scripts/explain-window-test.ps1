@@ -32,6 +32,7 @@ public static class ImmExplainInput {
     [DllImport("user32.dll")] static extern bool GetLastInputInfo(ref LASTINPUTINFO info);
     [DllImport("kernel32.dll")] static extern uint GetTickCount();
     [DllImport("user32.dll")] public static extern bool SetCursorPos(int x, int y);
+    [DllImport("user32.dll")] public static extern bool SetProcessDpiAwarenessContext(IntPtr value);
     [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
     public static uint LastInputTick() {
@@ -45,6 +46,9 @@ public static class ImmExplainInput {
 }
 "@
 }
+# Per-monitor DPI aware (like the reader worker), so UIA rectangles and SetCursorPos use the
+# same physical pixels on a scaled display.
+try { [void][ImmExplainInput]::SetProcessDpiAwarenessContext([IntPtr](-4)) } catch { }
 $AE = [System.Windows.Automation.AutomationElement]
 $Scope = [System.Windows.Automation.TreeScope]
 $root = $AE::RootElement
@@ -153,23 +157,32 @@ try {
     # Target: a text element inside Immortility's own window.
     $w = Window; $wr = $w.Current.BoundingRectangle
     $textType = New-Object System.Windows.Automation.PropertyCondition($AE::ControlTypeProperty, [System.Windows.Automation.ControlType]::Text)
-    $target = $null
+    # Prefer static UI text (the composer hint); chat bubbles scroll while the log settles.
+    $target = $null; $fallback = $null
     foreach ($t in $w.FindAll($Scope::Descendants, $textType)) {
         $n = $t.Current.Name; $r = $t.Current.BoundingRectangle
-        if ($n.Length -ge 20 -and $n.Length -le 160 -and $n -notmatch "Explain|Point at" -and -not $r.IsEmpty -and
-            $r.Left -ge $wr.Left -and $r.Right -le $wr.Right -and $r.Top -ge $wr.Top -and $r.Bottom -le $wr.Bottom -and $r.Width -gt 40) { $target = $t; break }
+        if ($t.Current.IsOffscreen -or $r.IsEmpty -or $r.Width -lt 40 -or $n -match "Explain|Point at") { continue }
+        if ($r.Left -lt $wr.Left -or $r.Right -gt $wr.Right -or $r.Top -lt $wr.Top -or $r.Bottom -gt $wr.Bottom) { continue }
+        if ($n -like "Enter to send*") { $target = $t; break }
+        if (-not $fallback -and $n.Length -ge 20 -and $n.Length -le 160) { $fallback = $t }
     }
-    if (-not $target) { throw "No text element inside the Immortility window to point at." }
-    $tr = $target.Current.BoundingRectangle
-    $px = [int]($tr.Left + $tr.Width / 2); $py = [int]($tr.Top + $tr.Height / 2)
-    $report.target = [ordered]@{ name = $target.Current.Name; point = "$px,$py"; window = "$($wr.Left),$($wr.Top),$($wr.Width)x$($wr.Height)" }
+    if (-not $target) { $target = $fallback }
+    if (-not $target) { throw "No visible text element inside the Immortility window to point at." }
+    function Aim {
+        $tr = $target.Current.BoundingRectangle
+        # Over the first word of the first line (a wrapped block's centre can be blank space).
+        return @([int]($tr.Left + [math]::Min(20, $tr.Width / 4)), [int]($tr.Top + [math]::Min(9, $tr.Height / 2)))
+    }
+    $aim = Aim
+    $report.target = [ordered]@{ name = $target.Current.Name; point = "$($aim[0]),$($aim[1])"; window = "$($wr.Left),$($wr.Top),$($wr.Width)x$($wr.Height)" }
 
     $script:lastTick = [ImmExplainInput]::LastInputTick()
     if ($script:lastTick -ne $tick0) { throw "BLOCKED: outside input before the pointer step." }
     $grace = (Get-Date).AddSeconds(6)
     Invoke $button
-    Start-Sleep -Milliseconds 300
-    [void][ImmExplainInput]::SetCursorPos($px, $py)
+    Start-Sleep -Milliseconds 600   # the countdown line may shift the layout; re-aim
+    $aim = Aim; $report.target.point_after_layout = "$($aim[0]),$($aim[1])"
+    [void][ImmExplainInput]::SetCursorPos($aim[0], $aim[1])
     $t1 = Get-Date
     $dialog = $null
     while (((Get-Date) - $t1).TotalSeconds -lt 30 -and -not $dialog) { Start-Sleep -Milliseconds 250; $dialog = Find-Named "Explain this text?" }
@@ -201,7 +214,8 @@ try {
     $report.counts_before = $before.counts; $report.counts_after = $task.counts
     Check "task_succeeded" ($task.screen_task.status -eq "succeeded") $task.screen_task.status
     Check "local_model" ("$($task.screen_task.model)" -match "qwen|local|ollama") "$($task.screen_task.model)"
-    Check "no_cloud_usage" ($task.screen_task.cloud_usage_calls -eq 0 -and $task.counts.usage_calls -eq $before.counts.usage_calls) "usage calls $($before.counts.usage_calls) -> $($task.counts.usage_calls)"
+    # Every model call is metered, local ones too; none may be on a non-local provider.
+    Check "no_cloud_usage" ($task.screen_task.cloud_usage_calls -eq 0) ("by provider: " + ($task.screen_task.usage_by_provider | ConvertTo-Json -Compress))
     Check "no_tools" ($task.screen_task.tool_events -eq 0) "$($task.screen_task.tool_events) tool events"
     Check "no_memory_written" ($task.counts.memory_items -eq $before.counts.memory_items -and $task.counts.confirmed_facts -eq $before.counts.confirmed_facts) "memory $($before.counts.memory_items) -> $($task.counts.memory_items)"
     Check "personal" ($task.screen_task.privacy -eq "personal") $task.screen_task.privacy

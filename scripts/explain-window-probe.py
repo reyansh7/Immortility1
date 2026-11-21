@@ -45,11 +45,15 @@ def main() -> None:
                     "SELECT body FROM events WHERE task_id=? ORDER BY sequence", (task_id,)
                 )
             ]
-            calls = conn.execute(
-                "SELECT COUNT(*) FROM usage_calls c JOIN usage_attempts a ON a.id=c.attempt_id "
-                "WHERE a.task_id=?",
+            routes = conn.execute(
+                "SELECT COALESCE(r.provider, '?'), COUNT(*) FROM usage_calls c "
+                "JOIN usage_attempts a ON a.id=c.attempt_id "
+                "LEFT JOIN inference_routes r ON r.attempt_id=a.id WHERE a.task_id=? "
+                "GROUP BY 1",
                 (task_id,),
-            ).fetchone()[0]
+            ).fetchall()
+            by_provider = {str(p): int(n) for p, n in routes}
+            calls = sum(n for p, n in by_provider.items() if p != "local")
             result = task.get("result") or {}
             out["screen_task"] = {
                 "task_id": task_id,
@@ -61,6 +65,7 @@ def main() -> None:
                 "error": (task.get("error") or {}).get("code"),
                 "event_types": [e.get("type") for e in events],
                 "tool_events": sum(1 for e in events if str(e.get("type", "")).startswith("tool.")),
+                "usage_by_provider": by_provider,
                 "cloud_usage_calls": calls,
             }
     print(json.dumps(out))
