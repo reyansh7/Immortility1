@@ -146,17 +146,19 @@ class WarmGateway:
         history: list[dict[str, str]],
         idempotency_key: str | None = None,
         on_run: Any = None,
+        instructions: str | None = None,
     ) -> AsyncIterator[str]:
         await self.ensure()
         headers = self._headers()
         if idempotency_key and idempotency_key.isascii() and 1 <= len(idempotency_key) <= 255:
             headers["Idempotency-Key"] = idempotency_key
+        body: dict[str, Any] = {"input": content, "conversation_history": history}
+        if instructions:
+            # Ephemeral per-run instructions (M2/P1 run binding); Hermes appends them to
+            # the system prompt at API-call time and never persists them.
+            body["instructions"] = instructions
         creating = asyncio.ensure_future(
-            self.client.post(
-                self.base_url + "/v1/runs",
-                headers=headers,
-                json={"input": content, "conversation_history": history},
-            )
+            self.client.post(self.base_url + "/v1/runs", headers=headers, json=body)
         )
         try:
             opened = await asyncio.shield(creating)
@@ -394,6 +396,7 @@ class GatewayRuntime:
         self.stop_phase: str | None = None
         self.on_run: Any = None
         self.supervisor: Any = None
+        self.run_binding: str | None = None
 
     def _bind(self, run_id: str) -> None:
         self.run_id = run_id
@@ -409,8 +412,14 @@ class GatewayRuntime:
             await self.supervisor.recover_if_crashed()
             if self.supervisor.gateway is not None:
                 self.gateway = self.supervisor.gateway
+        from .run_binding import marker
+
         async for piece in self.gateway.run(
-            content, history, self.idempotency_key or None, on_run=self._bind
+            content,
+            history,
+            self.idempotency_key or None,
+            on_run=self._bind,
+            instructions=marker(self.run_binding) if self.run_binding else None,
         ):
             yield piece
 

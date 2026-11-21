@@ -30,14 +30,18 @@ if ($out -match "OneDrive") { throw "Refusing to write a backup inside OneDrive.
 if (Test-Path -LiteralPath $out) { throw "Backup folder already exists: $out" }
 New-Item -ItemType Directory -Force (Join-Path $out "data") | Out-Null
 $python = Join-Path $Repo ".venv\Scripts\python.exe"
+function Invoke-Quiet {
+    # Windows PowerShell 5.1 turns native stderr into terminating errors under "Stop".
+    $previous = $ErrorActionPreference; $ErrorActionPreference = "Continue"
+    try { & $args[0] @($args | Select-Object -Skip 1) 2>&1 | Out-Null; return $LASTEXITCODE }
+    finally { $ErrorActionPreference = $previous }
+}
 $manifest = [ordered]@{ created = (Get-Date).ToString("o"); repo = $Repo; data = $Data; files = [ordered]@{} }
 
 # 1. Repository: every local ref, verified.
 $bundle = Join-Path $out "repo.bundle"
-& git -C $Repo bundle create $bundle --all 2>&1 | Out-Null
-if ($LASTEXITCODE) { throw "git bundle create failed" }
-& git -C $Repo bundle verify $bundle 2>&1 | Out-Null
-if ($LASTEXITCODE) { throw "git bundle verify failed" }
+if (Invoke-Quiet git -C $Repo bundle create $bundle --all) { throw "git bundle create failed" }
+if (Invoke-Quiet git -C $Repo bundle verify $bundle) { throw "git bundle verify failed" }
 $manifest.git = [ordered]@{
     head = (& git -C $Repo rev-parse HEAD); branch = (& git -C $Repo branch --show-current)
     refs = @(& git -C $Repo for-each-ref --format="%(refname:short) %(objectname:short)" refs/heads refs/tags)

@@ -104,6 +104,7 @@ from .artifacts import Artifacts, ReportInput, ReportOutput
 from .research import PublicResearch, ResearchInput, ResearchOutput, model_evidence
 from . import project_inspection as projects
 from .traces import execution_trace
+from . import run_binding
 from .web import research_page_async
 from .request_limits import BodyLimitMiddleware
 from .workspace import (
@@ -363,6 +364,9 @@ class Engine:
         self.resolved_approvals: dict[str, str] = {}
         self.require_tool_approval: set[str] = set()
         self.authorized_calls: dict[str, list[tuple[str, str, str]]] = {}
+        # M2/P1: one fresh binding per broker turn on the shared warm gateway.
+        self.run_bindings: dict[str, str] = {}
+        self.run_binding_secret = run_binding.new_secret()
         self.approval_ttl = 45.0
         self.gateway = Gateway(store)
         self.workflows = WorkflowJournal(store)
@@ -1093,6 +1097,10 @@ class Engine:
             self.runtime.broker_schemas = self.gateway.discover(tuple(approved))
             if getattr(self.runtime, "accepts_broker_schemas", False):
                 self.runtime.idempotency_key = str(task["input"].get("request_id", ""))[:255]
+                binding = run_binding.task_binding(self.run_binding_secret, task_id)
+                self.run_bindings[task_id] = binding
+                if hasattr(self.runtime, "run_binding"):
+                    setattr(self.runtime, "run_binding", binding)
             if hasattr(self.runtime, "on_run"):
 
                 def bind_run(run_id: str, task_id: str = task_id) -> None:
@@ -1484,6 +1492,7 @@ class Engine:
                 self.runtime = None
                 self.active = None
                 self.authorized_calls.pop(task_id, None)
+                self.run_bindings.pop(task_id, None)
                 self.approved_calls.pop(task_id, None)
                 self.require_tool_approval.discard(task_id)
                 self.tool_approvals.pop(task_id, None)
@@ -1836,6 +1845,7 @@ class Engine:
             self.store.event(task_id, "audit.notice", evidence)
             self._partial.pop(task_id, None)
             self.run_ids.pop(task_id, None)
+            self.run_bindings.pop(task_id, None)
             self.active = None
         elif task["status"] not in TERMINAL:
             self.store.state(task_id, "cancelled")
@@ -2075,6 +2085,8 @@ def create_app(
                 and peer in {"127.0.0.1", "::1"}
             ):
                 authorized = hmac.compare_digest(presented, "Bearer " + engine.warm_inference_key)
+                # Warm-key requests are shared across runs; handlers bind them to a run.
+                request.state.warm_key = authorized
             if not authorized:
                 return JSONResponse(
                     {"error": {"code": "unauthorized", "message": "Authentication required."}}, 401
@@ -3044,7 +3056,7 @@ def create_app(
         )
 
     @app.post("/inference/v1/capabilities/call")
-    async def agent_tool(proposal: ToolProposal) -> dict[str, Any]:
+    async def agent_tool(proposal: ToolProposal, request: Request) -> dict[str, Any]:
         task_id, grant_key = engine.active, engine.inference_key
         if not task_id or not engine.inference_allowed:
             raise BrokerError("tool_denied", "No active broker tool grant.", 403)
@@ -3065,6 +3077,24 @@ def create_app(
                 "tool_denied", "Operation is outside this task's approved scope.", 403
             )
         digest = engine.call_digest(proposal.capability, proposal.arguments)
+        if getattr(request.state, "warm_key", False) and not any(
+            entry[0] == proposal.capability and entry[1] == digest
+            for entry in engine.authorized_calls.get(task_id, [])
+        ):
+            # Shared warm key: only a call the broker relayed and authorized in this run's
+            # own model stream may execute. A stale run cannot reuse the active grant, and
+            # an unrelayed call never consumes a pending approve-once grant.
+            store.event(
+                task_id,
+                "audit.notice",
+                {
+                    "name": "tool.authorization",
+                    "decision": "deny",
+                    "reason": "unrelayed_tool_call",
+                    "capability": proposal.capability,
+                },
+            )
+            raise BrokerError("tool_denied", "This tool call was not proposed in this run.", 403)
         if engine.tool_needs_approval(task_id, proposal.capability):
             grants = engine.approved_calls.get(task_id, [])
             match = next(
@@ -3250,6 +3280,21 @@ def create_app(
             # Hermes' repeat attempts with a non-retryable status: a 5xx/429 here made Hermes
             # back off and retry until the task deadline (about 90 s) instead of failing fast.
             raise BrokerError(engine.provider_error.code, engine.provider_error.message, 403)
+        if getattr(request.state, "warm_key", False):
+            body = await request.json()  # Starlette caches it; stripping applies to later reads
+            found = run_binding.extract_and_strip(body)
+            verdict = run_binding.verdict(found, engine.run_bindings.get(engine.active))
+            if verdict != "ok":
+                store.event(
+                    engine.active,
+                    "audit.notice",
+                    {"name": "run_binding.refused", "reason": verdict, "path": "inference"},
+                )
+                raise BrokerError(
+                    "run_binding_mismatch",
+                    "This request does not belong to the active Hermes run.",
+                    403,
+                )
         request.state.inference_scope = (engine.active, engine.inference_key)
         approved = store.get(engine.active)["input"].get("allowed_capabilities", [])
         visible = approved
