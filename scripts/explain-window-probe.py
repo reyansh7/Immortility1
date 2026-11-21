@@ -55,7 +55,7 @@ def main() -> None:
                 "task_id": task_id,
                 "status": task.get("status"),
                 "content_chars": len(task.get("input", {}).get("content", "")),
-                "privacy": task.get("input", {}).get("privacy_class"),
+                "privacy": task.get("privacy_class") or task.get("input", {}).get("privacy_class"),
                 "model": result.get("model"),
                 "answer": str(result.get("text", ""))[:600],
                 "error": (task.get("error") or {}).get("code"),

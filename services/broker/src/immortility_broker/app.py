@@ -1137,7 +1137,10 @@ class Engine:
                         },
                     )
         identity = asks_identity(content) and local_choice is None
-        simple_chat = (
+        # D24: pointed-at screen text never reaches an agent runtime (Hermes has tools);
+        # it gets a tool-free direct chat on the local route, or is refused below.
+        screen_direct = screen and self.direct_simple_chat and not self.settings.simulated_inference
+        simple_chat = screen_direct or (
             self.direct_simple_chat
             and not self.settings.hermes_0232_gateway
             and not self.settings.simulated_inference
@@ -1201,8 +1204,14 @@ class Engine:
         first_token: float | None = None
         try:
             self.store.state(task_id, "running")
-            if screen and not self.screen_local_ready():
-                # Re-checked at run time: the mode may have changed since admission.
+            if screen and (
+                not self.screen_local_ready()
+                or isinstance(self.runtime, Hermes)
+                or getattr(self.runtime, "accepts_broker_schemas", False)
+                or (isinstance(self.runtime, DirectChat) and self.model_route.provider != "local")
+            ):
+                # Re-checked at run time: the mode may have changed since admission, and
+                # only a tool-free local runtime may see screen text.
                 raise BrokerError(
                     "screen_local_only",
                     "Explain this runs only on the local model; screen text never goes to the cloud.",

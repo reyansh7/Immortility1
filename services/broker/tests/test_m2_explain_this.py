@@ -130,3 +130,72 @@ def test_screen_turn_rejects_tools_and_public_class(tmp_path, monkeypatch):
 def test_screen_prompt_is_bounded():
     framed = screen_prompt("word " * 1000)
     assert len(framed) < 1500 and framed.endswith(">>>")
+
+
+def _local_mode(client):
+    assert (
+        client.post(
+            "/v1/settings/model-mode", headers=AUTH, json={"mode": "local_qwen"}
+        ).status_code
+        == 200
+    )
+
+
+def test_screen_turn_never_reaches_an_agent_runtime(tmp_path, monkeypatch):
+    """A tool-capable runtime (Hermes / warm gateway) is refused for screen text."""
+    app, prompts, _ = make(tmp_path, monkeypatch)
+    engine = app.state.engine
+    engine.direct_simple_chat = False
+
+    class AgentLike:
+        accepts_broker_schemas = True
+
+        async def run(self, content, history):
+            prompts.append(content)
+            yield "should not run"
+
+        async def stop(self):
+            pass
+
+    engine.factory = lambda: AgentLike()
+    with TestClient(app) as client:
+        _local_mode(client)
+        session = client.post("/v1/sessions", headers=AUTH).json()["id"]
+        created = ask(client, session, "pointed text", "s5", origin="screen")
+        assert created.status_code == 200, created.text
+        task = settle(client, created.json()["task_id"])
+    assert task["status"] == "failed" and task["error"]["code"] == "screen_local_only", task
+    assert prompts == []
+
+
+def test_screen_turn_uses_tool_free_local_direct_chat(tmp_path, monkeypatch):
+    """With the production direct path on, screen text goes to DirectChat on the local route
+    even when the warm gateway would otherwise carry the turn."""
+    app, prompts, _ = make(tmp_path, monkeypatch)
+    engine = app.state.engine
+    engine.direct_simple_chat = True
+    engine.settings.hermes_0232_gateway = True
+    seen = []
+
+    class FakeDirect:
+        def __init__(self, settings, offer):
+            self.offer, self.usage, self.spawn_ms, self.ready_ms = offer, None, 0.0, 0.0
+            seen.append(offer.provider)
+
+        async def run(self, content, history, role=None):
+            prompts.append(content)
+            yield "A plain explanation."
+
+        async def stop(self):
+            pass
+
+    monkeypatch.setattr("immortility_broker.app.DirectChat", FakeDirect)
+    engine.factory = lambda: pytest.fail("agent runtime must not be built for screen text")
+    with TestClient(app) as client:
+        _local_mode(client)
+        session = client.post("/v1/sessions", headers=AUTH).json()["id"]
+        created = ask(client, session, "pointed text", "s6", origin="screen")
+        assert created.status_code == 200, created.text
+        task = settle(client, created.json()["task_id"])
+    assert task["status"] == "succeeded", task
+    assert seen == ["local"] and len(prompts) == 1 and "pointed text" in prompts[0]

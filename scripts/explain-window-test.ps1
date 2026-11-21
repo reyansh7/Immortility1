@@ -80,6 +80,10 @@ if (-not (Test-Path -LiteralPath $Canary)) {
     Get-ChildItem -LiteralPath $Source -Force | Where-Object { $_.Name -notlike "*.log*" -and $_.Name -notlike "*.lock" -and $_.Name -ne "window-suite.json" } |
         ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $Canary -Recurse -Force }
 }
+# Live local model only: this copy must not carry the simulated fixture or the gateway flag.
+foreach ($f in "simulated-inference.json", "hermes-gateway.json") {
+    $p = Join-Path $Canary $f; if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p }
+}
 Set-Content -LiteralPath (Join-Path $Canary "local-model.json") -Value '{"enabled": true}' -Encoding ascii
 $db = Join-Path $Canary "state.sqlite3"
 function Set-Mode($mode) {
@@ -152,12 +156,12 @@ try {
     $target = $null
     foreach ($t in $w.FindAll($Scope::Descendants, $textType)) {
         $n = $t.Current.Name; $r = $t.Current.BoundingRectangle
-        if ($n.Length -ge 12 -and $n.Length -le 160 -and $n -notmatch "Explain|Point at" -and -not $r.IsEmpty -and
+        if ($n.Length -ge 20 -and $n.Length -le 160 -and $n -notmatch "Explain|Point at" -and -not $r.IsEmpty -and
             $r.Left -ge $wr.Left -and $r.Right -le $wr.Right -and $r.Top -ge $wr.Top -and $r.Bottom -le $wr.Bottom -and $r.Width -gt 40) { $target = $t; break }
     }
     if (-not $target) { throw "No text element inside the Immortility window to point at." }
     $tr = $target.Current.BoundingRectangle
-    $px = [int]($tr.Left + [math]::Min(30, $tr.Width / 2)); $py = [int]($tr.Top + $tr.Height / 2)
+    $px = [int]($tr.Left + $tr.Width / 2); $py = [int]($tr.Top + $tr.Height / 2)
     $report.target = [ordered]@{ name = $target.Current.Name; point = "$px,$py"; window = "$($wr.Left),$($wr.Top),$($wr.Width)x$($wr.Height)" }
 
     $script:lastTick = [ImmExplainInput]::LastInputTick()
