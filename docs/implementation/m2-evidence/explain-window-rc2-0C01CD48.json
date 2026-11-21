@@ -1,0 +1,150 @@
+﻿{
+    "test":  "explain-this real window (D24)",
+    "executable":  "C:\\Users\\reyan\\AppData\\Local\\Temp\\immortility-canary-build\\release\\immortility-desktop.exe",
+    "exe_sha256":  "0C01CD48091460385C90A7123B34417452AD0A906C0EA1383FD5342029A5725D",
+    "canary":  "C:\\Users\\reyan\\AppData\\Local\\Immortility\\canary-explain-m2",
+    "inference":  "live local model (Ollama loopback); no cloud",
+    "started":  "2026-11-22T05:26:58.7588529+05:30",
+    "checks":  {
+                   "button_enabled_local":  {
+                                                "pass":  true,
+                                                "detail":  "Explain this enabled with Local Qwen"
+                                            },
+                   "preview_shows_pointed_text":  {
+                                                      "pass":  true,
+                                                      "detail":  "preview contains \u0027Enter\u0027"
+                                                  },
+                   "preview_says_local":  {
+                                              "pass":  true,
+                                              "detail":  "label present"
+                                          },
+                   "task_succeeded":  {
+                                          "pass":  true,
+                                          "detail":  "succeeded"
+                                      },
+                   "local_model":  {
+                                       "pass":  true,
+                                       "detail":  "immortility-qwen3.5-4b"
+                                   },
+                   "no_cloud_usage":  {
+                                          "pass":  true,
+                                          "detail":  "by provider: {\"local\":1}"
+                                      },
+                   "no_tools":  {
+                                    "pass":  true,
+                                    "detail":  "0 tool events"
+                                },
+                   "no_memory_written":  {
+                                             "pass":  true,
+                                             "detail":  "memory  -\u003e "
+                                         },
+                   "personal":  {
+                                    "pass":  true,
+                                    "detail":  "personal"
+                                },
+                   "button_disabled_cloud":  {
+                                                 "pass":  true,
+                                                 "detail":  "help text: Explain this runs only on the local model. Choose Local Qwen in the Model hub."
+                                             }
+               },
+    "outside_input":  [
+
+                      ],
+    "preflight":  {
+                      "idle_seconds":  6948.8,
+                      "foreground":  "Grok Bot",
+                      "desktop_running":  false
+                  },
+    "cursor_before":  "1919,0",
+    "launch_local":  {
+                         "pid":  1812,
+                         "window_ms":  4233
+                     },
+    "target":  {
+                   "name":  "Enter to send · Shift+Enter for a new line",
+                   "point":  "1681,787",
+                   "window":  "1362,62,550x950",
+                   "point_after_layout":  "1681,787"
+               },
+    "read_ms":  4272,
+    "preview":  "READ FROM YOUR SCREEN ( | LINE | ) · STAYS ON THIS PC | Enter to send - Shift*Enter for a new line | Explain | Discard",
+    "answer_ms":  8358,
+    "screen_task":  {
+                        "task_id":  "e8be531a-0402-4e9f-8ad3-bfce3ac9fc30",
+                        "status":  "succeeded",
+                        "content_chars":  42,
+                        "privacy":  "personal",
+                        "model":  "immortility-qwen3.5-4b",
+                        "answer":  "This text describes keyboard shortcuts: pressing Enter sends a message, while Shift+Enter creates a new line. It is simply informational and does not require any action from you.",
+                        "error":  null,
+                        "event_types":  [
+                                            "task.state",
+                                            "task.state",
+                                            "task.state",
+                                            "audit.notice",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "message.delta",
+                                            "audit.notice",
+                                            "audit.notice",
+                                            "task.state",
+                                            "task.state"
+                                        ],
+                        "tool_events":  0,
+                        "usage_by_provider":  {
+                                                  "local":  1
+                                              },
+                        "cloud_usage_calls":  0
+                    },
+    "counts_before":  {
+                          "tasks":  436,
+                          "memory_items":  null,
+                          "confirmed_facts":  0,
+                          "usage_calls":  548
+                      },
+    "counts_after":  {
+                         "tasks":  437,
+                         "memory_items":  null,
+                         "confirmed_facts":  0,
+                         "usage_calls":  549
+                     },
+    "launch_cloud":  {
+                         "pid":  22308,
+                         "window_ms":  4651
+                     },
+    "finished":  "2026-11-22T05:27:28.4562315+05:30",
+    "passed":  10,
+    "total":  10,
+    "attended":  false
+}

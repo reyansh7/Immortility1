@@ -161,6 +161,17 @@ Query embedding 39 ms warm (Ollama 40 ms server-side, 100% GPU, 335 MB); first v
 **Explain this (D24), real window, LIVE local model** — `scripts/explain-window-test.ps1` on canary `6547B63A…` (built 05:02 IST; production exe `7A131F97…` before = after), PC idle 6324 s, foreground "Grok Bot", 0 outside-input events. Pointed only at Immortility's own composer hint. Result **10/10** — `m2-evidence/explain-window-real.json`: button enabled with Local Qwen; preview showed the pointed line + "stays on this PC"; screen read 4.0 s (incl. 3 s countdown); answer 1.4 s from `immortility-qwen3.5-4b` ("…press Enter to send and hold Shift+Enter to create a new line"); usage by provider `{"local": 1}`; 0 tool events; privacy `personal`; relaunched in cloud mode → button disabled with the explanation. (Memory v1 is off in that canary copy, so "no memory written" there is trivially true; the memory/history exclusions are covered by `test_m2_explain_this.py` 7/7.)
 Earlier attempts found real defects, all fixed before the passing run: (1) K29 observer pins broken by CRLF → screen read 503; (2) in the simulated canary the screen turn ran on the Hermes fixture → screen turns now go only to tool-free local DirectChat, agent runtimes refused (a46af22); (3) the session's earlier chat leaked into the explanation → screen turns get no history/notes/recall/facts/memory (01984e3). Test-harness fixes: aim at static visible text and the bottom-most composer hint.
 
+**M2 RC2 on m2/build @b7e1130 (05:19–05:28 IST)**: canary rebuilt 0C01CD48... (production exe 7A131F97... before = after).
+| Suite | Result |
+|---|---|
+| pytest (PC, full) | **732 passed**, 0 failed (168.8 s) |
+| vitest | **100/100** (15 files) |
+| `pnpm check` | pass |
+| cargo test | **13/13** |
+| pinned-hash check | 0 tracked mismatches / 1787 |
+| window suite (simulated fixture) | **18/18 CLEAN** - `m2-evidence/window-suite-rc2-0C01CD48.json` |
+| Explain this real window (live local Qwen) | **10/10**, read 4.3 s incl. 3 s countdown, answer 8.4 s (cold model load), usage `{local:1}` - `m2-evidence/explain-window-rc2-0C01CD48.json` |
+
 ## Not run (by rule)
 
 - 18/18 desktop window suite: waiting for an owner-scheduled ~10 min uninterrupted session (`WINDOW_SUITE_PROCEDURE.md`).
