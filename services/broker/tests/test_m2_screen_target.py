@@ -135,3 +135,9 @@ def test_off_windows_it_refuses(monkeypatch):
     request = screen_target.TargetRequest(x=1, y=1)
     with pytest.raises(BrokerError):
         asyncio.run(screen_target.read_target(request, screen_target.ScreenAccess()))
+
+
+def test_embedded_object_placeholder_is_not_text():
+    # Real-window finding (Edge canvas): UIA returned U+FFFC with a matching rectangle.
+    source = (ROOT / "integrations/windows-observer/screen_target.py").read_text()
+    assert 'text.replace("\\ufffc", "").strip() and exact' in source

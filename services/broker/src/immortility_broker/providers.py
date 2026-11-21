@@ -182,7 +182,7 @@ GROQ_FAST = RouteCandidate(
 GEMINI_REASONING = RouteCandidate(
     "gemini",
     "gemini-3.8-flash",
-    "The public price page lists a free tier for this model. This account is not qualified.",
+    "Owner-approved free-tier model (D15, 22 Nov). Free-tier data may be used by Google: non-sensitive requests only.",
 )
 NVIDIA_DEEP = RouteCandidate(
     "nvidia",
@@ -194,12 +194,20 @@ LOCAL_HERETIC = RouteCandidate(
     "xtools-at/DeepSeek-V4-Pro-Qwen3.5-9B-UNCENSORED-heretic",
     "The local model is not installed. Download requires separate approval.",
 )
-# Explicit free-tier allowlist. A published paid price does not remove a model
+# Explicit free-tier allowlist. Gemini switched from gemini-3.5-flash (no longer listed by
+# Google) to gemini-3.8-flash on the owner's explicit decision (D15, 22 Nov 2026). A published paid price does not remove a model
 # that the provider serves on its free plan. Models absent from this map stay closed.
+# "personal": False means the free tier's terms allow the provider to use prompts to improve
+# its products, so only tasks explicitly classified "public" may use it (never memories,
+# private files, credentials or screen content; personal tasks carry those).
 FREE_TIER: dict[tuple[str, str], dict[str, int | bool]] = {
-    ("groq", "openai/gpt-oss-120b"): {"context": 131072, "tools": True},
-    ("gemini", "gemini-3.5-flash"): {"context": 1048576, "tools": True},
-    ("nvidia", "nvidia/nemotron-3-ultra-550b-a55b"): {"context": 1048576, "tools": True},
+    ("groq", "openai/gpt-oss-120b"): {"context": 131072, "tools": True, "personal": True},
+    ("gemini", "gemini-3.8-flash"): {"context": 1048576, "tools": True, "personal": False},
+    ("nvidia", "nvidia/nemotron-3-ultra-550b-a55b"): {
+        "context": 1048576,
+        "tools": True,
+        "personal": True,
+    },
 }
 CANDIDATES = (GROQ_FAST, GEMINI_REASONING, NVIDIA_DEEP, LOCAL_HERETIC)
 
@@ -223,7 +231,7 @@ def quota_evidence() -> dict[str, dict[str, str]]:
         },
         "gemini": {
             "automated_remaining_quota": "unsupported",
-            "free_tier_allowlist": "gemini-3.5-flash",
+            "free_tier_allowlist": "gemini-3.8-flash",
             "observed_remaining": "unknown",
             "check": "https://ai.google.dev/gemini-api/docs/rate-limits",
         },
@@ -365,7 +373,7 @@ class ModelRegistry:
                 tools_qualified=bool(spec["tools"]),
                 structured_qualified=True,
                 qualification="live",
-                privacy=("public", "personal"),
+                privacy=("public", "personal") if spec.get("personal") else ("public",),
                 available=True,
             )
 
@@ -423,10 +431,14 @@ class ModelRegistry:
         legacy = (
             offer.route_id == MODEL and offer.provider == "openrouter" and offer.model_id == MODEL
         )
-        if not legacy and not free_tier(offer.provider, offer.model_id) and (
-            offer.zero_price_until <= now
-            or offer.account_until <= now
-            or offer.credential_identity != identity
+        if (
+            not legacy
+            and not free_tier(offer.provider, offer.model_id)
+            and (
+                offer.zero_price_until <= now
+                or offer.account_until <= now
+                or offer.credential_identity != identity
+            )
         ):
             return "price_or_account_unverified"
         if need.privacy not in offer.privacy:
@@ -619,7 +631,7 @@ class ModelRegistry:
                     if provider.id == "openrouter"
                     else {
                         "groq": "free-tier allowlist openai/gpt-oss-120b; provider quota is not read",
-                        "gemini": "free-tier allowlist gemini-3.5-flash; provider quota is not read",
+                        "gemini": "free-tier allowlist gemini-3.8-flash; provider quota is not read",
                         "nvidia": "free prototype allowlist nvidia/nemotron-3-ultra-550b-a55b; account quota is not read",
                     }[provider.id],
                     "docs": provider.docs,

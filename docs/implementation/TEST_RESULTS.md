@@ -81,6 +81,20 @@ Evidence: `m2-evidence/bench-0232-typed-warmup-{off,on}.json`, `bench-0233-typed
   Paraphrase-without-shared-words (known lexical gap, scored separately): 1/4.
   Search latency over 3,000+ items: p50 1.69 ms, p95 1.91 ms, max 6.08 ms; DB 2.16 MB. Evidence: `m2-evidence/benchmark-memory-v1.json`.
 
+## Window suite 18/18 — owner-authorized unattended session (22 Nov, 02:51–03:01 IST)
+Canary exe sha `9E0702AA…7F46` (frontend predates the P4 indicator; broker from working tree @488310e), simulated fixture inference (not live evidence).
+- Run 1 (02:53–02:57): 18/18 scenario asserts passed but **ATTENDED-INVALID** — 1 outside input at 02:57:02 (confirmed by system idle clock: last input ≈02:57:00) and 1 "mode drift" logged during scenario-17 relaunch before the composer rendered (harness false positive → D16). Kept: `m2-evidence/window-suite-run1-attended.json`.
+- Run 2 (02:58:22–03:01:12): **`WINDOW_SUITE_DONE 18/18 CLEAN`** — unattended true, 0 outside input, 0 drift, final_orphans [], 8642 closed, scenario 18 production stamps identical. `m2-evidence/window-suite.json`. Production exe hash after: `7A131F97…63C1` (unchanged).
+
+## P4 real-window screen-target benchmark (22 Nov, ~03:02–03:04 IST, PC idle ≥5 min, foreground = Grok Bot app)
+REAL local UIA/OCR on windows the script opened itself (Notepad; Edge `--app` with a throwaway profile); no model, no cloud. Every point was confirmed to lie on the benchmark's own window (WindowFromPoint root), and the product's reported window title was checked per case.
+- Run 1: 14/19 — found 3 issues: selection-case harness bug (no ground-truth point requested), canvas returned U+FFFC as "text" (product bug → fixed), button expectation wrong (word under the centre of "Submit order" is "order").
+- Run 2 (`m2-evidence/screen-target-run2.json`): **17/19**. Notepad 8/8 (6 words, line, selection); Edge HTML 9/9 (5 words, line, password field **refused with no leak**, canvas text via **OCR fallback** "QUANTUM", button); Edge PDF 0/2 (no UIA ground truth — K19, probe not run). Latency p50 544 ms (UIA), OCR case 3133 ms (K20). Leftover processes: none.
+- Earlier (21 Nov 23:2x) attempt while a game was foreground: test window was occluded; the worker read only the game's window title, OCR found no text; that run is **invalid** and its harness now refuses occluded points.
+
+## Full Python regression @4430f1f (22 Nov ~03:05 IST)
+588 passed, 0 failed (161 s).
+
 ## Not run (by rule)
 
 - 18/18 desktop window suite: waiting for an owner-scheduled ~10 min uninterrupted session (`WINDOW_SUITE_PROCEDURE.md`).

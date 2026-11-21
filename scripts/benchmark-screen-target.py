@@ -153,9 +153,17 @@ def main() -> int:
     def record(name, app, result, ok, expected):
         # Identity confirmation: the product's own report of the window under the point
         # must be this benchmark's window, else the case is contaminated (never a pass).
-        marker = {"notepad": "ImmScreenBench-notes", "edge-html": "ImmScreenBench Page", "edge-pdf": "ImmScreenBench"}[app]
+        marker = {
+            "notepad": "ImmScreenBench-notes",
+            "edge-html": "ImmScreenBench Page",
+            "edge-pdf": "ImmScreenBench",
+        }[app]
         title = (result.get("window") or {}).get("title", "")
-        contaminated = bool(result.get("source")) and result.get("source") not in {"skipped_occluded", "no_ground_truth"} and marker.casefold() not in title.casefold()
+        contaminated = (
+            bool(result.get("source"))
+            and result.get("source") not in {"skipped_occluded", "no_ground_truth"}
+            and marker.casefold() not in title.casefold()
+        )
         if contaminated:
             ok = False
         if result.get("source") == "uia_name" and expected not in {"Submit / Submit order"}:
@@ -166,7 +174,8 @@ def main() -> int:
                 "app": app,
                 "passed": bool(ok),
                 "expected": expected,
-                "got": result.get("target", ""), "contaminated": contaminated if "contaminated" in dir() else False,
+                "got": result.get("target", ""),
+                "contaminated": contaminated,
                 "source": result.get("source"),
                 "denied": result.get("denied"),
                 "exact": result.get("exact"),

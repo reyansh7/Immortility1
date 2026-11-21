@@ -30,7 +30,7 @@ def identity_text(provider: str, model_id: str) -> str:
         "This answer comes from the broker's verified route table, not from a model persona. "
         f"Ordinary chat is answered by {provider} {model_id}. "
         "Deep reasoning uses NVIDIA nvidia/nemotron-3-ultra-550b-a55b when that route is eligible. "
-        "Long context uses Gemini gemini-3.5-flash. "
+        "Long context uses Gemini gemini-3.8-flash. "
         "I am not Particle-1 and I was not created by Particle AI."
     )
 

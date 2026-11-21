@@ -24,7 +24,7 @@ def test_identity_names_the_verified_route_and_rejects_the_invented_persona():
     text = identity_text("groq", "openai/gpt-oss-120b")
     assert "openai/gpt-oss-120b" in text
     assert "nvidia/nemotron-3-ultra-550b-a55b" in text
-    assert "gemini-3.5-flash" in text
+    assert "gemini-3.8-flash" in text
     assert "I am not Particle-1" in text
     assert "was not created by Particle AI" in text
 

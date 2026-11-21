@@ -27,14 +27,16 @@ Legend: [x] done with evidence · [~] partial · [ ] not started · [B] blocked 
 - [B] Capped live pilot with ledger evidence — owner approval + quota budget.
 
 ## P2 — Real intelligence
-- [~] Warm gateway, streaming, cancellation, approvals (M1.7, canary). [x] Typed per-capability tool schemas default on the gateway path (strict Pydantic `extra=forbid, strict=True` models drive both the provider schema and the Hermes manifest; 0.21.1 desktop default unchanged); [ ] modes INSTANT/DEEP/EXECUTE/BOTS; [ ] Gemini allowlist fix; [ ] remove OpenRouter legacy path; [ ] Heretic chat-only profile.
+- [~] Warm gateway, streaming, cancellation, approvals (M1.7, canary). [x] Typed per-capability tool schemas default on the gateway path (strict Pydantic `extra=forbid, strict=True` models drive both the provider schema and the Hermes manifest; 0.21.1 desktop default unchanged); [ ] modes INSTANT/DEEP/EXECUTE/BOTS; [x] Gemini allowlist fix (D15); [ ] remove OpenRouter legacy path; [ ] Heretic chat-only profile.
 - [B] ≥90% verified tool success on ≥50 live tool tasks — needs live pilot.
 
 ## P3–P10
 - [x] P3 memory v1 core (offline): `memory_v1.py` on the existing broker SQLite DB (additive `memory_items` + FTS5 porter; `user_version` stays 4; created only when `memory-v1.json` enables it). Categories working/episodic/semantic/procedural/profile; provenance JSON (task/url/via), confidence, created/updated/last_used/expires, project scope; slot-based contradiction detection with trust ranking; duplicate merge; correction (supersede chain); deletion that blanks content and also excludes the source task from legacy recall; untrusted-source gating (external → pending/quarantined, inferred durable → pending, verified → episodic only, secrets redacted). Engine captures the user's own statements, injects recalled memory labelled as data, writes episodic receipts. API `/v1/memory/items*`. Benchmark 40/40 incl. 5 cross-restart cases.
 - [ ] P3 embeddings (sqlite-vec + local model) — deferred (D12); paraphrase gap measured 1/4.
 - [ ] P3 memory dashboard UI; daily briefing; Gmail/Calendar read-only (owner connects).
-- [ ] P4 perception (UIA ElementFromPoint → TextPattern.RangeFromPoint → WGC crop + Windows.Media.Ocr → RapidOCR → consented vision).
+- [~] P4 perception: UIA ElementFromPoint → RangeFromPoint/ExpandToEnclosingUnit, selection, window-under-point, password/sensitive refusal, Windows.Media.Ocr crop fallback, privacy indicator, real-window benchmark 17/19 (488310e, 4430f1f). Open: PDF ground truth (K19), persistent worker latency (K20), hover-to-explain wiring, RapidOCR/WGC not needed so far.
+- [x] Window suite 18/18 CLEAN unattended (8f5a536).
+- [x] Gemini allowlist → gemini-3.8-flash (owner), public-only (D15).
 - [ ] P5 voice (Smart Turn v3, streaming TTS, barge-in, wake word opt-in).
 - [ ] P6 PC Guardian (Defender status/events/scans, read-only first).
 - [ ] P7 bounded computer control. [ ] P8 web research. [ ] P9 evolution engine. [ ] P10 release.

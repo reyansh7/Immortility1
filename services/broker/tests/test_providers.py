@@ -73,7 +73,7 @@ def test_model_hub_explains_provider_specific_missing_evidence_without_exposing_
     view = value.view()
     statuses = {provider["id"]: provider["status"] for provider in view["providers"]}
     assert "free-tier allowlist openai/gpt-oss-120b" in statuses["groq"]
-    assert "free-tier allowlist gemini-3.5-flash" in statuses["gemini"]
+    assert "free-tier allowlist gemini-3.8-flash" in statuses["gemini"]
     assert "free prototype allowlist nvidia/nemotron-3-ultra-550b-a55b" in statuses["nvidia"]
     assert "fresh preflight" in statuses["openrouter"]
     routed = {item["task_class"]: item for item in view["routing"]}
@@ -144,11 +144,16 @@ async def test_allowlisted_free_models_skip_zero_price_proof_and_paid_models_sta
     async with httpx.AsyncClient(transport=httpx.MockTransport(never)) as client:
         for provider, model in (
             ("groq", "openai/gpt-oss-120b"),
-            ("gemini", "gemini-3.5-flash"),
+            ("gemini", "gemini-3.8-flash"),
             ("nvidia", "nvidia/nemotron-3-ultra-550b-a55b"),
         ):
             route = registry.models[provider + "/" + model]
-            assert registry.rejection(route, Requirements()) is None
+            assert registry.rejection(route, Requirements(privacy="public")) is None
+            if provider == "gemini":
+                # Free-tier prompts may be used by Google: personal tasks never go there.
+                assert registry.rejection(route, Requirements()) == "privacy_ineligible"
+            else:
+                assert registry.rejection(route, Requirements()) is None
             assert await verify_dispatch(client, route, key="fixture-" + provider) is None
         paid = offer(
             registry,
@@ -185,11 +190,19 @@ def test_free_tier_routes_by_task_and_falls_back_after_a_rate_limit(registry):
         == "groq"
     )
     registry.failure(registry.models["groq/openai/gpt-oss-120b"], 429, "30")
-    fallback = registry.choose(ModelSelection(), Requirements(task_class="FAST_CHAT"))
-    assert fallback.provider == "gemini" and fallback.model_id == "gemini-3.5-flash"
+    fallback = registry.choose(
+        ModelSelection(), Requirements(task_class="FAST_CHAT", privacy="public")
+    )
+    assert fallback.provider == "gemini" and fallback.model_id == "gemini-3.8-flash"
+    personal = registry.choose(ModelSelection(), Requirements(task_class="FAST_CHAT"))
+    assert personal.provider != "gemini"  # personal context never falls back to Gemini free tier
     registry.failure(registry.models["nvidia/nvidia/nemotron-3-ultra-550b-a55b"], 429, "30")
-    deep_fallback = registry.choose(ModelSelection(), Requirements(task_class="DEEP_REASONING"))
-    assert deep_fallback.provider == "gemini" and deep_fallback.model_id == "gemini-3.5-flash"
+    deep_fallback = registry.choose(
+        ModelSelection(), Requirements(task_class="DEEP_REASONING", privacy="public")
+    )
+    assert deep_fallback.provider == "gemini" and deep_fallback.model_id == "gemini-3.8-flash"
+    personal_deep = registry.choose(ModelSelection(), Requirements(task_class="DEEP_REASONING"))
+    assert personal_deep.provider != "gemini"
 
 
 @pytest.mark.parametrize(
