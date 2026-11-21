@@ -37,9 +37,11 @@ Legend: [x] done with evidence · [~] partial · [ ] not started · [B] blocked 
 - [~] P4 perception: UIA ElementFromPoint → RangeFromPoint/ExpandToEnclosingUnit, selection, window-under-point, password/sensitive refusal, Windows.Media.Ocr crop fallback, privacy indicator, real-window benchmark 17/19 (488310e, 4430f1f). Open: PDF ground truth (K19), persistent worker latency (K20), hover-to-explain wiring, RapidOCR/WGC not needed so far.
 - [x] Window suite 18/18 CLEAN unattended (8f5a536).
 - [x] Gemini allowlist → gemini-3.8-flash (owner), public-only (D15).
-- [ ] P5 voice (Smart Turn v3, streaming TTS, barge-in, wake word opt-in).
-- [ ] P6 PC Guardian (Defender status/events/scans, read-only first).
-- [ ] P7 bounded computer control. [ ] P8 web research. [ ] P9 evolution engine. [ ] P10 release.
+- [x] Local Qwen3.5 4B via Ollama (D17): 100% GPU, warm TTFT ~0.3 s, 70 tok/s; broker chat 5/5, tools 9/9. K22 fixed.
+- [x] Status HUD (system/mic/screen/cursor/model) + ModelHub local option (D22).
+- [~] P5 voice: synthetic E2E voice→broker→local Qwen→Ultron TTS 3/3; streaming TTS + playback cancel existed and re-verified; D20 local DirectChat for voice. Open: live mic procedure (PENDING), Smart Turn v3 (not added), TTS cold start (K25), wake word (not planned).
+- [~] P6 PC Guardian: read-only Defender status `laptop.security.v1` (D21). Open: event log, scan history.
+- [x] P7a bounded pointer move `pointer.move.v1` (D18), real desktop 8/8. [ ] clicks/typing (separate tier, not started). [ ] P8 web research. [ ] P9 evolution engine. [ ] P10 release.
 
 ## Audit claims (research report) re-verified against the repo — 21 Nov 2026
 | Claim | Verdict | Evidence |

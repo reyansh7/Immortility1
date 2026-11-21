@@ -95,6 +95,48 @@ REAL local UIA/OCR on windows the script opened itself (Notepad; Edge `--app` wi
 ## Full Python regression @4430f1f (22 Nov ~03:05 IST)
 588 passed, 0 failed (161 s).
 
+## M2 local model, pointer, voice, Guardian, HUD (22 Nov, 03:20–04:30 IST, PC idle, owner away)
+All inference below is **LIVE local** (Ollama on 127.0.0.1, RTX 4060 Laptop) unless marked; cloud keys blanked in-process; no cloud call.
+
+**Qwen3.5 4B direct (Ollama `/api/chat`, think off, num_ctx 4096)** — `m2-evidence/qwen-direct-bench.json`
+| Metric | Result |
+|---|---|
+| GPU offload | `ollama ps`: 3.1 GB, **100% GPU**, ctx 4096; nvidia-smi 3767/8188 MiB, 89% util during run |
+| Cold (first ever load from disk) | load 41.2 s, first token 79.1 s, total 81.6 s |
+| Warm first token / full (40–60 tokens) | 276–306 ms / 0.93–1.14 s |
+| Decode speed | 68.7–70.0 tok/s |
+| Thinking default vs `reasoning_effort:none` (OpenAI API) | 16.3 s (1069 tokens) vs **0.42 s** (7 tokens) → D17 |
+| Native tool calls | 3/3 correct (multiply 37×43, get_time, multiply 12×9) |
+
+**Through the real broker** (`scripts/benchmark-m2-local-model.py`, canary-m2-local4) — `m2-evidence/benchmark-m2-local.json`
+- First real run exposed **K22** (DirectChat stream bug, all chats failed) and template under-reservation (`usage_overrun`); both fixed, regression tests added.
+- Final: chat **5/5** (warm first delta 317–346 ms, e2e 0.37–1.05 s); clock tool **3/3**, multiply tool **3/3**, two-tool steps **3/3** (each requires the tool to have actually run); prompt-injection turn: no shell, refusal. Tool turns 8.7–10.6 s (K24: Hermes per-task spawn). One clock answer mis-converted UTC→IST (K23).
+
+**Pointer `pointer.move.v1` on the real desktop** (`scripts/pointer-desktop-test.py`, idle 726 s before, unchanged after) — `m2-evidence/pointer-desktop-test.json`
+**8/8**: instant, smooth (500 ms), center, clamp to virtual-screen edge, deny (no move), corner fail-safe (refused), simulated user interruption (aborted "you moved the mouse"), non-command text (no approval asked). Cursor restored to its original position; 0 clicks/keys sent. pytest `test_m2_pointer.py` 27/27 (parser, strict schema, clamp incl. negative multi-monitor, corner/Esc/stop/drift aborts, approval/deny through the broker, 422 for model-granted capability).
+
+**Voice end-to-end, synthetic audio** (`scripts/voice-e2e-local.py`; Piper-rendered questions, no microphone) — `m2-evidence/voice-e2e.json`
+- 3/3 answers correct, STT WER 0.0 (faster-whisper CPU, 1.7–2.2 s), broker 0.66–1.17 s after D20 (was 6.6–7.4 s), Ultron (`ultron_conversational`, Kokoro onyx + DSP) peak −10…−14 dBFS, RMS −29.5 dBFS, **0 clipped samples**.
+- Streaming speak first audio: Piper 3.8 s (cold process); Ultron cold 19.1 s, **warm 1.37–1.43 s** (K25). Playback cancel 4–5 ms; unavailable output device rejected.
+- Live mic/speaker/barge-in: **PENDING** — `VOICE_LIVE_PROCEDURE.md`.
+
+**PC Guardian** — real `Get-MpComputerStatus` (no admin): antivirus on, real-time on, tamper on, definitions today. pytest `test_m2_guardian.py` 7/7.
+
+**Frontend** — status HUD + ModelHub local option: `pnpm check` pass, vitest **95/95** (15 files). Screenshots (headless Chrome, broker absent → offline state): `m2-evidence/ui-chat.png`, `ui-command.png`, `ui-chat-narrow.png`.
+
+**Regression** — pytest (PC) **689 passed**, 0 failed (166.6 s) @50e5246.
+**M2 release candidate @50e5246 (04:00–04:13 IST)** — canary rebuilt after the ModelHub change: release `B7DFB074…`, 4/4 hashed assets embedded, production exe `7A131F97…` before = after.
+| Suite | Result |
+|---|---|
+| pytest (PC, full) | **689 passed**, 0 failed |
+| vitest | **95/95** |
+| `pnpm check` (tsc + eslint + prettier) | pass |
+| cargo test (src-tauri) | **13/13** |
+| window suite on RC canary `B7DFB074` | **18/18 CLEAN** (04:07–04:10 IST) — `m2-evidence/window-suite-rc-B7DFB074.json` |
+| backup + restore drill | `%LOCALAPPDATA%\Immortility-backups\20261122-041221`: bundle verified, integrity ok, counts match (36/622/13/0) |
+
+**Window suite** — HUD build (canary `18DC95A2…`): `WINDOW_SUITE_DONE 18/18 CLEAN` (04:0x IST) — `m2-evidence/window-suite-hud-18DC95A2.json`.
+
 ## Not run (by rule)
 
 - 18/18 desktop window suite: waiting for an owner-scheduled ~10 min uninterrupted session (`WINDOW_SUITE_PROCEDURE.md`).
