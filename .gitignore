@@ -65,3 +65,6 @@ Thumbs.db
 
 # Shipped face asset (see docs/visual/FACE_AND_DASHBOARD.md; small and versioned)
 !apps/desktop/public/models/
+
+# Stray Windows cache files created by an unexpanded env var (K6); keep on disk, never track
+/%SystemDrive%/
