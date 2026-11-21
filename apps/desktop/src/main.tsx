@@ -446,7 +446,11 @@ function App() {
         window.clearTimeout(screenHold.current);
         if (reading) setScreenReading(reading);
         // Keep the indicator visible briefly so even a fast read is noticeable.
-        else screenHold.current = window.setTimeout(() => setScreenReading(null), 1500);
+        else
+          screenHold.current = window.setTimeout(
+            () => setScreenReading(null),
+            1500,
+          );
         setHealth({ ...snapshot.health, voice_state: snapshot.voice_state });
         setConnected(true);
         setReconnecting(false);
