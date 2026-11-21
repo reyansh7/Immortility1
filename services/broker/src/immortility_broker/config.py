@@ -57,6 +57,7 @@ class Settings(BaseSettings):
     gateway_warmup_enabled: bool = True
     # P3 memory v1: only the data dir's memory-v1.json can enable it (additive tables).
     memory_v1_enabled: bool = False
+    memory_embeddings_model: str = ""  # D23: empty = lexical only
     # M2 local model (Ollama on loopback). Opt-in per data dir (local-model.json); the
     # "credential" is a fixed loopback marker, not a secret (Ollama has no auth).
     local_model_enabled: bool = False

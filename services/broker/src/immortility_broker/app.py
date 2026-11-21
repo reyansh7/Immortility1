@@ -2072,6 +2072,21 @@ def apply_memory_flag(settings: Settings) -> None:
         return
     if isinstance(data, dict) and data.get("enabled") is True:
         settings.memory_v1_enabled = True
+    try:
+        embed = json.loads(
+            (settings.data_dir / "memory-embeddings.json").read_text(encoding="utf-8")
+        )
+    except (OSError, json.JSONDecodeError, UnicodeError):
+        return
+    model = embed.get("model", "nomic-embed-text") if isinstance(embed, dict) else None
+    if (
+        settings.memory_v1_enabled
+        and isinstance(embed, dict)
+        and embed.get("enabled") is True
+        and isinstance(model, str)
+        and re.fullmatch(r"[A-Za-z0-9._:-]{1,64}", model)
+    ):
+        settings.memory_embeddings_model = model
 
 
 POINTER_AUDIT_FIELDS = (
@@ -2257,7 +2272,12 @@ def create_app(
     if settings.memory_v1_enabled:
         from .memory_v1 import MemoryStore
 
-        engine.memory = MemoryStore(store.db)
+        embedder = None
+        if settings.memory_embeddings_model:
+            from .memory_embed import LoopbackEmbedder
+
+            embedder = LoopbackEmbedder(settings.memory_embeddings_model)
+        engine.memory = MemoryStore(store.db, embedder)
         engine.memory.import_confirmed_facts()
     engine.supervisor = supervisor  # diagnostics/benchmarks only; not an authority
     if supervisor is not None:

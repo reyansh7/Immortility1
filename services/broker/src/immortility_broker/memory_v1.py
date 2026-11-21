@@ -20,8 +20,12 @@ Write gating (the broker decides, never the content):
     category; stored ``quarantined`` if it looks like an instruction, else ``pending``.
 Only ``active`` rows are ever recalled into a prompt, and always labelled as data.
 
-Retrieval is hybrid lexical: FTS5 (porter stemming, bm25) fused with recency, confidence,
-category weight and project match. Vector embeddings are deferred (DECISIONS D12).
+Retrieval is hybrid: FTS5 (porter stemming, bm25) fused with recency, confidence, category
+weight and project match. When the optional local embedder is enabled (D23,
+``memory-embeddings.json``) a cosine similarity from a loopback-only Ollama embedding model is
+fused in too, so paraphrases without shared words are found; without it, or whenever it fails,
+retrieval is exactly the lexical v1 path. Vectors exist only for active rows and are removed
+with the row's content on delete/supersede.
 """
 
 from __future__ import annotations
@@ -35,6 +39,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from .contracts import BrokerError, uid
+from . import memory_embed
 from .memory import redact
 
 CATEGORIES = ("working", "episodic", "semantic", "procedural", "profile")
@@ -50,6 +55,12 @@ CATEGORY_WEIGHT = {
     "working": 0.7,
 }
 WORKING_TTL = timedelta(hours=2)
+# Cosine calibration for nomic-embed-text (D23, measured on the PC with
+# scripts/benchmark-memory-embeddings.py): expected pairs median 0.65, other pairs median
+# 0.47 / p95 0.54, best unrelated question 0.535. Below FLOOR contributes nothing; a row that
+# only matches semantically must reach MIN to be recalled at all.
+SEMANTIC_FLOOR = 0.50
+SEMANTIC_MIN = 0.56
 MAX_BODY = 500
 
 _INSTRUCTION = re.compile(
@@ -170,8 +181,9 @@ def looks_like_instruction(text: str) -> bool:
 class MemoryStore:
     """Memory v1 over an existing broker SQLite connection."""
 
-    def __init__(self, db: sqlite3.Connection):
+    def __init__(self, db: sqlite3.Connection, embedder: Any = None):
         self.db = db
+        self.embedder = embedder
         with self.db:
             self.db.executescript(
                 """
@@ -212,6 +224,13 @@ class MemoryStore:
             raise BrokerError(
                 "memory_unavailable", "Local full-text search is unavailable.", 503
             ) from error
+        if embedder is not None:
+            with self.db:
+                self.db.execute(
+                    "CREATE TABLE IF NOT EXISTS memory_items_vec("
+                    "memory_id TEXT PRIMARY KEY, model TEXT NOT NULL, dim INTEGER NOT NULL, "
+                    "vec BLOB NOT NULL)"
+                )
 
     # ---------------------------------------------------------------- writes
     def write(
@@ -322,6 +341,7 @@ class MemoryStore:
         provenance = {**item["provenance"], "confirmed_from": item["source"]}
         with self.db:
             self.db.execute("DELETE FROM memory_items WHERE id=?", (memory_id,))
+            self._drop_vector(memory_id)
         result = self.write(
             item["body"],
             category=item["category"],
@@ -360,6 +380,7 @@ class MemoryStore:
         item = self.get(memory_id)
         with self.db:
             self.db.execute("DELETE FROM memory_items_fts WHERE memory_id=?", (memory_id,))
+            self._drop_vector(memory_id)
             self.db.execute(
                 "UPDATE memory_items SET status='deleted', body='', body_key='', subject='', "
                 "provenance='{}', updated=? WHERE id=?",
@@ -396,7 +417,8 @@ class MemoryStore:
                 (slot[0], project_id),
             ).fetchall()
         if not rows:
-            hits = self.search(text, project_id=project_id, limit=1, touch=False)
+            # Lexical only: a paraphrase match must never be enough to delete something.
+            hits = self.search(text, project_id=project_id, limit=1, touch=False, semantic=False)
             rows = [{"id": hits[0]["id"]}] if hits and hits[0]["score"] > 0.5 else []
         return [self.delete(str(row["id"])) for row in rows]
 
@@ -429,25 +451,39 @@ class MemoryStore:
         categories: tuple[str, ...] | None = None,
         limit: int = 5,
         touch: bool = True,
+        semantic: bool = True,
     ) -> list[dict[str, Any]]:
         terms = sorted(tokens(query))[:12]
-        if not terms:
-            return []
-        match = " OR ".join(f'"{t}"' for t in terms)
-        try:
-            rows = self.db.execute(
-                "SELECT m.*, bm25(memory_items_fts) AS rank FROM memory_items_fts f "
-                "JOIN memory_items m ON m.id=f.memory_id WHERE memory_items_fts MATCH ? "
-                "AND m.status='active' ORDER BY rank LIMIT 64",
-                (match,),
-            ).fetchall()
-        except sqlite3.OperationalError:
+        lexical_rank: dict[str, float] = {}
+        rows: dict[str, dict[str, Any]] = {}
+        if terms:
+            match = " OR ".join(f'"{t}"' for t in terms)
+            try:
+                for row in self.db.execute(
+                    "SELECT m.*, bm25(memory_items_fts) AS rank FROM memory_items_fts f "
+                    "JOIN memory_items m ON m.id=f.memory_id WHERE memory_items_fts MATCH ? "
+                    "AND m.status='active' ORDER BY rank LIMIT 64",
+                    (match,),
+                ).fetchall():
+                    item = dict(row)
+                    lexical_rank[item["id"]] = item.pop("rank")
+                    rows[item["id"]] = item
+            except sqlite3.OperationalError:
+                pass
+        similarity = self._similar(query) if semantic else {}
+        for memory_id, cosine in similarity.items():
+            if memory_id not in rows and cosine >= SEMANTIC_MIN:
+                row = self.db.execute(
+                    "SELECT * FROM memory_items WHERE id=? AND status='active'", (memory_id,)
+                ).fetchone()
+                if row is not None:
+                    rows[memory_id] = dict(row)
+        if not rows:
             return []
         now = datetime.now(timezone.utc)
         query_tokens = set(terms)
         scored = []
-        for row in rows:
-            item = dict(row)
+        for item in rows.values():
             if item["project_id"] and item["project_id"] != project_id:
                 continue  # another project's memory never leaks into this one
             if item["category"] == "working" and (
@@ -457,7 +493,8 @@ class MemoryStore:
                 continue
             if categories and item["category"] not in categories:
                 continue
-            lexical = 1.0 / (1.0 + math.exp(item["rank"] + 2.0))  # bm25 is negative-better
+            rank = lexical_rank.get(item["id"])
+            lexical = 0.0 if rank is None else 1.0 / (1.0 + math.exp(rank + 2.0))
             overlap = len(tokens(item["body"]) & query_tokens) / max(1, len(query_tokens))
             age_days = max(
                 0.0,
@@ -467,18 +504,22 @@ class MemoryStore:
                 / 86400,
             )
             recency = math.exp(-age_days / 90)
-            score = (
-                0.45 * lexical
-                + 0.35 * overlap
-                + 0.08 * recency
+            prior = (
+                0.08 * recency
                 + 0.07 * item["confidence"]
                 + 0.05 * CATEGORY_WEIGHT[item["category"]]
             )
+            if similarity:
+                cosine = similarity.get(item["id"], 0.0)
+                semantic = max(0.0, (cosine - SEMANTIC_FLOOR) / (1.0 - SEMANTIC_FLOOR))
+                score = 0.30 * lexical + 0.20 * overlap + 0.30 * semantic + prior
+                item["similarity"] = round(cosine, 4)
+            else:
+                score = 0.45 * lexical + 0.35 * overlap + prior
             if project_id and item["project_id"] == project_id:
                 score += 0.05
             item["score"] = round(score, 4)
             item["provenance"] = json.loads(item.pop("provenance") or "{}")
-            item.pop("rank", None)
             scored.append(item)
         scored.sort(key=lambda i: i["score"], reverse=True)
         chosen = scored[:limit]
@@ -489,6 +530,59 @@ class MemoryStore:
                     [(_now(), item["id"]) for item in chosen],
                 )
         return chosen
+
+    # ---------------------------------------------------------------- vectors (D23)
+    def _drop_vector(self, memory_id: str) -> None:
+        if self.embedder is not None:
+            self.db.execute("DELETE FROM memory_items_vec WHERE memory_id=?", (memory_id,))
+
+    def ensure_vectors(self, budget: int = 32) -> int:
+        """Embed up to ``budget`` active rows that have no vector for the current model."""
+        if self.embedder is None or not self.embedder.available():
+            return 0
+        model = self.embedder.model
+        with self.db:
+            # Vectors never outlive their row's active content.
+            self.db.execute(
+                "DELETE FROM memory_items_vec WHERE model<>? OR memory_id NOT IN "
+                "(SELECT id FROM memory_items WHERE status='active')",
+                (model,),
+            )
+        missing = self.db.execute(
+            "SELECT m.id, m.body, m.subject FROM memory_items m LEFT JOIN memory_items_vec v "
+            "ON v.memory_id=m.id WHERE m.status='active' AND v.memory_id IS NULL "
+            "ORDER BY m.updated DESC LIMIT ?",
+            (max(0, min(budget, 32)),),
+        ).fetchall()
+        if not missing:
+            return 0
+        vectors = self.embedder.embed(
+            [" ".join(filter(None, [r["body"], r["subject"]])) for r in missing]
+        )
+        if vectors is None:
+            return 0
+        with self.db:
+            self.db.executemany(
+                "INSERT OR REPLACE INTO memory_items_vec(memory_id, model, dim, vec) "
+                "VALUES(?,?,?,?)",
+                [(r["id"], model, len(v), memory_embed.pack(v)) for r, v in zip(missing, vectors)],
+            )
+        return len(missing)
+
+    def _similar(self, query: str) -> dict[str, float]:
+        if self.embedder is None or not query.strip():
+            return {}
+        self.ensure_vectors()
+        found = self.embedder.embed([query], query=True)
+        if not found:
+            return {}
+        q = found[0]
+        rows = self.db.execute(
+            "SELECT v.memory_id, v.vec FROM memory_items_vec v JOIN memory_items m "
+            "ON m.id=v.memory_id WHERE m.status='active' AND v.model=? AND v.dim=? LIMIT 5000",
+            (self.embedder.model, len(q)),
+        ).fetchall()
+        return {r["memory_id"]: memory_embed.dot(q, memory_embed.unpack(r["vec"])) for r in rows}
 
     def context_block(
         self, query: str, *, project_id: str = "", session_id: str = "", limit_chars: int = 900
@@ -507,7 +601,13 @@ class MemoryStore:
         rows = self.db.execute(
             "SELECT category, status, COUNT(*) AS n FROM memory_items GROUP BY category, status"
         ).fetchall()
-        return {f"{r['category']}.{r['status']}": r["n"] for r in rows}
+        out: dict[str, Any] = {f"{r['category']}.{r['status']}": r["n"] for r in rows}
+        if self.embedder is not None:
+            out["embeddings"] = {
+                **self.embedder.status(),
+                "vectors": self.db.execute("SELECT COUNT(*) FROM memory_items_vec").fetchone()[0],
+            }
+        return out
 
     # ---------------------------------------------------------------- user turns
     def capture_user_turn(
@@ -617,6 +717,7 @@ class MemoryStore:
 
     def _retire(self, memory_id: str, status: str, successor: str) -> None:
         self.db.execute("DELETE FROM memory_items_fts WHERE memory_id=?", (memory_id,))
+        self._drop_vector(memory_id)
         self.db.execute(
             "UPDATE memory_items SET status=?, superseded_by=?, updated=? WHERE id=?",
             (status, successor, _now(), memory_id),

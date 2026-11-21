@@ -33,3 +33,6 @@ Started M2/P0, 21 Nov 2026. Status: OPEN / FIXED / ACCEPTED. Times are IST.
 
 ## K27 — `pnpm check` failed after `git switch` on Windows (line endings) — FIXED on m2/build
 With `core.autocrlf=true` a fresh checkout writes CRLF; prettier's default `endOfLine: lf` then flags 19 files although the committed content is identical (`git diff main m2/build` empty, `--end-of-line auto` passes). Seen in the post-merge run on `main` (fa0da22). Fix: `apps/desktop/.prettierrc.json` `{ endOfLine: auto }` — no other formatting rule changes. `main` does not have the fix yet (no second merge without the owner).
+
+## K28 — Memory embedding call is synchronous inside the broker turn
+`MemoryStore.search` embeds the query with a blocking loopback call (≈40 ms warm). A cold Ollama model load can block the turn up to the 2 s timeout once, then the breaker skips embeddings for 60 s. Acceptable for a single-user broker; moving search to a worker thread needs a per-thread SQLite connection (next). Thresholds (`SEMANTIC_FLOOR 0.50`, `SEMANTIC_MIN 0.56`) were calibrated on a 15-memory synthetic set; the margin over the best unrelated question (0.535) is small — re-measure on real memory before turning it on by default.
