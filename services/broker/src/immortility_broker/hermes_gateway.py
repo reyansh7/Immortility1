@@ -584,7 +584,7 @@ class GatewaySupervisor:
 
         typed = bool(getattr(self.settings, "typed_tool_schemas_enabled", False))
         outputs = {
-            "clock.now.v1": {"timestamp": {}},
+            "clock.now.v1": {"timestamp": {}, "utc": {}, "local": {}},
             "arithmetic.multiply.v1": {"result": {}},
             "project.outline.v1": {},
         }

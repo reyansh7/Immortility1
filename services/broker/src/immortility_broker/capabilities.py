@@ -115,6 +115,8 @@ class EmptyInput(StrictModel):
 
 class ClockOutput(StrictModel):
     timestamp: str = Field(min_length=20, max_length=40)
+    utc: str | None = Field(default=None, min_length=20, max_length=40)
+    local: str | None = Field(default=None, min_length=8, max_length=96)
 
     @field_validator("timestamp")
     @classmethod

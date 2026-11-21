@@ -29,7 +29,13 @@ from .config import Settings
 from .contracts import BrokerError, TERMINAL, TaskRequest, uid
 from .delegation import apply_delegation_file, orchestrate, project_notes, save_delegation_file
 from .hermes import Hermes, runtime_check
-from .local_tools import AUTHORIZED, apply_local_tools_file, call_local_tool, save_local_tools_file
+from .local_tools import (
+    AUTHORIZED,
+    apply_local_tools_file,
+    call_local_tool,
+    clock_reading,
+    save_local_tools_file,
+)
 from .storage_audit import apply_laptop_file, defender_status, intent as laptop_intent
 from .storage_audit import render as render_storage
 from .storage_audit import resource_summary
@@ -422,7 +428,8 @@ class Engine:
 
         async def clock(arguments: dict[str, Any]) -> dict[str, Any]:
             del arguments
-            return {"timestamp": call_local_tool("clock", settings.local_tools_enabled)["result"]}
+            call_local_tool("clock", settings.local_tools_enabled)  # authorization gate
+            return clock_reading()
 
         async def public_research(arguments: dict[str, Any]) -> dict[str, Any]:
             task_id = self.active
@@ -1282,7 +1289,11 @@ class Engine:
                 text = (
                     f"{arguments['a']} + {arguments['b']} = {answer['result']}"
                     if name == "arithmetic.add.v1"
-                    else "UTC time: " + answer["timestamp"]
+                    else (
+                        "Local time: " + answer["local"]
+                        if answer.get("local")
+                        else "UTC time: " + answer["timestamp"]
+                    )
                 )
                 self.store.event(task_id, "message.delta", {"text": text})
                 self.store.state(task_id, "verifying")
