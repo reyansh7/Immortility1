@@ -1136,7 +1136,9 @@ class Engine:
             and not approved
             and not edit
             and not delegate
-            and not voice
+            # D20: a tool-free spoken turn on the local model skips the per-task Hermes
+            # spawn (~7 s); cloud voice turns keep the reviewed Hermes path.
+            and (not voice or self.model_selection.mode == "local_qwen")
         )
         if simple_chat:
             offer = self.registry.choose(

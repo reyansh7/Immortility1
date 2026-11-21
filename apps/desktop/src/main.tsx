@@ -36,6 +36,7 @@ import {
 import { FlatFace } from "./face/FlatFace";
 import { MotionProvider } from "./ui/motion";
 import { Icon } from "./ui/Icon";
+import { StatusHud } from "./ui/StatusHud";
 import { Overlay } from "./companion/Overlay";
 import type { View } from "./command/CommandCenter";
 
@@ -732,6 +733,16 @@ function App() {
         ? "Ready"
         : faceLabel[face]
       : presence;
+  const hud = (
+    <StatusHud
+      presence={presence}
+      connected={connected}
+      voiceState={health?.voice_state}
+      screenReading={screenReading}
+      pointer={live?.pointer}
+      route={health?.model_selection?.mode}
+    />
+  );
   const tip = `Immortility · ${stateLabel}. Click for chat, double-click for the command center, right-click for more.`;
 
   return (
@@ -880,6 +891,7 @@ function App() {
                 </button>
               </div>
             </header>
+            {hud}
             {prefs.cloudChat === undefined && !localOnly && !fixtureChat && (
               <div className="onboarding" role="region" aria-label="Cloud chat">
                 <p>
@@ -977,6 +989,7 @@ function App() {
               onQuickChat={() => void changeMode("chat")}
               chat={messages}
               composer={composer(true)}
+              hud={hud}
               voice={
                 localOnly ? (
                   <p className="hint">

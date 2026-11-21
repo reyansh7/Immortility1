@@ -111,6 +111,8 @@ export interface CommandCenterProps {
   onQuickChat: () => void;
   chat: ReactNode;
   composer: ReactNode;
+  /** Live status strip (system, mic, screen, cursor, model). */
+  hud?: ReactNode;
   settings: ReactNode;
   memory: ReactNode;
   voice: ReactNode;
@@ -1024,6 +1026,7 @@ export default function CommandCenter(props: CommandCenterProps) {
           })}
         </span>
         <span className="badge">Free</span>
+        {props.hud}
         <span className="drag-zone" aria-hidden="true" />
         <div className="window-buttons">
           <MagneticButton
