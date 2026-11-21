@@ -43,6 +43,13 @@ export function ModelHubView({
   const selection = catalog.selection;
   const local =
     selection.mode === "local_qwen" || selection.mode === "local_heretic";
+  // D17: the broker lists the loopback Qwen route only when it is enabled.
+  const localQwen = catalog.models.find(
+    (model) => model.provider === "local" && !model.blocked_reason,
+  );
+  const cloudModels = catalog.models.filter(
+    (model) => model.provider !== "local",
+  );
   return (
     <section aria-label="Model Hub">
       <h3>Model Hub</h3>
@@ -70,16 +77,20 @@ export function ModelHubView({
                 mode,
                 route_id:
                   mode === "manual_cloud"
-                    ? (catalog.models[0]?.route_id ?? null)
+                    ? (cloudModels[0]?.route_id ?? null)
                     : null,
               });
             }}
           >
             <option value="auto_cloud">Auto — Cloud Primary</option>
-            <option value="manual_cloud" disabled={!catalog.models.length}>
+            <option value="manual_cloud" disabled={!cloudModels.length}>
               Manual Cloud
             </option>
-            <option value="local_qwen">Local Qwen — runtime unavailable</option>
+            <option value="local_qwen">
+              {localQwen
+                ? "Local Qwen — on this PC"
+                : "Local Qwen — runtime unavailable"}
+            </option>
             <option value="local_heretic">
               Local Heretic — runtime unavailable
             </option>
@@ -95,7 +106,7 @@ export function ModelHubView({
                 onSelect({ mode: "manual_cloud", route_id: event.target.value })
               }
             >
-              {catalog.models.map((model) => (
+              {cloudModels.map((model) => (
                 <option key={model.route_id} value={model.route_id}>
                   {model.provider} · {model.model}
                   {model.blocked_reason ? " · blocked" : ""}
@@ -116,7 +127,12 @@ export function ModelHubView({
             This pins the OpenRouter free route. Its underlying model may vary.
           </p>
         )}
-      {local ? (
+      {selection.mode === "local_qwen" && localQwen ? (
+        <p role="status">
+          Answers come from {localQwen.model} on this PC (Ollama, loopback
+          only). Cloud inference and cloud fallback are blocked.
+        </p>
+      ) : local ? (
         <p role="status">
           Local language-model runtime is unavailable. Cloud inference and cloud
           fallback are blocked. No model is downloaded or started.

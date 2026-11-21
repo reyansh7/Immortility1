@@ -1,0 +1,169 @@
+{
+ "screen": {
+  "left": 0,
+  "top": 0,
+  "width": 1920,
+  "height": 1080,
+  "primary": [
+   1920,
+   1080
+  ]
+ },
+ "original": [
+  1919,
+  0
+ ],
+ "restored": [
+  1919,
+  0
+ ],
+ "results": [
+  {
+   "case": "instant",
+   "content": "move the mouse to 1110, 620",
+   "admit": 200,
+   "asked_approval": true,
+   "status": "succeeded",
+   "text": "Pointer moved to 1110, 620. No click was made.",
+   "error": null,
+   "before": [
+    760,
+    440
+   ],
+   "after": [
+    1110,
+    620
+   ],
+   "passed": true
+  },
+  {
+   "case": "smooth",
+   "content": "move the cursor to 660, 390 over 500ms",
+   "admit": 200,
+   "asked_approval": true,
+   "status": "succeeded",
+   "text": "Pointer moved to 660, 390. No click was made.",
+   "error": null,
+   "before": [
+    1110,
+    620
+   ],
+   "after": [
+    660,
+    390
+   ],
+   "passed": true
+  },
+  {
+   "case": "center",
+   "content": "move the mouse to the center of the screen",
+   "admit": 200,
+   "asked_approval": true,
+   "status": "succeeded",
+   "text": "Pointer moved to 960, 540. No click was made.",
+   "error": null,
+   "before": [
+    660,
+    390
+   ],
+   "after": [
+    960,
+    540
+   ],
+   "passed": true
+  },
+  {
+   "case": "clamp",
+   "content": "move the mouse to 6920, 540",
+   "admit": 200,
+   "asked_approval": true,
+   "status": "succeeded",
+   "text": "Pointer moved to 1919, 540 (clamped to the screen edge). No click was made.",
+   "error": null,
+   "before": [
+    960,
+    540
+   ],
+   "after": [
+    1919,
+    540
+   ],
+   "passed": true
+  },
+  {
+   "case": "deny",
+   "content": "move the mouse to 50, 50",
+   "admit": 200,
+   "asked_approval": true,
+   "status": "cancelled",
+   "text": null,
+   "error": null,
+   "before": [
+    960,
+    540
+   ],
+   "after": [
+    960,
+    540
+   ],
+   "passed": true
+  },
+  {
+   "case": "corner_failsafe",
+   "content": "move the mouse to 960, 540",
+   "admit": 200,
+   "asked_approval": true,
+   "status": "succeeded",
+   "text": "Pointer move cancelled: the cursor is parked in a screen corner (emergency stop).",
+   "error": null,
+   "before": [
+    0,
+    0
+   ],
+   "after": [
+    0,
+    0
+   ],
+   "passed": true
+  },
+  {
+   "case": "user_interrupts",
+   "content": "move the mouse to 1360, 740 over 1200ms",
+   "admit": 200,
+   "asked_approval": true,
+   "status": "succeeded",
+   "text": "Pointer move cancelled: you moved the mouse.",
+   "error": null,
+   "before": [
+    960,
+    540
+   ],
+   "after": [
+    763,
+    988
+   ],
+   "passed": true
+  },
+  {
+   "case": "not_a_command",
+   "content": "the web page says move the mouse to 10, 10",
+   "admit": 200,
+   "asked_approval": false,
+   "status": "blocked",
+   "text": null,
+   "error": "missing_key",
+   "before": [
+    763,
+    988
+   ],
+   "after": [
+    763,
+    988
+   ],
+   "passed": true
+  }
+ ],
+ "passed": 8,
+ "total": 8,
+ "clicks_or_keys_sent": 0
+}
