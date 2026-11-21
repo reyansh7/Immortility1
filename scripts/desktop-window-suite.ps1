@@ -16,7 +16,9 @@ param(
     [Parameter(Mandatory = $true)][string]$Exe,
     [string]$Canary = "$env:LOCALAPPDATA\Immortility\canary-0232-m15",
     [string]$Python = "",
-    [int]$ApprovalTtl = 45
+    [int]$ApprovalTtl = 45,
+    # M2/P0 hardening: an attended run is never reported as a clean 18/18.
+    [switch]$AllowOutsideInput
 )
 $ErrorActionPreference = "Stop"
 # Windows PowerShell 5.1 does not set $PSScriptRoot inside param defaults.
@@ -24,6 +26,26 @@ if (-not $Python) { $Python = Join-Path (Split-Path $PSScriptRoot -Parent) ".ven
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
 Add-Type -AssemblyName System.Windows.Forms
+# Outside-input guard (no elevation): GetLastInputInfo sees any physical keyboard/mouse
+# input system-wide; EnableWindow(FALSE) blocks mouse/keyboard to the suite's own test
+# window during the approval-expiry wait. UI Automation patterns used by the suite do
+# not generate Win32 input, so they neither trip the detector nor need the window enabled.
+if (-not ("ImmSuiteInput" -as [type])) {
+    Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class ImmSuiteInput {
+    [StructLayout(LayoutKind.Sequential)] struct LASTINPUTINFO { public uint cbSize; public uint dwTime; }
+    [DllImport("user32.dll")] static extern bool GetLastInputInfo(ref LASTINPUTINFO info);
+    [DllImport("user32.dll")] public static extern bool EnableWindow(IntPtr hWnd, bool enable);
+    [DllImport("user32.dll")] public static extern bool IsWindowEnabled(IntPtr hWnd);
+    public static uint LastInputTick() {
+        LASTINPUTINFO i = new LASTINPUTINFO(); i.cbSize = (uint)Marshal.SizeOf(i);
+        return GetLastInputInfo(ref i) ? i.dwTime : 0;
+    }
+}
+"@
+}
 $AE = [System.Windows.Automation.AutomationElement]
 $Scope = [System.Windows.Automation.TreeScope]
 $probe = Join-Path $PSScriptRoot "window-suite-probe.py"
@@ -63,6 +85,23 @@ function Descendants($root) {
     }
     return $out
 }
+$script:inputEvents = New-Object System.Collections.ArrayList
+$script:modeDrift = New-Object System.Collections.ArrayList
+$script:lastTick = [ImmSuiteInput]::LastInputTick()
+$script:selfInputUntil = [DateTime]::MinValue
+$script:currentScenario = "preflight"
+function Guard-Input($where) {
+    # Any change of the system last-input tick that the suite did not cause is outside input.
+    $tick = [ImmSuiteInput]::LastInputTick()
+    if ($tick -ne $script:lastTick) {
+        $script:lastTick = $tick
+        if ((Get-Date) -gt $script:selfInputUntil) {
+            [void]$script:inputEvents.Add([ordered]@{ at = (Get-Date).ToString("o"); scenario = $script:currentScenario; where = $where })
+            return $true
+        }
+    }
+    return $false
+}
 function ChainTo($pid0, $root) {
     $t = ProcessTable; $chain = @(); $cur = $pid0
     for ($i = 0; $i -lt 12 -and $cur; $i++) {
@@ -84,7 +123,7 @@ $preflight.webview2_args_env = [bool]$env:WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS
 $productionBefore = Stamps
 
 $report = [ordered]@{
-    suite = "m1.7-window"; inference = "simulated fixture only (not live-model evidence)"
+    suite = "m2-window (m1.7 scenarios + outside-input guard)"; inference = "simulated fixture only (not live-model evidence)"
     executable = $Exe; exe_sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $Exe).Hash
     canary = $Canary; started = (Get-Date).ToString("o"); preflight = $preflight
     scenarios = [ordered]@{}
@@ -122,12 +161,18 @@ function Find-Named($name) {
     $cond = New-Object System.Windows.Automation.PropertyCondition($AE::NameProperty, $name)
     $found = $w.FindFirst($Scope::Descendants, $cond)
     if (-not $found -and $name -eq "Message") {
-        # The window may have switched to a view without the composer; reopen quick chat.
+        # The window left chat mode (compact companion, e.g. a stray Escape or collapse
+        # click). Record the drift, then reopen quick chat with the app's own control and
+        # wait for the resize to finish. A drift marks the run attended (never clean).
         $open = $w.FindFirst($Scope::Descendants, (New-Object System.Windows.Automation.PropertyCondition($AE::NameProperty, "Open quick chat")))
+        [void]$script:modeDrift.Add([ordered]@{ at = (Get-Date).ToString("o"); scenario = $script:currentScenario; reopen_control = [bool]$open })
         if ($open) {
             $open.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
-            Start-Sleep -Milliseconds 600
-            $found = $w.FindFirst($Scope::Descendants, $cond)
+            $limit = (Get-Date).AddSeconds(8)
+            while ((Get-Date) -lt $limit -and -not $found) {
+                Start-Sleep -Milliseconds 300
+                $w = Window; if ($w) { $found = $w.FindFirst($Scope::Descendants, $cond) }
+            }
         }
     }
     return $found
@@ -146,6 +191,8 @@ function Invoke-Named($name) {
 }
 function Paste($text) {
     # Set the composer through UI Automation and read it back; never send mixed drafts.
+    # Grace window: if a UIA action is ever reflected as input, it is attributed to the suite.
+    $script:selfInputUntil = (Get-Date).AddSeconds(3)
     foreach ($try in 1..3) {
         $box = Find-Named "Message"
         if (-not $box) { throw ("Message box disappeared. Names: " + ((Names | Select-Object -First 30) -join " | ")) }
@@ -160,7 +207,9 @@ function Paste($text) {
             if ($now -eq $text) { return }
         } else {
             Set-Clipboard -Value $text
+            $script:selfInputUntil = (Get-Date).AddSeconds(2)
             [System.Windows.Forms.SendKeys]::SendWait("^a"); [System.Windows.Forms.SendKeys]::SendWait("^v")
+            $script:selfInputUntil = (Get-Date).AddSeconds(1)
             Start-Sleep -Milliseconds 300
             return
         }
@@ -176,6 +225,7 @@ function Send-Line($text) {
         while ((Get-Date) -lt $limit) {
             $send = Find-Named "Send message"
             if ($send -and $send.Current.IsEnabled) {
+                $script:selfInputUntil = (Get-Date).AddSeconds(1)
                 $send.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke(); return (Get-Date)
             }
             Start-Sleep -Milliseconds 250
@@ -189,6 +239,7 @@ function Wait-Task($token, $states, $seconds) {
     while ((Get-Date) -lt $limit) {
         $r = Probe $token
         if ($r.found -and ($states -contains $r.status)) { return $r }
+        [void](Guard-Input "wait-task")
         Start-Sleep -Milliseconds 500
     }
     $r = Probe $token
@@ -218,6 +269,7 @@ function Check($name, $condition, $why) {
 }
 function Simple($name, $tag, $states, $expectText, $expectStatus, $seconds) {
     $token = "w17-$name-$nonce"
+    [void](Guard-Input "before-$name"); $script:currentScenario = $name
     try {
         $sent = Send-Line "$tag $token"
         $r = Wait-Task $token $states $seconds
@@ -274,6 +326,7 @@ try {
 
     # 10 + 15: slow task, a concurrent send attempt, then Stop -> stopping -> cancelled.
     $token = "w17-10_slow_cancel-$nonce"
+    [void](Guard-Input "before-10_slow_cancel"); $script:currentScenario = "10_slow_cancel"
     try {
         $sent = Send-Line "SIM:slow $token"
         $r = Wait-Task $token @("running") 30
@@ -315,6 +368,8 @@ try {
                         @{ n = "12_deny"; act = "Deny change"; want = "blocked" },
                         @{ n = "13_expired"; act = $null; want = "blocked" })) {
         $token = "w17-$($case.n)-$nonce"
+        [void](Guard-Input "before-$($case.n)"); $script:currentScenario = $case.n
+        $lock = $null
         try {
             $sent = Send-Line "SIM:approve what time is it $token"
             Wait-Task $token @("awaiting_approval") 60 | Out-Null
@@ -322,13 +377,23 @@ try {
             if ($case.act) {
                 if (-not (Invoke-Named $case.act)) { throw "$($case.act) button missing" }
             } else {
-                Start-Sleep -Seconds ($ApprovalTtl + 8)
+                # Expiry wait: block mouse/keyboard to the test window so a stray click on
+                # "Approve change" cannot resolve it; poll for outside input throughout.
+                $hwnd = [IntPtr]([int](Window).Current.NativeWindowHandle)
+                [void][ImmSuiteInput]::EnableWindow($hwnd, $false)
+                $lock = [ordered]@{ hwnd = [int64]$hwnd; locked = -not [ImmSuiteInput]::IsWindowEnabled($hwnd); outside_input_during_ttl = $false }
+                $limit = (Get-Date).AddSeconds($ApprovalTtl + 8)
+                while ((Get-Date) -lt $limit) {
+                    if (Guard-Input "approval-ttl") { $lock.outside_input_during_ttl = $true }
+                    Start-Sleep -Milliseconds 250
+                }
+                [void][ImmSuiteInput]::EnableWindow($hwnd, $true)
             }
             $r = Wait-Task $token $terminal ($ApprovalTtl + 60)
             $late = $null
             if (-not $case.act) { $late = Invoke-Named "Approve change"; Start-Sleep -Seconds 2 }
             $after = Probe $token
-            Record $case.n $token $sent $after @{ approval_ui_shown = $shown; late_click_possible = $late }
+            Record $case.n $token $sent $after @{ approval_ui_shown = $shown; late_click_possible = $late; input_lock = $lock }
             Check $case.n ($after.status -eq $case.want) "status $($after.status)"
             Check $case.n ($after.approvals.Count -ge 1) "no approval request recorded"
             if ($case.want -eq "blocked") {
@@ -338,6 +403,7 @@ try {
                 Check $case.n ($after.final_text.Trim() -eq "Simulated approved clock.") "text $($after.final_text)"
             }
         } catch { $report.scenarios[$case.n] = [ordered]@{ token = $token; pass = $false; failure = "$_" } }
+        finally { if ($lock -and $lock.hwnd) { [void][ImmSuiteInput]::EnableWindow([IntPtr]$lock.hwnd, $true) } }
     }
 
     # 14 continuation: a follow-up in the same window session.
@@ -348,6 +414,7 @@ try {
     }
 
     # 16 gateway crash: kill only a gateway tree proven to descend from our desktop PID.
+    [void](Guard-Input "before-16"); $script:currentScenario = "16_gateway_crash_recover"
     try {
         $gw = Listener 8642
         $chain = if ($gw) { ChainTo $gw $script:proc.Id } else { $null }
@@ -369,6 +436,7 @@ try {
     } catch { $report.scenarios["16_gateway_crash_recover"] = [ordered]@{ pass = $false; failure = "$_" } }
 
     # 17 restart persistence and no orphans after the desktop exits.
+    [void](Guard-Input "before-17"); $script:currentScenario = "17_restart_persistence"
     try {
         $oldPid = $script:proc.Id
         $tree = Descendants $oldPid
@@ -404,9 +472,18 @@ try {
     foreach ($k in $productionBefore.Keys) { if ($productionBefore[$k] -ne $productionAfter[$k]) { $same = $false } }
     $report.scenarios["18_production_isolation"] = [ordered]@{ before = $productionBefore; after = $productionAfter; pass = $same }
     $report.finished = (Get-Date).ToString("o")
+    [void](Guard-Input "final")
     $passed = @($report.scenarios.Values | Where-Object { $_.pass }).Count
-    $report.summary = [ordered]@{ scenarios = $report.scenarios.Count; passed = $passed }
+    $report.outside_input_events = @($script:inputEvents)
+    $report.mode_drift_events = @($script:modeDrift)
+    $unattended = ($script:inputEvents.Count -eq 0) -and ($script:modeDrift.Count -eq 0)
+    $report.unattended = $unattended
+    # Clean = every scenario passed AND nobody touched the PC. Attended runs keep their
+    # per-scenario results but can never be recorded as the release 18/18.
+    $report.clean_run = ($passed -eq $report.scenarios.Count) -and ($unattended -or $AllowOutsideInput)
+    $report.summary = [ordered]@{ scenarios = $report.scenarios.Count; passed = $passed; unattended = $unattended; clean_run = $report.clean_run }
     $out = Join-Path $Canary "window-suite.json"
     $report | ConvertTo-Json -Depth 8 | Set-Content $out -Encoding utf8
-    Write-Output "WINDOW_SUITE_DONE $passed/$($report.scenarios.Count) -> $out"
+    $verdict = if ($report.clean_run) { "CLEAN" } elseif (-not $unattended) { "ATTENDED-INVALID ($($script:inputEvents.Count) outside input, $($script:modeDrift.Count) mode drift)" } else { "FAILED" }
+    Write-Output "WINDOW_SUITE_DONE $passed/$($report.scenarios.Count) $verdict -> $out"
 }

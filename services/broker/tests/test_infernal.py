@@ -129,3 +129,47 @@ async def test_broken_worker_pipe_is_reaped_and_meter_cleared(tmp_path, monkeypa
         assert voice.infernal_process is None and voice.level == 0
     finally:
         store.db.close()
+
+
+@pytest.mark.asyncio
+async def test_reap_failure_does_not_mask_broken_pipe_or_leave_meter(tmp_path, monkeypatch):
+    """M2/P0: a cleanup failure must not replace the original error or leak meter state."""
+    monkeypatch.setenv("IMMORTILITY_VOICE_DIR", str(tmp_path / "private"))
+    python = tmp_path / ".venv-infernal/Scripts/python.exe"
+    python.parent.mkdir(parents=True)
+    python.touch()
+    monkeypatch.setattr("immortility_broker.voice.ROOT", tmp_path)
+    store = Store(tmp_path / "state.db")
+    try:
+        voice = VoiceService(
+            Settings(_env_file=None, data_dir=tmp_path, infernal_voice_enabled=True),
+            store,
+            AsyncMock(),
+            AsyncMock(),
+        )
+        worker = Mock(returncode=None, pid=0)
+        worker.stdin.drain = AsyncMock(side_effect=BrokenPipeError)
+        worker.wait = AsyncMock(side_effect=TimeoutError)
+        voice.infernal_process = worker
+        voice.level = 0.7
+        with pytest.raises(BrokenPipeError):
+            await voice.worker("speak", voice="infernal", text="public test")
+        worker.kill.assert_called_once()
+        assert voice.infernal_process is None and voice.level == 0
+    finally:
+        store.db.close()
+
+
+@pytest.mark.asyncio
+async def test_reap_kills_owned_child_when_descendant_lookup_fails(monkeypatch):
+    from immortility_broker import process_owner
+
+    def broken_lookup(_root: int) -> None:
+        raise OSError("toolhelp snapshot failed")
+
+    monkeypatch.setattr(process_owner, "_terminate_descendants", broken_lookup)
+    child = Mock(returncode=None, pid=4242)
+    child.wait = AsyncMock(return_value=1)
+    await process_owner.reap(child, None)
+    child.kill.assert_called_once()
+    child.wait.assert_awaited_once()

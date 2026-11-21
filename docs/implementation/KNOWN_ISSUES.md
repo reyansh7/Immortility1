@@ -1,0 +1,18 @@
+# Known issues register (living)
+
+Started M2/P0, 21 Nov 2026. Status: OPEN / FIXED / ACCEPTED. Times are IST.
+
+| # | Issue | Severity | Status | Notes / next action |
+|---|---|---|---|---|
+| K1 | `test_infernal::test_broken_worker_pipe_is_reaped_and_meter_cleared` failed since 6084fb6 | Medium (real leak path) | **FIXED (M2/P0)** | Root cause: `reap()` called `_terminate_descendants()` before `process.kill()`; any lookup failure skipped the kill (leaking the owned child) and the cleanup exception replaced the caller's original error; `_stop_infernal` left the meter non-zero. Fix: kill always runs in `finally`, cleanup errors cannot mask the original failure, meter cleared in `finally`. Test unchanged; 2 regression tests added. |
+| K2 | Window suite 18/18 not recorded on the current build | Release blocker | OPEN (owner) | Needs ~10 min uninterrupted desktop. Suite hardened (input lock during expiry, outside-input detector, compact-mode recovery). See `WINDOW_SUITE_PROCEDURE.md`. |
+| K3 | `mypy services/broker/src`: 50 errors in 4 files (app.py 31, hermes_gateway.py 16, direct_chat.py 2, simulated.py 1) | Low (typing debt) | OPEN | Pre-existing; none in M2-changed regions. `scripts/check.ps1` therefore fails at the mypy step. Fix in a typing pass; not hidden. |
+| K4 | `ruff format --check`: 14 broker files not formatted | Low | OPEN | Pre-existing (M1.7 "ruff clean" referred to `ruff check` only). M2 files are formatted. |
+| K5 | Production broker runs from the repo working tree (`spawn_broker` uses `<repo>\.venv` + `services/broker/src`) | Medium (process) | ACCEPTED, documented | Whatever branch is checked out is what the production exe runs. M2 broker changes are inert in production (warm-gateway path is flag-off there), but to pin production to M1.7 exactly: `git switch m1.7/release-hardening`. Long-term: P10 installer ships a frozen broker. |
+| K6 | 4 Windows cache files tracked under a literal `%SystemDrive%/ProgramData/...` folder in git | Low (repo hygiene) | OPEN (owner decision) | An unexpanded env var created a folder in the repo. Removing them is a deletion → not done without approval. Proposed: `git rm --cached` + `.gitignore`. |
+| K7 | Cold first turn ≈3.9 s on the warm gateway (Hermes agent init) | Medium (latency) | OPEN | P1/P2: broker-issued warm-up turn after gateway readiness; measure. |
+| K8 | Shared warm gateway key not bound to a Hermes run | High (authorization) | **FIXED in canary path (M2/P1)** | Per-task HMAC run binding sent as Hermes ephemeral `instructions`; broker refuses warm-key inference without the active binding and refuses warm-key tool calls the broker did not relay in this run. Tests: `test_m2_run_binding.py`. Still needs the offline gateway benchmark + window suite for end-to-end evidence. |
+| K9 | Live provider eligibility unknown (Groq/Gemini/NVIDIA quota, billing, data-use) | Release blocker for live pilot | OPEN (owner) | See `PROVIDER_READINESS_M2.md`. No live calls made. |
+| K10 | Hermes 0.23.3 is official (verified) but the canary still runs 0.23.2 | Medium | OPEN | 1,657 commits / 370 PRs since 0.23.2 (release notes). Install only into a new isolated `canary-0233-*` dir and rerun the M1.7/M2 regression before any switch. |
+| K11 | Repo, `.venv*`, `.cache`, `node_modules`, Rust `target` all live inside OneDrive | Medium (sync churn, lock errors) | OPEN (owner decision) | Proposal in `DECISIONS.md` D6. Not moved (would change the production layout). |
+| K12 | Real tool success on providers is unmeasured since Phase 0 (2 of 6 verified tool rows in prod DB) | High | OPEN | P1/P2 benchmark needs live calls → blocked on owner approval + budget. |

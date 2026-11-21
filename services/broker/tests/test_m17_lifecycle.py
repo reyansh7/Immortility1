@@ -523,6 +523,12 @@ async def test_denied_or_expired_approval_never_reaches_hermes(tmp_path, outcome
             assert call.status_code == 403
         resolved = next(e["data"] for e in store.events(tid) if e["type"] == "approval.resolved")
         assert resolved["decision"] == outcome
+        # M2/P0: the audit trail attributes who resolved it and when.
+        expected_source = "expiry_timer" if outcome == "expired" else "approval_endpoint"
+        assert resolved["source"] == expected_source
+        assert isinstance(resolved["decided_after_ms"], int) and resolved["decided_after_ms"] >= 0
+        if outcome == "expired":
+            assert resolved["decided_after_ms"] >= 400
     finally:
         store.db.close()
 

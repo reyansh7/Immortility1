@@ -465,15 +465,20 @@ class VoiceService:
                         return dict(frame)
             raise BrokerError("voice_worker_lost", "INFERNAL worker exited before completion.")
         except BaseException:
-            await self._stop_infernal()
+            # Cleanup must not replace the original failure (broken pipe, timeout,
+            # cancellation). The worker reference and meter are cleared regardless.
+            with contextlib.suppress(Exception):
+                await self._stop_infernal()
             raise
 
     async def _stop_infernal(self) -> None:
         process, self.infernal_process = self.infernal_process, None
         owner, self.infernal_owner = self.infernal_owner, None
-        if process is not None:
-            await reap(process, owner)
-        self.level = 0.0
+        try:
+            if process is not None:
+                await reap(process, owner)
+        finally:
+            self.level = 0.0
 
     async def stop_worker(self) -> None:
         if self.reference_warm and not self.reference_warm.done():

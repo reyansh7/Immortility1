@@ -1702,6 +1702,7 @@ class Engine:
             "tool_call_id": call_id,
             "capability": capability,
             "digest": digest,
+            "opened": time.monotonic(),
             "expires": time.monotonic() + self.approval_ttl,
             "future": asyncio.get_running_loop().create_future(),
         }
@@ -1753,6 +1754,13 @@ class Engine:
                 "request_id": pending["request_id"],
                 "tool_call_id": pending["tool_call_id"],
                 "capability": pending["capability"],
+                # Attribution for audits: how long after the request it was decided, and
+                # whether the broker's expiry timer (not a caller) produced the outcome.
+                "decided_after_ms": round(
+                    1000 * (time.monotonic() - pending.get("opened", time.monotonic()))
+                ),
+                "ttl_s": self.approval_ttl,
+                "source": "expiry_timer" if outcome == "expired" else "approval_endpoint",
             },
         )
         if outcome == "approve":

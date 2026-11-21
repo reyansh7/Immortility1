@@ -1,6 +1,7 @@
 """Owned Windows process trees. A job is a cleanup boundary, NOT an OS sandbox."""
 
 import asyncio
+import contextlib
 import ctypes
 import os
 import subprocess
@@ -329,8 +330,15 @@ async def reap(process: asyncio.subprocess.Process, owner: ProcessOwner | None) 
         elif process.returncode is None:
             # No second job is available when this process already inherited one.
             # Stop only descendants of the process we created, then that process.
-            _terminate_descendants(process.pid)
-            process.kill()
+            # A failed descendant lookup must never stop us from killing the exact
+            # child we own (that would leak it and mask the caller's original error).
+            try:
+                _terminate_descendants(process.pid)
+            except Exception:  # noqa: BLE001 - best effort; the owned child is killed below
+                pass
+            finally:
+                with contextlib.suppress(ProcessLookupError):
+                    process.kill()
         await asyncio.wait_for(
             process.wait(), max(0.001, deadline - asyncio.get_running_loop().time())
         )
