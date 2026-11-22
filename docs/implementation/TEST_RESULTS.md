@@ -172,6 +172,8 @@ Earlier attempts found real defects, all fixed before the passing run: (1) K29 o
 | window suite (simulated fixture) | **18/18 CLEAN** - `m2-evidence/window-suite-rc2-0C01CD48.json` |
 | Explain this real window (live local Qwen) | **10/10**, read 4.3 s incl. 3 s countdown, answer 8.4 s (cold model load), usage `{local:1}` - `m2-evidence/explain-window-rc2-0C01CD48.json` |
 
+**Second local merge into main (owner t14s1), 05:31 IST**: preconditions main = fa0da22 with no unique commits except that merge; `git merge --no-ff m2/build` -> **c98ad22** (parents fa0da22 + bb4d3ba), tree identical to m2/build, not pushed. Re-verified on main: pytest **732 passed**, vitest **100/100**, `pnpm check` **pass** (K27 fixed on main), cargo test **13/13**, pinned-hash check 0 mismatches. Switched back to m2/build (production exe follows the checked-out tree, K5). m1.7/release-hardening = acf13fb, production exe 7A131F97... unchanged.
+
 ## Not run (by rule)
 
 - 18/18 desktop window suite: waiting for an owner-scheduled ~10 min uninterrupted session (`WINDOW_SUITE_PROCEDURE.md`).
