@@ -40,9 +40,10 @@ def test_stored_key_does_not_enable_optional_fallback(registry):
     value.settings.openrouter_fallback_enabled = False
     route = value.models[MODEL]
     assert value.rejection(route, Requirements()) == "optional_fallback_disabled"
-    for selection in [ModelSelection(), ModelSelection(mode="manual_cloud", route_id=MODEL)]:
-        with pytest.raises(BrokerError, match="route_unavailable"):
-            value.choose(selection, Requirements())
+    chosen = value.choose(ModelSelection(), Requirements())
+    assert chosen.provider == "groq" and chosen.model_id == "openai/gpt-oss-120b"
+    with pytest.raises(BrokerError, match="route_unavailable"):
+        value.choose(ModelSelection(mode="manual_cloud", route_id=MODEL), Requirements())
     assert "optional fallback disabled" in next(
         p["status"] for p in value.view()["providers"] if p["id"] == "openrouter"
     )

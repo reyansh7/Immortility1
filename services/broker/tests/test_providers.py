@@ -21,6 +21,8 @@ from immortility_broker.providers import (
     Requirements,
     compatible_request,
     credential_identity,
+    decide_route,
+    route_class,
     task_class,
     verify_dispatch,
 )
@@ -70,10 +72,14 @@ def test_model_hub_explains_provider_specific_missing_evidence_without_exposing_
     value, _ = registry
     view = value.view()
     statuses = {provider["id"]: provider["status"] for provider in view["providers"]}
-    assert "account-plan zero-cost evidence missing" in statuses["groq"]
-    assert "project/model-specific free-tier billing evidence missing" in statuses["gemini"]
-    assert "zero-cost production entitlement missing" in statuses["nvidia"]
+    assert "free-tier allowlist openai/gpt-oss-120b" in statuses["groq"]
+    assert "free-tier allowlist gemini-3.8-flash" in statuses["gemini"]
+    assert "free prototype allowlist nvidia/nemotron-3-ultra-550b-a55b" in statuses["nvidia"]
     assert "fresh preflight" in statuses["openrouter"]
+    routed = {item["task_class"]: item for item in view["routing"]}
+    assert routed["DEEP_REASONING"]["model_id"] == "nvidia/nemotron-3-ultra-550b-a55b"
+    assert routed["DEEP_REASONING"]["admitted"] is False
+    assert routed["FAST_CHAT"]["provider"] == "groq"
     assert all("fixture-" + provider not in json.dumps(view) for provider in PROVIDERS)
 
 
@@ -127,6 +133,76 @@ async def test_advertisement_or_key_cannot_prove_free_account_dispatch(registry,
     async with httpx.AsyncClient(transport=httpx.MockTransport(never)) as client:
         with pytest.raises(BrokerError, match="price_unverified"):
             await verify_dispatch(client, offer(registry, provider))
+
+
+async def test_allowlisted_free_models_skip_zero_price_proof_and_paid_models_stay_closed(registry):
+    registry, _ = registry
+
+    def never(_):
+        pytest.fail("A free-tier allowlist check must not call a provider")
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(never)) as client:
+        for provider, model in (
+            ("groq", "openai/gpt-oss-120b"),
+            ("gemini", "gemini-3.8-flash"),
+            ("nvidia", "nvidia/nemotron-3-ultra-550b-a55b"),
+        ):
+            route = registry.models[provider + "/" + model]
+            assert registry.rejection(route, Requirements(privacy="public")) is None
+            if provider == "gemini":
+                # Free-tier prompts may be used by Google: personal tasks never go there.
+                assert registry.rejection(route, Requirements()) == "privacy_ineligible"
+            else:
+                assert registry.rejection(route, Requirements()) is None
+            assert await verify_dispatch(client, route, key="fixture-" + provider) is None
+        paid = offer(
+            registry,
+            "nvidia",
+            route_id="nvidia/partner-priced-model",
+            model_id="partner-priced-model",
+        )
+        with pytest.raises(BrokerError, match="price_unverified"):
+            await verify_dispatch(client, paid, key="fixture-nvidia")
+
+
+def test_pace_selects_groq_or_gemini_without_a_classifier_call():
+    assert route_class("hello", []) == "FAST_CHAT"
+    assert route_class("hello", [], budget_mode="deep") == "DEEP_REASONING"
+    assert route_class("prove this theorem", [], budget_mode="fast") == "FAST_CHAT"
+    assert route_class("x" * 4000, []) == "RESEARCH"
+    assert route_class("what time is it", ["clock.now.v1"], budget_mode="fast") == "TOOL_EXECUTION"
+
+
+def test_free_tier_routes_by_task_and_falls_back_after_a_rate_limit(registry):
+    registry, _ = registry
+    assert (
+        registry.choose(ModelSelection(), Requirements(task_class="FAST_CHAT")).model_id
+        == "openai/gpt-oss-120b"
+    )
+    assert (
+        registry.choose(ModelSelection(), Requirements(task_class="DEEP_REASONING")).model_id
+        == "nvidia/nemotron-3-ultra-550b-a55b"
+    )
+    assert (
+        registry.choose(
+            ModelSelection(), Requirements(task_class="TOOL_EXECUTION", tools=True)
+        ).provider
+        == "groq"
+    )
+    registry.failure(registry.models["groq/openai/gpt-oss-120b"], 429, "30")
+    fallback = registry.choose(
+        ModelSelection(), Requirements(task_class="FAST_CHAT", privacy="public")
+    )
+    assert fallback.provider == "gemini" and fallback.model_id == "gemini-3.8-flash"
+    personal = registry.choose(ModelSelection(), Requirements(task_class="FAST_CHAT"))
+    assert personal.provider != "gemini"  # personal context never falls back to Gemini free tier
+    registry.failure(registry.models["nvidia/nvidia/nemotron-3-ultra-550b-a55b"], 429, "30")
+    deep_fallback = registry.choose(
+        ModelSelection(), Requirements(task_class="DEEP_REASONING", privacy="public")
+    )
+    assert deep_fallback.provider == "gemini" and deep_fallback.model_id == "gemini-3.8-flash"
+    personal_deep = registry.choose(ModelSelection(), Requirements(task_class="DEEP_REASONING"))
+    assert personal_deep.provider != "gemini"
 
 
 @pytest.mark.parametrize(
@@ -465,3 +541,40 @@ async def test_broker_task_uses_selected_route_and_shared_accounting(
     finally:
         await transport.aclose()
         app.state.store.db.close()
+
+
+def test_direct_routes_prefer_specialists_and_admit_nothing_by_default():
+    fast = decide_route(kind="FAST_CHAT", content="hello")
+    deep = decide_route(kind="DEEP_REASONING", content="plan the architecture")
+    coding = decide_route(kind="CODING", content="debug this refactor")
+    clock = decide_route(kind="TOOL_EXECUTION", content="what time is it", tools=True)
+    assert fast["model_id"] == "openai/gpt-oss-120b" and fast["admitted"] is False
+    assert "remaining quota is unverified" in fast["reason"]
+    assert deep["model_id"] == "nvidia/nemotron-3-ultra-550b-a55b"
+    assert "free prototype" in deep["reason"] and "not read" in deep["reason"]
+    assert coding["provider"] == "nvidia" and coding["fallback_used"] is False
+    assert clock["provider"] == "groq" and clock["paid_fallback"] is False
+    eligible = frozenset({"gemini-3.8-flash"})
+    fallback = decide_route(kind="FAST_CHAT", content="hello", eligible=eligible)
+    assert fallback["model_id"] == "gemini-3.8-flash" and fallback["fallback_used"] is True
+    pinned = decide_route(
+        kind="FAST_CHAT",
+        mode="manual_cloud",
+        manual_model="openai/gpt-oss-120b",
+        eligible=eligible,
+    )
+    assert pinned["model_id"] == "openai/gpt-oss-120b" and pinned["admitted"] is False
+    tool = decide_route(
+        kind="TOOL_EXECUTION",
+        content="debug the agentic tool",
+        tools=True,
+        eligible=eligible,
+    )
+    assert tool["model_id"] == "nvidia/nemotron-3-ultra-550b-a55b" and tool["admitted"] is False
+    private = decide_route(kind="FAST_CHAT", privacy="personal", eligible=eligible)
+    assert private["provider"] == "local" and private["admitted"] is False
+    offline = decide_route(kind="DEEP_REASONING", mode="local_heretic", local_ready=True)
+    assert offline["admitted"] is True and offline["model_id"].endswith("heretic")
+    assert "openrouter" not in json.dumps(
+        [fast, deep, coding, clock, fallback, pinned, tool, private, offline]
+    )

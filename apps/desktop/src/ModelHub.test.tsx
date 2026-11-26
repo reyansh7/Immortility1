@@ -121,4 +121,32 @@ describe("Model Hub policy presentation", () => {
       expect(html).not.toContain('aria-label="Cloud model"');
     },
   );
+  it("offers the local Qwen route when the broker lists it", () => {
+    const html = renderToStaticMarkup(
+      <ModelHubView
+        catalog={{
+          ...catalog,
+          selection: { mode: "local_qwen", route_id: null },
+          models: [
+            ...catalog.models,
+            {
+              route_id: "local/immortility-qwen3.5-4b",
+              provider: "local",
+              model: "immortility-qwen3.5-4b",
+              blocked_reason: null,
+              quota_remaining: null,
+              tools_qualification: "offline",
+            },
+          ],
+        }}
+        busy={false}
+        active={false}
+        onSelect={() => {}}
+      />,
+    );
+    expect(html).toContain("Local Qwen — on this PC");
+    expect(html).toContain("immortility-qwen3.5-4b on this PC");
+    expect(html).toContain("cloud fallback are blocked");
+    expect(html).not.toContain("No model is downloaded or started");
+  });
 });

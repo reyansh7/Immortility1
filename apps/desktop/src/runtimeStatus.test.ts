@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { followRuntimeStatus, type RuntimeStatus } from "./runtimeStatus";
+import {
+  followRuntimeStatus,
+  screenIndicator,
+  type RuntimeStatus,
+} from "./runtimeStatus";
 
 const snapshot = {
   revision: 0,
@@ -52,5 +56,26 @@ describe("read-only runtime subscription", () => {
       },
     );
     expect(calls).toBe(0);
+  });
+});
+
+describe("screen privacy indicator", () => {
+  it("shows only while the broker reports an active local read", () => {
+    expect(screenIndicator(snapshot)).toBeNull();
+    const idle = {
+      active: false,
+      kind: "",
+      reads: 3,
+      last_ms: 120,
+      last_source: "uia_text",
+      cloud: false as const,
+    };
+    expect(screenIndicator({ ...snapshot, screen_access: idle })).toBeNull();
+    expect(
+      screenIndicator({
+        ...snapshot,
+        screen_access: { ...idle, active: true, kind: "hover_target" },
+      }),
+    ).toBe("● Reading text under cursor (on this PC)");
   });
 });

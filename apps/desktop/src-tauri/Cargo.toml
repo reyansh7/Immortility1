@@ -4,6 +4,15 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.77.2"
 
+[features]
+# Tauri loads `devUrl` unless `custom-protocol` is on. It must not be a default
+# feature: `tauri dev` runs cargo without it (Vite on 1420), while `tauri build`
+# passes `--features tauri/custom-protocol` and embeds `frontendDist`. A plain
+# `cargo build --release` therefore needs `--features custom-protocol`
+# (see scripts/build-canary.ps1).
+default = []
+custom-protocol = ["tauri/custom-protocol"]
+
 [build-dependencies]
 tauri-build = { version = "=2.7.4", features = [] }
 

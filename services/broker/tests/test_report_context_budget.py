@@ -6,7 +6,7 @@ import json
 import pytest
 
 from immortility_broker.contracts import BrokerError
-from immortility_broker.ledger import input_upper_bound, prompt_byte_components
+from immortility_broker.ledger import fit_prompt, input_upper_bound, prompt_byte_components
 from immortility_broker.research import SOURCES, model_evidence
 
 
@@ -72,3 +72,17 @@ def test_prompt_components_match_reservation_without_emitting_content():
     assert sum(components.values()) == expected
     assert all(type(value) is int and value >= 0 for value in components.values())
     assert "CANARY" not in json.dumps(components)
+
+
+def test_oversized_history_is_trimmed_and_the_current_question_remains():
+    messages = [
+        {"role": "system", "content": "S" * 20000},
+        {"role": "user", "content": "old question " * 200},
+        {"role": "assistant", "content": "old answer " * 400},
+        {"role": "user", "content": "what model are you"},
+    ]
+    fitted = fit_prompt(messages, [], 8000)
+    assert sum(prompt_byte_components({"messages": fitted}).values()) <= 8000
+    assert fitted[-1]["content"] == "what model are you"
+    assert fitted[0]["role"] == "system"
+    assert "Required context exceeds task token budget." not in json.dumps(fitted)

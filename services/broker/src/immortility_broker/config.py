@@ -20,6 +20,13 @@ class Settings(BaseSettings):
     groq_api_key: SecretStr = SecretStr("")
     nvidia_api_key: SecretStr = SecretStr("")
     hermes_source: Path = Path.home() / "AppData/Local/hermes/hermes-agent"
+    # Off until the 0.23.2 gateway passes the live tool-selection gate.
+    hermes_0232_gateway: bool = False
+    # Which reviewed gateway pin to run. Only the canary flag file may select a candidate pin,
+    # and only inside a canary-* data directory (see hermes_gateway.GATEWAY_PINS).
+    hermes_gateway_version: str = "0.23.2"
+    # Environment cannot enable this. Only the canary file, applied after load, may.
+    simulated_inference: bool = False
     # A reviewed, tested release. Never silently follow upstream main.
     hermes_revision: str = "04b88a4c"
     data_dir: Path = ROOT / "data/dev"
@@ -31,6 +38,9 @@ class Settings(BaseSettings):
     # Specialists stay off until the user turns them on. Side-effect tools stay disabled.
     delegation_enabled: bool = False
     local_tools_enabled: bool = False
+    # Read-only profile scan and File Explorer reveal. Deletion stays off.
+    laptop_tools_enabled: bool = False
+    pointer_control_enabled: bool = False
     workspace_tools_enabled: bool = False
     project_read_enabled: bool = False
     workspace_root: Path | None = None
@@ -43,6 +53,16 @@ class Settings(BaseSettings):
     artifact_tools_enabled: bool = False
     # Experimental provider schema export; native MCP identity/grants are unchanged.
     typed_tool_schemas_enabled: bool = False
+    # Gateway path only: one locally answered warm-up run after readiness (K7).
+    gateway_warmup_enabled: bool = True
+    # P3 memory v1: only the data dir's memory-v1.json can enable it (additive tables).
+    memory_v1_enabled: bool = False
+    memory_embeddings_model: str = ""  # D23: empty = lexical only
+    # M2 local model (Ollama on loopback). Opt-in per data dir (local-model.json); the
+    # "credential" is a fixed loopback marker, not a secret (Ollama has no auth).
+    local_model_enabled: bool = False
+    local_model_id: str = "immortility-qwen3.5-4b"
+    local_model_key: SecretStr = SecretStr("")
     # No autorun/service install. Only explicit, local read workflows may recover.
     durable_workflows_enabled: bool = False
     local_only_mode: bool = False
@@ -64,6 +84,12 @@ class Settings(BaseSettings):
     @field_validator("code_execution_enabled", "experimental_qwen_tts", mode="before")
     @classmethod
     def execution_stays_off(cls, value: object) -> object:
+        del value
+        return False
+
+    @field_validator("simulated_inference", mode="before")
+    @classmethod
+    def simulated_stays_off(cls, value: object) -> object:
         del value
         return False
 

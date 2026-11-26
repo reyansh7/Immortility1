@@ -1,0 +1,6 @@
+# K29: hash-pinned runtime files (config/*-runtime.json) must be byte-exact on every
+# checkout. core.autocrlf rewrote them with CRLF after a branch switch, which broke the
+# pins and made the screen observer 'unavailable'. Never convert these.
+integrations/** -text
+config/observer-requirements.in -text
+config/observer-requirements.lock -text

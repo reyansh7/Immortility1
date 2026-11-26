@@ -83,7 +83,7 @@ def test_untrusted_incoming_definitions_never_override_approved_provider_schema(
         ],
     }
     result = inference_payload(raw, approved_capabilities=["arithmetic.add.v1"], typed_tools=True)
-    assert result["tools"] == [tool_spec(["arithmetic.add.v1"], typed=True)]
+    assert result["tools"] == [tool_spec(["arithmetic.add.v1"], typed=True, provider=True)]
     assert "MALICIOUS_SCHEMA_CANARY" not in json.dumps(result)
 
 
@@ -145,8 +145,9 @@ def test_phase_schema_keeps_authorized_history_without_exposing_previous_tool():
         schema_capabilities=["report.create.v1"],
     )
     assert payload["messages"][1]["tool_calls"][0]["id"] == "research:1"
+    assert payload["messages"][1]["tool_calls"][0]["function"]["name"] == "execute"
     assert payload["messages"][2]["content"] == "UNTRUSTED_SOURCE_CANARY"
-    assert payload["tools"] == [tool_spec(["report.create.v1"], typed=True)]
+    assert payload["tools"] == [tool_spec(["report.create.v1"], typed=True, provider=True)]
     with pytest.raises(BrokerError, match="tool_denied"):
         inference_payload(
             raw,

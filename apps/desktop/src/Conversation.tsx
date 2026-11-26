@@ -97,6 +97,12 @@ export function Approval({
   );
 }
 
+export function greeting(hour: number): string {
+  if (hour < 12) return "Good morning.";
+  if (hour < 18) return "Good afternoon.";
+  return "Good evening.";
+}
+
 export function Messages({
   tasks,
   transcripts,
@@ -140,25 +146,21 @@ export function Messages({
     >
       {!tasks.length && (
         <div className="welcome">
-          <span className="eyebrow">IMMORTILITY · HERMES</span>
-          <h1>What should we work on?</h1>
+          <span className="eyebrow">IMMORTILITY</span>
+          <h1>{greeting(new Date().getHours())}</h1>
+          <p>What can I help you with today?</p>
           <p>
             {localOnly
-              ? "Local background mode. Open Settings to run a local task; chat and voice need the desktop runtime."
+              ? "This window is attached to local tasks. Chat and voice use the desktop app."
               : ready
-                ? "A conversation with Hermes on a broker-authorized free route. Tools stay off unless you enable them in Settings."
-                : "No eligible cloud route is ready. Review provider status in Settings. A verified Hermes installation is also required."}
+                ? "Auto. A qualified free model is selected when you send."
+                : "Chat needs an admitted free-tier model. Saved keys stay unused until the broker admits one."}
           </p>
         </div>
       )}
       {tasks.map((task) => {
         const live = transcripts[task.task_id];
         const { status, text, notice } = taskOutcome(task, live);
-        const model = task.result
-          ? `${task.result.provider} · ${task.result.model}`
-          : task.input.no_cloud
-            ? "Local task · no cloud"
-            : "Hermes · route pending";
         return (
           <article key={task.task_id}>
             <div className="user-message">
@@ -166,9 +168,7 @@ export function Messages({
               <p>{task.input.content}</p>
             </div>
             <div className="assistant-message">
-              <small>
-                IMMORTILITY <span>{model}</span>
-              </small>
+              <small>IMMORTILITY</small>
               {text && (
                 <div
                   className={`answer ${terminal.has(status) ? "" : "streaming"}`}
@@ -279,10 +279,9 @@ export function Messages({
 export function Composer({
   input,
   setInput,
-  consent,
-  setConsent,
   running,
   canSend,
+  blockedReason,
   onSend,
   onStop,
   quickActions,
@@ -293,13 +292,14 @@ export function Composer({
   artifactConsent = false,
   setArtifactConsent,
   artifactsAvailable = false,
+  pace = "auto",
+  onPace,
 }: {
   input: string;
   setInput: (value: string) => void;
-  consent: boolean;
-  setConsent: (value: boolean) => void;
   running: boolean;
   canSend: boolean;
+  blockedReason?: string;
   onSend: () => void;
   onStop: () => void;
   quickActions?: boolean;
@@ -310,6 +310,8 @@ export function Composer({
   artifactConsent?: boolean;
   setArtifactConsent?: (value: boolean) => void;
   artifactsAvailable?: boolean;
+  pace?: "auto" | "fast" | "deep";
+  onPace?: (value: "auto" | "fast" | "deep") => void;
 }) {
   const send = useMagnetic<HTMLButtonElement>(0.35);
   const actions = [
@@ -331,8 +333,8 @@ export function Composer({
           <Icon name="sparkle" size={18} />
         </span>
         <textarea
-          aria-label="Message Hermes"
-          placeholder="Ask Immortility anything…"
+          aria-label="Message"
+          placeholder="Ask anything or give me a task..."
           maxLength={16000}
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -388,15 +390,25 @@ export function Composer({
             for this task · 2 model calls · no private history
           </label>
         )}
-        {!localOnly && (
-          <label className="consent">
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-            />
-            Send this conversation to the free cloud model
-          </label>
+        {onPace && (
+          <div className="pace" role="group" aria-label="Response pace">
+            {(
+              [
+                ["auto", "Auto"],
+                ["fast", "Instant"],
+                ["deep", "Deep"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={pace === value}
+                onClick={() => onPace(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         )}
         {quickActions && (
           <div className="quick-actions" aria-label="Prompt starters">
@@ -414,13 +426,9 @@ export function Composer({
           </div>
         )}
         <span className="hint">Enter to send · Shift+Enter for a new line</span>
-        {!canSend && !running && (
+        {!canSend && !running && blockedReason && (
           <p className="hint" role="status">
-            {localOnly
-              ? "Local background mode accepts local tasks only. Open Settings to run a local check."
-              : !consent
-                ? "Cloud text permission is off. Enable it to submit a chat question; local tools have separate permissions."
-                : "Chat is unavailable while its provider, runtime or voice turn is not ready."}
+            {blockedReason}
           </p>
         )}
       </div>

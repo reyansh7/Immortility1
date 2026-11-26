@@ -1,0 +1,82 @@
+{
+ "schema_version": "1.0",
+ "microphone_opened": false,
+ "audio_input": "synthetic_piper",
+ "inference": "live_local_qwen",
+ "cloud_calls": 0,
+ "turns": [
+  {
+   "question": "What is the capital of France?",
+   "fixture_render_ms": 3885,
+   "stt_ms": 2223,
+   "transcript": "What is the capital of France?",
+   "wer": 0.0,
+   "broker_ms": 658,
+   "status": "succeeded",
+   "provider": "local",
+   "reply": "The capital of France is Paris.",
+   "answer_ok": true,
+   "tts_render_ms": 14660,
+   "tts": {
+    "seconds": 2.5,
+    "rate": 24000,
+    "peak_dbfs": -10.0,
+    "rms_dbfs": -29.5,
+    "clipped_fraction": 0.0
+   },
+   "voice_to_audio_ms": 17541
+  },
+  {
+   "question": "Name one planet with rings.",
+   "fixture_render_ms": 3817,
+   "stt_ms": 1704,
+   "transcript": "Name one planet with rings.",
+   "wer": 0.0,
+   "broker_ms": 1169,
+   "status": "succeeded",
+   "provider": "local",
+   "reply": "Saturn is the most famous planet known for its prominent ring system. Other planets like Jupiter, Uranus, and Neptune also have rings, though they are less visible.",
+   "answer_ok": true,
+   "tts_render_ms": 17263,
+   "tts": {
+    "seconds": 8.93,
+    "rate": 24000,
+    "peak_dbfs": -11.0,
+    "rms_dbfs": -30.4,
+    "clipped_fraction": 0.0
+   },
+   "voice_to_audio_ms": 20136
+  },
+  {
+   "question": "How many days are in a week?",
+   "fixture_render_ms": 3877,
+   "stt_ms": 1813,
+   "transcript": "How many days are in a week?",
+   "wer": 0.0,
+   "broker_ms": 676,
+   "status": "succeeded",
+   "provider": "local",
+   "reply": "There are 7 days in a week.",
+   "answer_ok": true,
+   "tts_render_ms": 14333,
+   "tts": {
+    "seconds": 2.27,
+    "rate": 24000,
+    "peak_dbfs": -14.1,
+    "rms_dbfs": -29.5,
+    "clipped_fraction": 0.0
+   },
+   "voice_to_audio_ms": 16822
+  }
+ ],
+ "playback_cancel_ms": 5,
+ "worker_after_cancel": null,
+ "unavailable_output_rejected": true,
+ "summary": {
+  "answers_ok": 3,
+  "turns": 3,
+  "max_wer": 0.0,
+  "max_peak_dbfs": -10.0,
+  "median_voice_to_audio_ms": 17541
+ }
+}

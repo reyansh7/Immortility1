@@ -852,7 +852,9 @@
     "config/observer-requirements.lock": "992d6d4341a8f057bc2188ef4d2331588710f4b75a6abb362e605b579b1eb81d",
     "integrations/windows-observer/inspect_window.py": "05a6753b233dcf74998a9ea22ba640e4a5c014ce0705e191b5bd3a7e977f485d",
     "integrations/windows-observer/native_picker.py": "cc26875d1ac4c64ff15fa5589aa71b5341a35753a5680d05ebd1225150ea7d0d",
-    "integrations/windows-observer/scratch_window.py": "f09b3b10edac2af8ff4d186602340ff0628a2e5c81a28a29d457762838de3496"
+    "integrations/windows-observer/scratch_window.py": "f09b3b10edac2af8ff4d186602340ff0628a2e5c81a28a29d457762838de3496",
+    "integrations/windows-observer/ocr_crop.ps1": "9a4b3878435da36b4cd9dc28162b85a722c26172ba7054a2ce361031469e6013",
+    "integrations/windows-observer/screen_target.py": "45f3eeb3fc1a8138f8bb633f987ff37adb00d49dd8043f2412f8dc3ad3169e4f"
   },
   "excluded": [
     "bytecode",

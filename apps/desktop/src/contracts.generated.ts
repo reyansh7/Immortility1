@@ -4,6 +4,7 @@ export const statuses = [
   "queued",
   "running",
   "awaiting_approval",
+  "stopping",
   "verifying",
   "succeeded",
   "failed",

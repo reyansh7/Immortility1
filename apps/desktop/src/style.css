@@ -610,6 +610,26 @@ h3 {
   color: var(--gray);
   line-height: 1.7;
 }
+.onboarding {
+  margin: 0 16px 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #ffffff08;
+}
+.onboarding p {
+  margin: 0 0 10px;
+  color: var(--gray);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.settings details.advanced {
+  margin-top: 14px;
+}
+.settings details.advanced summary {
+  cursor: pointer;
+  font-weight: 600;
+}
 article {
   font-size: 13px;
   line-height: 1.65;
@@ -945,6 +965,20 @@ textarea::placeholder {
 }
 .composer-meta .hint {
   font-size: 10px;
+}
+.pace {
+  display: flex;
+  gap: 4px;
+}
+.pace button {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border-color: #ffffff1a;
+}
+.pace button[aria-pressed="true"] {
+  border-color: var(--energy);
+  color: var(--white);
 }
 .consent {
   display: flex;
@@ -2571,4 +2605,195 @@ button.node:hover:not(:disabled) {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   user-select: text;
+}
+
+.screen-indicator {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------------------
+   Status HUD (M2): system, mic, screen, cursor and model at a glance.
+   Text labels carry meaning; colour and the pulse only reinforce it.
+   ------------------------------------------------------------------------- */
+.status-hud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 12px 8px;
+  border-bottom: 1px solid var(--line);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.cc-top .status-hud {
+  border-bottom: 0;
+  padding: 0 4px;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow: hidden;
+}
+.hud-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(180deg, #ffffff08, #00000020);
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.hud-label {
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--gray);
+}
+.hud-value {
+  color: var(--muted);
+}
+.hud-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffffff26;
+  box-shadow: inset 0 0 0 1px #ffffff1a;
+  flex: none;
+}
+.hud-chip.level-on .hud-dot {
+  background: var(--ok);
+}
+.hud-chip.level-on .hud-value {
+  color: var(--white);
+}
+.hud-chip.level-live {
+  border-color: var(--line-red);
+  background: linear-gradient(180deg, #ff2b471f, #a60f2512);
+}
+.hud-chip.level-live .hud-value {
+  color: var(--white);
+  font-weight: 600;
+}
+.hud-chip.level-live .hud-dot {
+  background: var(--energy);
+  box-shadow: 0 0 8px var(--energy);
+  animation: hud-pulse 1.4s var(--ease) infinite;
+}
+.hud-chip.level-warn {
+  border-color: #ff5a5f55;
+}
+.hud-chip.level-warn .hud-dot {
+  background: var(--ember);
+}
+.hud-chip.level-warn .hud-value {
+  color: var(--ember);
+}
+@keyframes hud-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.7);
+    opacity: 0.55;
+  }
+}
+.reduced .hud-chip .hud-dot,
+.status-hud.compact .hud-dot {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-chip .hud-dot {
+    animation: none;
+  }
+}
+@media (max-width: 520px) {
+  .hud-chip:not(.level-live, .level-warn) .hud-value {
+    display: none;
+  }
+}
+/* In the command-center title bar the state pill already shows the system
+   state, so the HUD drops that chip and shows values only when they matter. */
+.cc-top .status-hud {
+  flex: 0 1 auto;
+}
+.cc-top .brand {
+  flex: none;
+}
+.cc-top .hud-system {
+  display: none;
+}
+@media (max-width: 1440px) {
+  .cc-top .hud-chip:not(.level-live, .level-warn) .hud-value {
+    display: none;
+  }
+}
+
+/* Explain this (D24): one-shot, previewed, local-only screen text explanation. */
+.explain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+}
+.explain-start {
+  border: 1px solid rgba(255, 70, 70, 0.35);
+  background: rgba(20, 12, 14, 0.7);
+  border-radius: 999px;
+  padding: 4px 12px;
+  letter-spacing: 0.02em;
+}
+.explain-start:disabled {
+  opacity: 0.45;
+}
+.explain-hint {
+  color: var(--muted, #9a9aa2);
+  font-size: 0.78rem;
+}
+.explain-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--text, #eee);
+}
+.explain-preview {
+  width: 100%;
+  border: 1px solid rgba(255, 70, 70, 0.4);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(16, 10, 12, 0.85);
+}
+.explain-preview blockquote {
+  margin: 6px 0 10px;
+  padding-left: 10px;
+  border-left: 2px solid rgba(255, 70, 70, 0.6);
+  max-height: 7.5em;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.explain-label {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted, #9a9aa2);
+}
+.explain-actions {
+  display: flex;
+  gap: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .explain * {
+    transition: none !important;
+  }
 }

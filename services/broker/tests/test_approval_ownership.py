@@ -125,8 +125,10 @@ async def test_fetch_cancellation_propagates(monkeypatch):
     from immortility_broker.web import research_page_async
 
     cancelled = asyncio.Event()
+    entered = asyncio.Event()
 
-    async def hung(url):
+    async def hung(url, **kwargs):
+        entered.set()
         try:
             await asyncio.sleep(60)
         finally:
@@ -134,7 +136,7 @@ async def test_fetch_cancellation_propagates(monkeypatch):
 
     monkeypatch.setattr("immortility_broker.web.fetch_json", hung)
     operation = asyncio.create_task(research_page_async("test"))
-    await asyncio.sleep(0)
+    await asyncio.wait_for(entered.wait(), 2)  # both sources now query in parallel
     operation.cancel()
     with pytest.raises(asyncio.CancelledError):
         await operation

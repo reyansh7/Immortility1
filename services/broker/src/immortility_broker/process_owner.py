@@ -1,6 +1,7 @@
 """Owned Windows process trees. A job is a cleanup boundary, NOT an OS sandbox."""
 
 import asyncio
+import contextlib
 import ctypes
 import os
 import subprocess
@@ -183,14 +184,161 @@ class ProcessOwner:
             self.handle = None
 
 
+def process_identity(pid: int) -> tuple[int, str] | None:
+    """Creation time (FILETIME ticks) and image path of a live process, or None.
+
+    The creation time distinguishes a recycled PID from the process we started.
+    """
+    if os.name != "nt" or pid <= 0:
+        return None
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel.GetProcessTimes.argtypes = [wintypes.HANDLE] + [ctypes.POINTER(wintypes.FILETIME)] * 4
+    kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+    kernel.QueryFullProcessImageNameW.argtypes = [
+        wintypes.HANDLE,
+        wintypes.DWORD,
+        wintypes.LPWSTR,
+        ctypes.POINTER(wintypes.DWORD),
+    ]
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    handle = kernel.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+    if not handle:
+        return None
+    try:
+        code = wintypes.DWORD()
+        if not kernel.GetExitCodeProcess(handle, ctypes.byref(code)) or code.value != 259:
+            return None  # STILL_ACTIVE is 259
+        times = [wintypes.FILETIME() for _ in range(4)]
+        if not kernel.GetProcessTimes(handle, *(ctypes.byref(item) for item in times)):
+            return None
+        created = (times[0].dwHighDateTime << 32) | times[0].dwLowDateTime
+        size = wintypes.DWORD(1024)
+        buffer = ctypes.create_unicode_buffer(1024)
+        image = ""
+        if kernel.QueryFullProcessImageNameW(handle, 0, buffer, ctypes.byref(size)):
+            image = buffer.value
+        return created, image
+    finally:
+        kernel.CloseHandle(handle)
+
+
+def _snapshot_children() -> dict[int, list[int]]:
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+    kernel.Process32FirstW.argtypes = [wintypes.HANDLE, ctypes.c_void_p]
+    kernel.Process32NextW.argtypes = [wintypes.HANDLE, ctypes.c_void_p]
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+
+    class Entry(ctypes.Structure):
+        _fields_ = [
+            ("size", wintypes.DWORD),
+            ("usage", wintypes.DWORD),
+            ("process_id", wintypes.DWORD),
+            ("heap", ctypes.c_size_t),
+            ("module_id", wintypes.DWORD),
+            ("threads", wintypes.DWORD),
+            ("parent", wintypes.DWORD),
+            ("priority", wintypes.LONG),
+            ("flags", wintypes.DWORD),
+            ("exe", wintypes.WCHAR * 260),
+        ]
+
+    snapshot = kernel.CreateToolhelp32Snapshot(2, 0)
+    children: dict[int, list[int]] = {}
+    if snapshot in {None, ctypes.c_void_p(-1).value}:
+        return children
+    entry = Entry()
+    entry.size = ctypes.sizeof(Entry)
+    try:
+        present = kernel.Process32FirstW(snapshot, ctypes.byref(entry))
+        while present:
+            children.setdefault(int(entry.parent), []).append(int(entry.process_id))
+            present = kernel.Process32NextW(snapshot, ctypes.byref(entry))
+    finally:
+        kernel.CloseHandle(snapshot)
+    return children
+
+
+def descendants(root: int) -> list[int]:
+    """Descendants of one process, excluding PIDs created before it (recycled parent IDs)."""
+    if os.name != "nt" or root <= 0:
+        return []
+    identity = process_identity(root)
+    floor = identity[0] if identity else None
+    children = _snapshot_children()
+    ordered: list[int] = []
+    pending = list(children.get(root, []))
+    while pending:
+        pid = pending.pop()
+        if pid == root or pid in ordered:
+            continue
+        found = process_identity(pid)
+        # A child cannot predate its parent. An older process only reuses a stale parent ID.
+        if found is None or (floor is not None and found[0] < floor):
+            continue
+        ordered.append(pid)
+        pending.extend(children.get(pid, []))
+    return ordered
+
+
+def _terminate_pids(pids: list[int]) -> None:
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.OpenProcess.restype = wintypes.HANDLE
+    kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]
+    kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+    for pid in pids:
+        handle = kernel.OpenProcess(0x0001, False, pid)
+        if handle:
+            kernel.TerminateProcess(handle, 1)
+            kernel.CloseHandle(handle)
+
+
+def _terminate_descendants(root: int) -> None:
+    """Stop children of one process we created. Other process IDs are left running."""
+    if os.name != "nt" or root <= 0:
+        return
+    _terminate_pids(list(reversed(descendants(root))))
+
+
+def terminate_recorded_tree(pid: int, created: int, image_prefix: str) -> bool:
+    """Stop a process this broker recorded as its own, only if PID, start time and image match.
+
+    Returns True when the recorded process was found and terminated. An unrelated process
+    that happens to reuse the PID or hold the same port is never touched.
+    """
+    identity = process_identity(pid)
+    if identity is None:
+        return False
+    found_created, image = identity
+    if found_created != created:
+        return False
+    if not image or not os.path.normcase(image).startswith(os.path.normcase(image_prefix)):
+        return False
+    _terminate_pids(list(reversed(descendants(pid))) + [pid])
+    return True
+
+
 async def reap(process: asyncio.subprocess.Process, owner: ProcessOwner | None) -> None:
     """No WMI/taskkill subprocess, name lookup or broad process termination."""
     deadline = asyncio.get_running_loop().time() + 3
     try:
-        if owner is not None:
+        if owner is not None and owner.handle:
             owner.terminate()
         elif process.returncode is None:
-            process.kill()
+            # No second job is available when this process already inherited one.
+            # Stop only descendants of the process we created, then that process.
+            # A failed descendant lookup must never stop us from killing the exact
+            # child we own (that would leak it and mask the caller's original error).
+            try:
+                _terminate_descendants(process.pid)
+            except Exception:  # noqa: BLE001 - best effort; the owned child is killed below
+                pass
+            finally:
+                with contextlib.suppress(ProcessLookupError):
+                    process.kill()
         await asyncio.wait_for(
             process.wait(), max(0.001, deadline - asyncio.get_running_loop().time())
         )

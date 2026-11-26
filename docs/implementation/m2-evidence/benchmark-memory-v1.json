@@ -1,0 +1,320 @@
+{
+ "benchmark": "m2-p3-memory-v1",
+ "inference": "none (deterministic; no model)",
+ "finished": "2026-11-21T23:04:28.250382+05:30",
+ "data": "C:\\Users\\reyan\\AppData\\Local\\Immortility\\canary-memory-m2",
+ "passed": 40,
+ "total": 40,
+ "groups": {
+  "recall": {
+   "passed": 10,
+   "total": 10
+  },
+  "scope": {
+   "passed": 3,
+   "total": 3
+  },
+  "contradiction": {
+   "passed": 4,
+   "total": 4
+  },
+  "duplicate": {
+   "passed": 3,
+   "total": 3
+  },
+  "correction": {
+   "passed": 2,
+   "total": 2
+  },
+  "deletion": {
+   "passed": 3,
+   "total": 3
+  },
+  "gating": {
+   "passed": 7,
+   "total": 7
+  },
+  "working": {
+   "passed": 3,
+   "total": 3
+  },
+  "restart": {
+   "passed": 5,
+   "total": 5
+  }
+ },
+ "paraphrase_gap": {
+  "found": 1,
+  "total": 4,
+  "cases": [
+   {
+    "query": "what do people call me",
+    "found": false,
+    "got": ""
+   },
+   {
+    "query": "which city is home",
+    "found": true,
+    "got": "I live in Mumbai now"
+   },
+   {
+    "query": "who employs me",
+    "found": false,
+    "got": ""
+   },
+   {
+    "query": "short feedback on pull requests",
+    "found": false,
+    "got": ""
+   }
+  ]
+ },
+ "latency_ms_3000_items": {
+  "p50": 1.686,
+  "p95": 1.909,
+  "max": 6.078
+ },
+ "db_bytes": 2158592,
+ "cases": [
+  {
+   "name": "recall: what is my name",
+   "group": "recall",
+   "passed": true,
+   "detail": "My name is Reyansh"
+  },
+  {
+   "name": "recall: where do I live",
+   "group": "recall",
+   "passed": true,
+   "detail": "I live in Bengaluru"
+  },
+  {
+   "name": "recall: where do I work",
+   "group": "recall",
+   "passed": true,
+   "detail": "I work at Immortility Labs"
+  },
+  {
+   "name": "recall: how should code reviews be formatted",
+   "group": "recall",
+   "passed": true,
+   "detail": "I prefer concise answers for code reviews"
+  },
+  {
+   "name": "recall: which theme for editors",
+   "group": "recall",
+   "passed": true,
+   "detail": "I prefer dark mode for editors"
+  },
+  {
+   "name": "recall: favourite programming language",
+   "group": "recall",
+   "passed": true,
+   "detail": "My favourite language is Rust"
+  },
+  {
+   "name": "recall: what to do before committing",
+   "group": "recall",
+   "passed": true,
+   "detail": "Always run the tests before committing"
+  },
+  {
+   "name": "recall: when is the investors demo",
+   "group": "recall",
+   "passed": true,
+   "detail": "the demo for the investors is on Friday"
+  },
+  {
+   "name": "recall: what laptop do I use",
+   "group": "recall",
+   "passed": true,
+   "detail": "My laptop is a ThinkPad X1"
+  },
+  {
+   "name": "recall: sister birthday",
+   "group": "recall",
+   "passed": true,
+   "detail": "my sister's birthday is on 4 March"
+  },
+  {
+   "name": "project scope: own project",
+   "group": "scope",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "project scope: no leak to other project",
+   "group": "scope",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "project scope: global facts still visible in project",
+   "group": "scope",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "contradiction: user update supersedes",
+   "group": "contradiction",
+   "passed": true,
+   "detail": "superseded"
+  },
+  {
+   "name": "contradiction: only the new value is recalled",
+   "group": "contradiction",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "contradiction: inferred value cannot override user",
+   "group": "contradiction",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "contradiction: external value cannot override user",
+   "group": "contradiction",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "duplicate: exact restatement merges",
+   "group": "duplicate",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "duplicate: punctuation variant merges",
+   "group": "duplicate",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "duplicate: no new active row",
+   "group": "duplicate",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "correction: replaces value",
+   "group": "correction",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "correction: old row superseded with provenance",
+   "group": "correction",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "deletion: content removed from row",
+   "group": "deletion",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "deletion: not recalled",
+   "group": "deletion",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "deletion: 'forget ...' in chat deletes the slot",
+   "group": "deletion",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "gating: instruction-like external text quarantined",
+   "group": "gating",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "gating: quarantined text never recalled",
+   "group": "gating",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "gating: external fact waits for confirmation",
+   "group": "gating",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "gating: inferred durable memory pending, confidence capped",
+   "group": "gating",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "gating: user confirmation activates it",
+   "group": "gating",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "gating: verified receipts only episodic",
+   "group": "gating",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "gating: credentials redacted before storage",
+   "group": "gating",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "working: visible in its session",
+   "group": "working",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "working: invisible in another session",
+   "group": "working",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "working: expires",
+   "group": "working",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "restart: profile survives",
+   "group": "restart",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "restart: supersession chain survives",
+   "group": "restart",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "restart: deletion survives",
+   "group": "restart",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "restart: pending stays pending",
+   "group": "restart",
+   "passed": true,
+   "detail": ""
+  },
+  {
+   "name": "restart: schema version unchanged (4)",
+   "group": "restart",
+   "passed": true,
+   "detail": ""
+  }
+ ]
+}

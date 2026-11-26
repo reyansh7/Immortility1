@@ -9,13 +9,16 @@ New-Item -ItemType Directory -Force -Path $bin | Out-Null
 $command = Join-Path $bin "immortility.cmd"
 $utf8 = New-Object System.Text.UTF8Encoding $false
 $shim = "@echo off`r`npowershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$launcher`" %*`r`nexit /b %ERRORLEVEL%`r`n"
+$devShim = "@echo off`r`npowershell.exe -NoProfile -ExecutionPolicy Bypass -File `"$launcher`" -Dev %*`r`nexit /b %ERRORLEVEL%`r`n"
 [System.IO.File]::WriteAllText($command, $shim, $utf8)
+[System.IO.File]::WriteAllText((Join-Path $bin "immortility-dev.cmd"), $devShim, $utf8)
 $localBin = Join-Path $env:USERPROFILE ".local\bin"
 if (Test-Path -LiteralPath $localBin) {
     # This directory is already earlier on PATH. Its old shim called a removed project.
     foreach ($name in @("immortility.cmd", "immortility.bat")) {
         [System.IO.File]::WriteAllText((Join-Path $localBin $name), $shim, $utf8)
     }
+    [System.IO.File]::WriteAllText((Join-Path $localBin "immortility-dev.cmd"), $devShim, $utf8)
 }
 
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -46,4 +49,5 @@ if (Test-Path -LiteralPath $localBin) {
     Write-Host "Updated the existing command in $localBin"
 }
 Write-Host "Open a new Command Prompt and type: immortility"
+Write-Host "immortility opens the production app. immortility-dev opens the development app."
 Write-Host "Modes: -performance, -balanced, -battery, -headless. -gpu matches -performance."

@@ -91,6 +91,8 @@ export interface Transcript {
   log?: LogEntry[];
   error?: string;
   preview?: string;
+  /** D18: broker-reported pointer control state; drives the cursor indicator. */
+  pointer?: "moving" | "idle";
   metrics?: {
     route_mode: string;
     calls: number;
@@ -114,6 +116,12 @@ export function reduceEvent(state: Transcript, event: TaskEvent): Transcript {
   if (event.type === "message.delta" && typeof event.data.text === "string")
     next.text += event.data.text;
   if (event.type === "task.state") next.status = event.data.status as Status;
+  if (
+    event.type === "audit.notice" &&
+    event.data.name === "pointer.control" &&
+    (event.data.state === "moving" || event.data.state === "idle")
+  )
+    next.pointer = event.data.state;
   if (event.type === "task.error")
     next.error = String(event.data.message ?? "Request failed.");
   if (
@@ -173,7 +181,8 @@ export function orbState(
     status === "running" ||
     status === "queued" ||
     status === "created" ||
-    status === "verifying"
+    status === "verifying" ||
+    status === "stopping"
   )
     return "thinking";
   return "idle";

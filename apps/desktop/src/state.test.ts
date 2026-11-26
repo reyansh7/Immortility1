@@ -50,6 +50,25 @@ describe("durable event presentation", () => {
     const once = reduceEvent(initial, event);
     expect(reduceEvent(once, event).text).toBe("hello");
   });
+  it("keeps identical text from distinct events and drops a replay", () => {
+    const initial: Transcript = {
+      text: "",
+      sequence: 0,
+      status: "running",
+      events: [],
+    };
+    const delta = (sequence: number) => ({
+      schema_version: "1.0" as const,
+      task_id: "t",
+      sequence,
+      type: "message.delta",
+      data: { text: "Simulated duplicate." },
+    });
+    const twice = reduceEvent(reduceEvent(initial, delta(1)), delta(2));
+    expect(twice.text).toBe("Simulated duplicate.Simulated duplicate.");
+    expect(reduceEvent(twice, delta(2)).text).toBe(twice.text);
+    expect(reduceEvent(twice, delta(1)).text).toBe(twice.text);
+  });
   it("keeps partial output when cancelled", () => {
     const state: Transcript = {
       text: "partial",
@@ -88,5 +107,9 @@ describe("durable event presentation", () => {
     expect(orbState("blocked", true)).toBe("error");
     expect(orbState("running", true)).toBe("thinking");
     expect(orbState("succeeded", true)).toBe("idle");
+  });
+  it("keeps a requested stop active until the broker confirms it", () => {
+    expect(orbState("stopping", true)).toBe("thinking");
+    expect(orbState("cancelled", true)).toBe("idle");
   });
 });

@@ -32,7 +32,13 @@ export interface FaceInputs {
   ttsState: string;
 }
 
-const running = new Set<Status>(["created", "queued", "running", "verifying"]);
+const running = new Set<Status>([
+  "created",
+  "queued",
+  "running",
+  "verifying",
+  "stopping",
+]);
 
 export function playbackEnergy(level: number, speaking: boolean): number {
   return speaking && Number.isFinite(level)
@@ -107,6 +113,24 @@ export function deriveFace(input: FaceInputs): {
     .find((entry) => typeof entry.data.route_mode === "string");
   if (plan && plan.data.route_mode !== "fast") return { state: "planning" };
   return { state: "thinking" };
+}
+
+export function presenceLabel(input: {
+  connected: boolean;
+  ready: boolean;
+  starting: boolean;
+  localOnly: boolean;
+  reconnecting?: boolean;
+  hermes?: string;
+}): string {
+  if (!input.connected)
+    return input.starting || input.reconnecting ? "Starting" : "Offline";
+  if (input.reconnecting) return "Reconnecting";
+  if (input.localOnly) return "Local";
+  if (input.hermes === "checking") return "Starting";
+  if (input.hermes && input.hermes !== "available")
+    return "Hermes is not ready";
+  return input.ready ? "Ready" : "Needs a qualified model";
 }
 
 export const faceLabel: Record<FaceState, string> = {

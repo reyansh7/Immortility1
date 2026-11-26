@@ -16,12 +16,17 @@ sys.path.insert(0,str(ROOT/'services/broker/src'))
 from immortility_broker.process_owner import reap,spawn_owned
 
 
-async def main(data_dir=None,stream_seconds=None,stall=False):
+async def main(data_dir=None,stream_seconds=None,stall=False,project_inspector=False):
     scope=(ROOT/'.cache/model-hub-native').resolve()
     root=(data_dir if data_dir is not None else scope/str(uuid4())).resolve()
     if root==scope or not root.is_relative_to(scope):
         raise ValueError('Native fixture data must stay inside .cache/model-hub-native.')
     root.mkdir(parents=True,exist_ok=True)
+    if project_inspector:
+        if stream_seconds is not None:
+            raise ValueError('Project and synthetic stream scenarios must run separately.')
+        from native_project_fixture import prepare
+        prepare(root)
     if stream_seconds is not None:
         (root/'native-stream.json').write_text(json.dumps({'seconds':stream_seconds,**({'stall_seconds':95} if stall else {})}),encoding='utf-8')
     local=root/'Local';local.mkdir(exist_ok=True)
@@ -65,7 +70,7 @@ async def main(data_dir=None,stream_seconds=None,stall=False):
                     break
                 if command=='restart':
                     await reap(*native);native=await launch();print('{"status":"native-restarted"}',flush=True)
-                elif command in {'task_busy','voice_busy','idle','delay_model','no_delay','fail_model_once','disconnect'}:
+                elif command in {'task_busy','voice_busy','idle','delay_model','no_delay','fail_model_once','disconnect','slow_project','fast_project'}:
                     (root/'scenario.txt').write_text(command,encoding='utf-8')
                 elif command=='snapshot':
                     path=root/'state.sqlite3'
@@ -88,7 +93,8 @@ if __name__=='__main__':
     parser.add_argument('--data-dir',type=Path)
     parser.add_argument('--stream-seconds',type=int,choices=[180,285])
     parser.add_argument('--stall',action='store_true')
+    parser.add_argument('--project-inspector',action='store_true')
     options=parser.parse_args()
     if options.stall and options.stream_seconds!=180:
         parser.error('--stall requires --stream-seconds 180')
-    asyncio.run(main(options.data_dir,options.stream_seconds,options.stall))
+    asyncio.run(main(options.data_dir,options.stream_seconds,options.stall,options.project_inspector))

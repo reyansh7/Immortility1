@@ -62,6 +62,8 @@ def main():
     token=secrets.token_urlsafe(32)
     transport=httpx.AsyncClient(transport=httpx.MockTransport(no_network),trust_env=False)
     app=create_app(settings,token,url,client=transport,factory=no_hermes)
+    from native_project_fixture import install, allowed
+    project_fixture=install(app,folder)
     stream_producer=None
     stream_config=folder/'native-stream.json'
     if stream_config.exists():
@@ -79,6 +81,15 @@ def main():
     async def acceptance_scope(request, call_next):
         nonlocal fail_model_once
         authenticated=hmac.compare_digest(request.headers.get('authorization',''),'Bearer '+token)
+        project_request=False
+        if project_fixture['enabled'] and authenticated and request.method=='POST' and request.url.path in {'/v1/settings/project','/v1/workflows'}:
+            try:
+                body=await request.json()
+                project_request=isinstance(body,dict) and allowed(request.url.path,body,folder)
+            except (ValueError,TypeError):
+                pass
+            if not project_request:
+                return JSONResponse({'error':{'code':'acceptance_scope','message':'Only the two synthetic projects and project-read steps are allowed.'}},status_code=403)
         if authenticated and request.method=='POST' and (request.url.path=='/v1/stop' or request.url.path.endswith('/cancel')):
             category='global_stop' if request.url.path=='/v1/stop' else 'task_cancel'
             with (folder/'native-actions.jsonl').open('a',encoding='utf-8') as output:
@@ -96,7 +107,7 @@ def main():
                 return JSONResponse({'error':{'code':'synthetic_failure','message':'Synthetic model selection failure; no preference changed.'}},status_code=503)
         if request.method not in {'GET','OPTIONS'} and request.url.path not in {
             '/v1/sessions','/v1/settings/model-mode','/v1/stop'
-        } and not (request.url.path.startswith('/v1/tasks/') and request.url.path.endswith('/cancel')):
+        } and not project_request and not (request.url.path.startswith('/v1/tasks/') and request.url.path.endswith('/cancel')):
             return JSONResponse({'error':{'code':'acceptance_scope','message':'This scratch fixture allows model-mode acceptance only.'}},status_code=403)
         return await call_next(request)
     route=ModelOffer(route_id='openrouter/native-acceptance-fixture',provider='openrouter',
@@ -134,6 +145,8 @@ def main():
                         model_delay=0
                     elif scenario=='fail_model_once':
                         fail_model_once=True
+                    elif scenario in {'slow_project','fast_project'}:
+                        project_fixture['slow']=scenario=='slow_project'
                     if scenario in {'task_busy','voice_busy','idle'}:
                         if active_fixture is not None:
                             app.state.store.state(active_fixture,'cancelled')

@@ -93,6 +93,18 @@ def main() -> None:
         shutdown_hook=cleanup_publication if args.publish_attachment else None,
         stop_runtime=stop_runtime if args.headless else None,
     )
+    if settings.data_dir.name.startswith("canary-"):
+        (settings.data_dir / "startup-trace.json").write_text(
+            json.dumps(
+                {
+                    "data_dir": str(settings.data_dir),
+                    "hermes_0232_gateway": settings.hermes_0232_gateway,
+                    "hermes_gateway_version": settings.hermes_gateway_version,
+                    "simulated_inference": settings.simulated_inference,
+                }
+            ),
+            encoding="utf-8",
+        )
     server = uvicorn.Server(uvicorn.Config(app, log_level="critical", access_log=False))
 
     def parent_watch() -> None:

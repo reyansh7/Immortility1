@@ -1,12 +1,12 @@
 {
-  "checkpoint_date": "2026-11-15 Asia/Calcutta",
+  "checkpoint_date": "2026-11-16 Asia/Calcutta",
   "implementation": {
     "diagnostic_schema_version": "1.0",
-    "captured_at": "2026-11-15T16:43:14.971388+00:00",
-    "git_head": "a2fbdbe47e8664ecf87149470b60732999bf88f6",
+    "captured_at": "2026-11-16T07:31:55.032940+00:00",
+    "git_head": "edafc64abca0e7340f46a4068dad4b2a33fdd6f2",
     "working_tree_dirty": true,
     "source_sha256": {
-      "services/broker/src/immortility_broker/app.py": "d134375995cbacb3200149ded2bcd286135d933fb8d2eabf781e92c655333ef3",
+      "services/broker/src/immortility_broker/app.py": "2bbe8cea4852bbab8d1732556919896bac78b06d372597174b66b30fe92315f9",
       "services/broker/src/immortility_broker/agent_bridge.py": "30aedbeb23682d3bc841f76a244fa7c4ee781838d0535192f0e2ac56d0d6526d",
       "services/broker/src/immortility_broker/semantic_stream.py": "612e77042d43fbfc693c84a96d5be3a10e75516497206c6d042a3b8dc1754eb0",
       "services/broker/src/immortility_broker/provider_stream.py": "7f5aa8168a29b6729e20cadf6d20da28fcbec8cda007c98ce630bdc266a7575d",
@@ -34,8 +34,8 @@
     }
   },
   "milestone_status": {
-    "offline_regression": "PASSED: 425 Python / 68 frontend / 12 Rust; builds/static/security passed",
-    "M3_release": "BLOCKED: direct concrete-model/account/stream qualification and separately authorized real-model tool execution",
+    "offline_regression": "PASSED: 455 Python / 85 frontend / 13 Rust; current-source builds/static/security passed",
+    "M3_release": "BLOCKED: direct account/model qualification and separately authorized live tool execution",
     "K32_F38": "IMPLEMENTED / OFFLINE VERIFIED with real pinned Hermes and synthetic 600-fragment turns",
     "F04": "IMPLEMENTED / OFFLINE VERIFIED; per-read scopes, strict UTF-8 and finite transport limits",
     "K24_F33_F39": "IMPLEMENTED / OFFLINE VERIFIED; safe termination statistics, all smoke failure categories, dirty-source hashes",
@@ -44,67 +44,58 @@
     "runtime_notifications": "IMPLEMENTED / OFFLINE VERIFIED / NATIVE VERIFIED in keyless fixture",
     "Model_Hub_error_recovery": "NATIVE VERIFIED with injected failure and explicit retry; no inference",
     "typed_capability_schemas": "IMPLEMENTED / OFFLINE VERIFIED, experimental default OFF",
-    "warm_Hermes": "OFFLINE feasibility only: two sequential scratch profiles; production reuse OFF"
+    "warm_Hermes": "OFFLINE feasibility only: two sequential scratch profiles; production reuse OFF",
+    "Project_Inspector": "CLOSED: offline verified and native synthetic-project subset verified; see explicit limits"
   },
   "checks": {
     "scripts/check.ps1": {
       "status": "passed",
       "exit_code": 0,
-      "python_tests": 425,
-      "python_seconds": 97.74,
-      "frontend_tests": 68,
-      "frontend_seconds": 2.3,
-      "mypy_sources": 49,
-      "python_format_files": 99,
-      "frontend_build_seconds": 3.02,
+      "python_tests": 455,
+      "python_seconds": 110.02,
+      "frontend_tests": 85,
+      "frontend_seconds": 2.47,
+      "mypy_sources": 51,
+      "python_format_files": 103,
       "contracts_lint_format_types": "passed",
-      "includes_original_four_SDK_failures": true,
-      "log": ".cache/verification/m3-optional-provider-check-20261115.log",
-      "log_sha256": "7e57337feeeb0822750484cf4b219fefd0f50e62e2efd38ecec7e6338d0df817",
-      "revision_note": "A type-narrowing assertion and provider-neutral status copy were completed during this gate; final source policy/rotation cases separately passed 22/22 afterwards. Engineering warm probe has separate executable evidence."
+      "frontend_build_seconds": 2.98,
+      "log": ".cache/verification/project-close-91210ab3-624b-4fca-91d6-d02e5ca3ad06/final-check-repaired.log",
+      "log_sha256": "20ddea963e4eddf91eafb6e223722c73bc2da63d95a5828b9fafa99be01f4f79"
     },
     "rust_tests": {
       "status": "passed",
-      "tests": 12,
+      "tests": 13,
       "seconds": 0.91,
-      "build_seconds": 1.58,
-      "build_timing": "warm offline build, not startup latency",
-      "command": ". ./scripts/dev-env.ps1; cargo test --offline --manifest-path apps/desktop/src-tauri/Cargo.toml; cargo build --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
+      "compile_seconds": 29.56,
+      "command": ". ./scripts/dev-env.ps1; cargo test --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
     },
-    "stream_failure_and_evidence_tests": {
-      "passed": 10,
-      "seconds": 2.68
+    "native_build": {
+      "status": "passed",
+      "seconds": 19.43,
+      "command": ". ./scripts/dev-env.ps1; cargo build --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
     },
-    "minimum_report_headroom_and_stream_checks": {
-      "passed": 17,
-      "seconds": 2.04,
-      "minimum_output_reservation": 826,
-      "tokenizer_calibrated": false
+    "focused_frontend_transport": {
+      "status": "passed",
+      "tests": 22,
+      "seconds": 0.92
     },
-    "provider_stream_readiness_focused": {
-      "passed": 92,
-      "seconds": 7.52
+    "project_workspace_workflows": {
+      "status": "passed",
+      "tests": 40,
+      "seconds": 24.39
     },
-    "readiness_integrity_firewall": {
-      "passed": 13,
-      "seconds": 3.58,
-      "before_fix": "2 failed / 1 passed: readiness-first did not submit; raw TimeoutError escaped"
+    "native_fixture_scope": {
+      "status": "passed",
+      "tests": 2,
+      "seconds": 1.79
     },
     "security": {
       "status": "passed",
       "configured_key_isolation": true,
       "git_diff_check": true,
-      "engineering_scripts_compile": true,
-      "warm_probe_lint": "passed with intentional sys.path/import E402 exception",
-      "protected_account_requests": 0,
-      "cloud_model_requests": 0
-    },
-    "source_and_history_integrity": "passed: recorded source hashes match; project HEAD unchanged; failed live and full-run evidence have no Git diff",
-    "final_policy_focus": {
-      "status": "passed",
-      "tests": 22,
-      "seconds": 2.46,
-      "log": ".cache/verification/m3-final-policy-focus-20261115.log"
+      "engineering_script_compilation": true,
+      "new_cloud_model_calls": 0,
+      "new_protected_account_requests": 0
     }
   },
   "acceptance": {
@@ -280,56 +271,25 @@
     ]
   },
   "changed_source_sha256": {
-    "apps/desktop/src/runtimeStatus.test.ts": "35549939dab23e7025ea935a849312fcb3ba7509d6f32112899f5f76a1336af9",
-    "apps/desktop/src/runtimeStatus.ts": "5b2730fb6e7762f89618ff5cab50b0aef576dd61d39bc94457cb9c2b0903c650",
-    "scripts/native_event_fixture.py": "73aee93f0a15af7a7f7ae6289bfa67a9ff3a5e50e9f5f91ac3a399f80d83a321",
-    "scripts/probe-hermes-session-reuse.py": "e68f442214a5f353e62ac4eec1398a634a16137bae9d3200f71ae6c3494143b2",
-    "services/broker/src/immortility_broker/evidence.py": "e42777a2dce97a6e4c66b1ed0bf2bbdc7082ec33b16c81bdda79c31fd1f2effb",
-    "services/broker/src/immortility_broker/runtime_status.py": "fa310d307162f97a811859e5647531838f78b098ee1762f4e5774225e3cd3047",
-    "services/broker/src/immortility_broker/semantic_stream.py": "612e77042d43fbfc693c84a96d5be3a10e75516497206c6d042a3b8dc1754eb0",
-    "services/broker/tests/provider_fixtures.py": "338e6b068b675b8c33749a9343e7901c51fe59b9bc48ed27ae2d89374441b329",
-    "services/broker/tests/test_cancellation_diagnostics.py": "661cfc449ec06e637dc0f6fa11aee9d4c300e51c739a56617e4194dcc7332b0a",
-    "services/broker/tests/test_engineering_evidence.py": "89850d29c698c4706e6327d449c372c07dda3f6e7a4f7f2df7363a7c022f0cb0",
-    "services/broker/tests/test_hermes_readiness.py": "d4c2fe0a43f0332155249330f3326048590e156dfe4feff05de8b9dd979e9206",
-    "services/broker/tests/test_native_event_fixture.py": "cbe603bb3ffbe9fdc21d0aad6f9ec528b080fea7fada71c7defcc22875726ea4",
-    "services/broker/tests/test_provider_eligibility.py": "21b9488fb89f241029e70251ac148e7f6663c2c7db9b353a46efddb411139e72",
-    "services/broker/tests/test_report_context_budget.py": "e7667d63faf9981a08e4723ceefa05acaa5a00900d5dffc097440c2e697f080a",
-    "services/broker/tests/test_runtime_status.py": "202e26f47afe4c6f46e00c6862193db75b6bf130aabea77dd8e8619f8982a27a",
-    "services/broker/tests/test_semantic_stream.py": "f54815b839fa629a87785b15f41dd44f52470dcad83d3b0306312ac936eb6ecf",
-    "services/broker/tests/test_stream_termination.py": "5f67dcbac91fb05186410e349c23d2c77ae8f9e00005c5a8ccf9c26af95286e6",
-    "services/broker/tests/test_typed_tool_schemas.py": "343c1981c6b0fd6b0936a596296ee6cb75c2a5ffc6ec1a9125fc1514d8ac2745",
-    "apps/desktop/src-tauri/src/main.rs": "77350aa371a15d8f5e0e76ad5aafccfde4778856aa883fd96d285fac9300cd2a",
-    "apps/desktop/src/Conversation.tsx": "47e4094a7ce03495fc5431bb62c9aedf5644d02ce3e3eedf12a9a41bf6e0d21b",
-    "apps/desktop/src/ModelHub.test.tsx": "51538a88dce12a36d9dec743cdc3a4428bef6a9fa3ec7b75094c79b85454ba98",
-    "apps/desktop/src/ModelHub.tsx": "e64701e047bd1788759e8254b3e11395f19c08cf40db14f4be8c6733e5277e79",
-    "apps/desktop/src/SettingsPanel.tsx": "9564d192c7134655201d2c17750fd1e99b2e7a51ff82473fbdbca53805d6d266",
-    "apps/desktop/src/main.tsx": "4a289b19353cfcece957b1dcead82453126011331accb3c944f9779208a397a6",
-    "apps/desktop/src/transport.test.ts": "770ac42bce778ea70832c404bf748fcda029a1dc7a3d08e7094ebc1f1ef7a864",
-    "apps/desktop/src/transport.ts": "22546543f32caa11e921fcfde6d7fd056a0ddc6eb39feb671cfacb8c3231e1d8",
-    "scripts/benchmark-model-router.py": "279224dd0e3afe4b749217f90f5f71513d029bbcd477bfdc97143dcef0c7f65d",
-    "scripts/benchmark-report-workflow.py": "d266bb5105628e1fd9a9d69b9d25a09d7e6e02c05e2f6cbb62c5460ae00a6df1",
-    "scripts/benchmark-sdk-startup.py": "3c59ecf7cdec5544943867a359b8d33869c22d3585d867ffced7d1d5b6c41b8a",
-    "scripts/native-model-hub-broker.py": "2dcb38c27e00bb6bd82d0ac8f45b985e617d276fd638a5bc06452b702cac1426",
-    "scripts/smoke-agent-tools.py": "bea6bee9d240e2c09fc99450296acd6e9bf4fad2ccbba1ea8b9554b11f307432",
-    "scripts/smoke-hermes.py": "9f2f754525e6ea15c5f557585ef34bbebad664e06de853a0947e9ba4a8735253",
-    "scripts/smoke-model-hub-native.py": "0d0f2aa69ea29727b92af30e8ef39c327e9fbadf0e2649f729b78a677edf74db",
-    "scripts/smoke-research-report.py": "7ee6fa1fbeedaeacf784067990d3f5a9f8d02e50262a3fbbc6940713cefaff4f",
-    "services/broker/src/immortility_broker/agent_bridge.py": "30aedbeb23682d3bc841f76a244fa7c4ee781838d0535192f0e2ac56d0d6526d",
-    "services/broker/src/immortility_broker/app.py": "d134375995cbacb3200149ded2bcd286135d933fb8d2eabf781e92c655333ef3",
-    "services/broker/src/immortility_broker/artifacts.py": "71a8340ca1f9562cfcff5d29bd23c8bf7c9083067de8d579c3b0df7ae4134d74",
-    "services/broker/src/immortility_broker/config.py": "6ff667de24e198e0a2f69ea0a173d50de4917e60f4c1b529aaf90a06842c212c",
-    "services/broker/src/immortility_broker/hermes.py": "66319e7e98970d2cfb182af193c4237d4ef1a1b8e726ea336bda5ec5c14f3c8f",
-    "services/broker/src/immortility_broker/ledger.py": "82cce2d35ebced154e38b829dabedc3d961b023f24fd0974b76feeb331ad826d",
-    "services/broker/src/immortility_broker/policy.py": "80a855b429cacfcc8b322f93421d2f9ecab36d1010fae92847593ca8a3dbabdb",
-    "services/broker/src/immortility_broker/provider_stream.py": "7f5aa8168a29b6729e20cadf6d20da28fcbec8cda007c98ce630bdc266a7575d",
-    "services/broker/src/immortility_broker/providers.py": "3796f195d330729dcb46a0f013ab72882da0061b451316cd7656b07d60cca5fe",
-    "services/broker/src/immortility_broker/research.py": "b13ecbe47a492e126cecca5ec3e3b299b87ed60ca4ccf8ded1cf62a09669d6e2",
-    "services/broker/src/immortility_broker/voice.py": "9315cc387460ebe15ebb3fd0926fa855918a6b99feef9df0ac7aceaacb9b23ad",
-    "services/broker/tests/test_chat_regressions.py": "84fc5be448cde85cea8738699690b1ebf9b935f88117c20d0d663e43eb48d6aa",
-    "services/broker/tests/test_firewall.py": "1775af25ffd35241c2355887aad69d7b559639f8b75242093c51d89130099a3e",
-    "services/broker/tests/test_inference_grants.py": "6c2fa53045b84511fc8918838504b90f324d23e76a79a9f965f37b3b621eb26f",
-    "services/broker/tests/test_provider_stream.py": "fd3a864835e3deb634594433e2a57dbb6a450df1d9f2c9c90264437655859a6b",
-    "services/broker/tests/test_providers.py": "fcac21065f055686c94487c96d1bf4bf368431e2f856b6f2d0e50612d201fc38"
+    "apps/desktop/src/ProjectInspector.test.tsx": "31d3e83a2b27effc63563c2101a32b5ed783b64de68015781f322f0333bbfeee",
+    "apps/desktop/src/projectInspection.ts": "519f3abe902ee5c1cda1f82fef6a7b31ede90836418fb7727adc324c7f3a29c9",
+    "scripts/check-direct-model.py": "b4e1566717b3e5d78a2120ae4b1e870af2344f67dd920d56de554422ab30b81b",
+    "scripts/native_project_fixture.py": "fe705406f6ba6c2d23559657fab3628408c5882d15aff7e8608202ec72b82f81",
+    "services/broker/src/immortility_broker/direct_metadata.py": "41cda70d9326f80af0f6c17aef2242f33b4edd1fcfb22ff3da6541070c4a405a",
+    "services/broker/tests/test_direct_metadata.py": "418e33f9c3b1b7fcb7b972e45e2abdbf13c29693df8e997d76fe08cf4d9b2d59",
+    "apps/desktop/src-tauri/src/main.rs": "0cbc6fd28bc4f36cdc7b0677f8317ba7489ca631ec0159c7063bf3d0308d0662",
+    "apps/desktop/src/ProjectInspector.tsx": "0df0de6866f5c01ca10bd6a399a2c8ffbfea276484aa4e081317a3b5de18e4d2",
+    "apps/desktop/src/SettingsPanel.tsx": "b8fa45bd33a7a08fb179cb7578705874d912d8c5d5e35e84dedce89fe6fd537f",
+    "apps/desktop/src/transport.test.ts": "0539fa53296f4c61a4f3d6f8d11e05617113d87325f5a4188de20e740d7f1e13",
+    "apps/desktop/src/transport.ts": "f3c422f839bd7316914412c85ddfad5905ea6e689f30b9dae9b54750d4384960",
+    "scripts/native-model-hub-broker.py": "444b8534b41d50cec034162e1616829d4efeb63e0e5a9b84c21d5f18122d80bf",
+    "scripts/smoke-model-hub-native.py": "a9a4e4000056c7d3254c2500302dc8c163ce01b4e4a0c77e67d690d3595a7497",
+    "services/broker/src/immortility_broker/app.py": "2bbe8cea4852bbab8d1732556919896bac78b06d372597174b66b30fe92315f9",
+    "services/broker/src/immortility_broker/project_inspection.py": "259f2f026b16aee404042d9fda2b7e292727fffadc94bd574b9fbc851a0e085b",
+    "services/broker/src/immortility_broker/workspace.py": "847d84141b4cc6254c6de535eb5f50f2a90093a345ca743f7c8409b5b6e844da",
+    "services/broker/tests/test_broker.py": "d642f9bac0c9967624ad558231ddda8d7ab6d4e1151b11b28cc0c8f1d7a25142",
+    "services/broker/tests/test_native_event_fixture.py": "bf23f92030b37137fd29f4fd0aa6915bffb6ea8f3d5b796757788a0463e78e65",
+    "services/broker/tests/test_project_inspection.py": "692ff468c0941d508a156784175c77838b8814eeaf8dc705c175b6c31e568567"
   },
   "historical_evidence": {
     "previous_M3": "M3_PRE_HARDENING_VERIFICATION.json",
@@ -458,5 +418,387 @@
     ".cache/verification/hermes-session-reuse-probe-efcab0c5-8991-43e0-afe7-fea07bc35089.json": "7c93ad8a8007804c2249896df1747bff5b7a75fc1689be992540339c9bceb949",
     ".cache/verification/hermes-session-reuse-probe-e45813c6-eca6-4428-b8d7-7a316d56241b.json": "aaaa5f9632f0ecd0df51eb10d0da86d2ed7b9a6787eaba0ffcad2c1596769f81"
   },
-  "changed_source_scope": "All observed dirty/untracked source files, including preceding implementation; not an authorship claim for this final slice."
+  "changed_source_scope": "All observed dirty/untracked source files, including preceding implementation; not an authorship claim for this final slice.",
+  "active_product_build_2026_11_16": {
+    "status": "Project Inspector CLOSED; current full regression passed; live AI gates remain BLOCKED",
+    "checkpoint": "PRODUCT_BUILD_CHECKPOINT_2026-11-16.md",
+    "project_backend": {
+      "tests_passed": 14,
+      "seconds": 4.2,
+      "native_verified": false
+    },
+    "metadata_fixture_tests": {
+      "passed": 8,
+      "seconds": 0.8
+    },
+    "frontend_existing_tests": {
+      "passed": 68,
+      "seconds": 2.76,
+      "static_checks": "passed",
+      "new_component_tests": "pending"
+    },
+    "authorized_account_read": {
+      "provider": "groq",
+      "model": "openai/gpt-oss-120b",
+      "authenticated_metadata_GETs": 1,
+      "inference_calls": 0,
+      "listed": true,
+      "active": true,
+      "context_tokens": 131072,
+      "billing_verified": false,
+      "quota_verified": false,
+      "evidence": ".cache/verification/groq-model-metadata-2cb3e864-4a90-4bda-96fb-317c6420886b.json"
+    },
+    "warm_MCP": {
+      "status": "BLOCKED: second MCP profile used first revoked credential; broker denied 401",
+      "production_reuse": false,
+      "cleanup": true,
+      "warm_cancellation_and_recovery": "not reached",
+      "evidence": ".cache/verification/hermes-mcp-reuse-probe-7ebc02ee-567c-41ec-b6e7-7120309cc36a.json"
+    },
+    "computer_use": "Native application subset verified this session; browser policy was not bypassed or revisited. No account access.",
+    "last_full_gate_is_historical": false,
+    "current_gate": {
+      "scripts/check.ps1": {
+        "status": "passed",
+        "exit_code": 0,
+        "python_tests": 455,
+        "python_seconds": 110.02,
+        "frontend_tests": 85,
+        "frontend_seconds": 2.47,
+        "mypy_sources": 51,
+        "python_format_files": 103,
+        "contracts_lint_format_types": "passed",
+        "frontend_build_seconds": 2.98,
+        "log": ".cache/verification/project-close-91210ab3-624b-4fca-91d6-d02e5ca3ad06/final-check-repaired.log",
+        "log_sha256": "20ddea963e4eddf91eafb6e223722c73bc2da63d95a5828b9fafa99be01f4f79"
+      },
+      "rust_tests": {
+        "status": "passed",
+        "tests": 13,
+        "seconds": 0.91,
+        "compile_seconds": 29.56,
+        "command": ". ./scripts/dev-env.ps1; cargo test --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
+      },
+      "native_build": {
+        "status": "passed",
+        "seconds": 19.43,
+        "command": ". ./scripts/dev-env.ps1; cargo build --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
+      },
+      "focused_frontend_transport": {
+        "status": "passed",
+        "tests": 22,
+        "seconds": 0.92
+      },
+      "project_workspace_workflows": {
+        "status": "passed",
+        "tests": 40,
+        "seconds": 24.39
+      },
+      "native_fixture_scope": {
+        "status": "passed",
+        "tests": 2,
+        "seconds": 1.79
+      },
+      "security": {
+        "status": "passed",
+        "configured_key_isolation": true,
+        "git_diff_check": true,
+        "engineering_script_compilation": true,
+        "new_cloud_model_calls": 0,
+        "new_protected_account_requests": 0
+      }
+    },
+    "closure_evidence": ".cache/verification/project-inspector-final-verification-fdacc1cd-7be7-452d-b28e-3e4ba32cef58.json"
+  },
+  "historical_checks_before_project_closure": {
+    "scripts/check.ps1": {
+      "status": "passed",
+      "exit_code": 0,
+      "python_tests": 425,
+      "python_seconds": 97.74,
+      "frontend_tests": 68,
+      "frontend_seconds": 2.3,
+      "mypy_sources": 49,
+      "python_format_files": 99,
+      "frontend_build_seconds": 3.02,
+      "contracts_lint_format_types": "passed",
+      "includes_original_four_SDK_failures": true,
+      "log": ".cache/verification/m3-optional-provider-check-20261115.log",
+      "log_sha256": "7e57337feeeb0822750484cf4b219fefd0f50e62e2efd38ecec7e6338d0df817",
+      "revision_note": "A type-narrowing assertion and provider-neutral status copy were completed during this gate; final source policy/rotation cases separately passed 22/22 afterwards. Engineering warm probe has separate executable evidence."
+    },
+    "rust_tests": {
+      "status": "passed",
+      "tests": 12,
+      "seconds": 0.91,
+      "build_seconds": 1.58,
+      "build_timing": "warm offline build, not startup latency",
+      "command": ". ./scripts/dev-env.ps1; cargo test --offline --manifest-path apps/desktop/src-tauri/Cargo.toml; cargo build --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
+    },
+    "stream_failure_and_evidence_tests": {
+      "passed": 10,
+      "seconds": 2.68
+    },
+    "minimum_report_headroom_and_stream_checks": {
+      "passed": 17,
+      "seconds": 2.04,
+      "minimum_output_reservation": 826,
+      "tokenizer_calibrated": false
+    },
+    "provider_stream_readiness_focused": {
+      "passed": 92,
+      "seconds": 7.52
+    },
+    "readiness_integrity_firewall": {
+      "passed": 13,
+      "seconds": 3.58,
+      "before_fix": "2 failed / 1 passed: readiness-first did not submit; raw TimeoutError escaped"
+    },
+    "security": {
+      "status": "passed",
+      "configured_key_isolation": true,
+      "git_diff_check": true,
+      "engineering_scripts_compile": true,
+      "warm_probe_lint": "passed with intentional sys.path/import E402 exception",
+      "protected_account_requests": 0,
+      "cloud_model_requests": 0
+    },
+    "source_and_history_integrity": "passed: recorded source hashes match; project HEAD unchanged; failed live and full-run evidence have no Git diff",
+    "final_policy_focus": {
+      "status": "passed",
+      "tests": 22,
+      "seconds": 2.46,
+      "log": ".cache/verification/m3-final-policy-focus-20261115.log"
+    }
+  },
+  "project_inspector_closure": {
+    "checkpoint_date": "2026-11-16 Asia/Calcutta",
+    "captured_at": "2026-11-16T07:31:54.885504+00:00",
+    "implementation": {
+      "diagnostic_schema_version": "1.0",
+      "captured_at": "2026-11-16T07:31:55.032940+00:00",
+      "git_head": "edafc64abca0e7340f46a4068dad4b2a33fdd6f2",
+      "working_tree_dirty": true,
+      "source_sha256": {
+        "services/broker/src/immortility_broker/app.py": "2bbe8cea4852bbab8d1732556919896bac78b06d372597174b66b30fe92315f9",
+        "services/broker/src/immortility_broker/agent_bridge.py": "30aedbeb23682d3bc841f76a244fa7c4ee781838d0535192f0e2ac56d0d6526d",
+        "services/broker/src/immortility_broker/semantic_stream.py": "612e77042d43fbfc693c84a96d5be3a10e75516497206c6d042a3b8dc1754eb0",
+        "services/broker/src/immortility_broker/provider_stream.py": "7f5aa8168a29b6729e20cadf6d20da28fcbec8cda007c98ce630bdc266a7575d",
+        "services/broker/src/immortility_broker/policy.py": "80a855b429cacfcc8b322f93421d2f9ecab36d1010fae92847593ca8a3dbabdb",
+        "services/broker/src/immortility_broker/ledger.py": "82cce2d35ebced154e38b829dabedc3d961b023f24fd0974b76feeb331ad826d",
+        "services/broker/src/immortility_broker/providers.py": "3796f195d330729dcb46a0f013ab72882da0061b451316cd7656b07d60cca5fe",
+        "services/broker/src/immortility_broker/hermes.py": "66319e7e98970d2cfb182af193c4237d4ef1a1b8e726ea336bda5ec5c14f3c8f",
+        "services/broker/src/immortility_broker/artifacts.py": "71a8340ca1f9562cfcff5d29bd23c8bf7c9083067de8d579c3b0df7ae4134d74",
+        "services/broker/src/immortility_broker/evidence.py": "e42777a2dce97a6e4c66b1ed0bf2bbdc7082ec33b16c81bdda79c31fd1f2effb",
+        "scripts/smoke-research-report.py": "7ee6fa1fbeedaeacf784067990d3f5a9f8d02e50262a3fbbc6940713cefaff4f",
+        "integrations/artifacts/report_worker.py": "1e34bf7d0208ecedef9b876e087d813b356624b2f57ccb281c06b248f6a22165",
+        "integrations/mcp-standard/agent_bridge.py": "7ccd6da1beaadfb193b7896273ac99f6a5e4ae47cd59c3eafd2ce74ae7f90acd",
+        "packages/contracts/schemas/task-request.schema.json": "a1a5b4ed264c5cb9e6a8476011d86ddd7226e34ef53d3da63df1a7eb0769b2bf",
+        "packages/contracts/schemas/event.schema.json": "a9ac826d94fadc7b0a805e23a79a1eece2b8f7e42e4f7a602e68054b8dc9170c",
+        "config/agent-bridge-runtime.json": "812e1f304f8d5277107c80dc9a729ea3ca22f10d3d3af3f5b924425496a0cc1b"
+      },
+      "contract_version": "1.0",
+      "database_schema_version": 4,
+      "python": "3.13.11",
+      "platform": "Windows",
+      "packages": {
+        "httpx": "0.28.1",
+        "pydantic": "2.11.4",
+        "fastapi": "0.162.5"
+      }
+    },
+    "primary_feature": "Project Inspector CLOSED; offline verified and native subset verified",
+    "scope_frozen": true,
+    "optional_feature_started": false,
+    "M3_release": "BLOCKED: direct account/model qualification and separately authorized live tool execution",
+    "checks": {
+      "scripts/check.ps1": {
+        "status": "passed",
+        "exit_code": 0,
+        "python_tests": 455,
+        "python_seconds": 110.02,
+        "frontend_tests": 85,
+        "frontend_seconds": 2.47,
+        "mypy_sources": 51,
+        "python_format_files": 103,
+        "contracts_lint_format_types": "passed",
+        "frontend_build_seconds": 2.98,
+        "log": ".cache/verification/project-close-91210ab3-624b-4fca-91d6-d02e5ca3ad06/final-check-repaired.log",
+        "log_sha256": "20ddea963e4eddf91eafb6e223722c73bc2da63d95a5828b9fafa99be01f4f79"
+      },
+      "rust_tests": {
+        "status": "passed",
+        "tests": 13,
+        "seconds": 0.91,
+        "compile_seconds": 29.56,
+        "command": ". ./scripts/dev-env.ps1; cargo test --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
+      },
+      "native_build": {
+        "status": "passed",
+        "seconds": 19.43,
+        "command": ". ./scripts/dev-env.ps1; cargo build --offline --manifest-path apps/desktop/src-tauri/Cargo.toml"
+      },
+      "focused_frontend_transport": {
+        "status": "passed",
+        "tests": 22,
+        "seconds": 0.92
+      },
+      "project_workspace_workflows": {
+        "status": "passed",
+        "tests": 40,
+        "seconds": 24.39
+      },
+      "native_fixture_scope": {
+        "status": "passed",
+        "tests": 2,
+        "seconds": 1.79
+      },
+      "security": {
+        "status": "passed",
+        "configured_key_isolation": true,
+        "git_diff_check": true,
+        "engineering_script_compilation": true,
+        "new_cloud_model_calls": 0,
+        "new_protected_account_requests": 0
+      }
+    },
+    "native_acceptance": {
+      "evidence": ".cache/verification/project-inspector-native-close-1459f04a-9d4b-4751-a2fd-09512122b8a3.json",
+      "sha256": "6b2f078e24897bb2219504166cabe68d60b76c4242d3062d4353ecb4ed95ef21",
+      "cases": [
+        "folder selection without write authority",
+        "explicit view consent",
+        "actual literal search: answer=42",
+        "actual file page, range and SHA-256",
+        "protected .env refusal",
+        "scope restored after native restart; view consent cleared",
+        "root switch clears consent and prior receipt",
+        "explicit queued-task cancellation",
+        "replacement-root search: answer=99",
+        "broker restart/recovery with consent cleared",
+        "revoke while view consent unchecked"
+      ],
+      "limitations": [
+        "Transient disconnected header not sampled; disabled-state logic is presenter-test coverage",
+        "Native cancellation used queue delay before I/O; actual scanner-thread cancellation is backend-test coverage",
+        "No physical voice, general computer-control or real model acceptance"
+      ],
+      "task_count": 7,
+      "model_dispatches": 0,
+      "cleanup_confirmed": true
+    },
+    "confirmed_repairs": [
+      "Root changes invalidate view consent and results",
+      "Legacy workspace-root changes revoke project-read availability",
+      "Active tasks block project/workspace changes",
+      "Revocation does not require checked view consent",
+      "Duplicate submission/cancellation guards",
+      "Explicit retries retain idempotency key after unknown submission failure",
+      "Read-only reconnect and stale receipt/task rejection",
+      "Actual task/tool event presentation",
+      "Unexpected error paths/tokens are not echoed",
+      "File page ranges reflect clipped text; out-of-range page refused",
+      "Search output respects payload budget"
+    ],
+    "historical_failed_gate": {
+      "path": ".cache/verification/project-close-91210ab3-624b-4fca-91d6-d02e5ca3ad06/final-check.log",
+      "python_passed": 454,
+      "python_failed": 1,
+      "seconds": 111.41,
+      "reason": "Stale Gemini/NVIDIA health-status text expectation from before provider-neutral policy. Runtime was correct; fixture text updated and readiness-false/non-disclosure checks retained/strengthened."
+    },
+    "environment_notes": [
+      "Initial lint dependency read encountered EBUSY; later read passed without dependency changes",
+      "Sandboxed focused Python invocation was interrupted after no progress; reviewed host invocation passed with unchanged deadlines",
+      "Existing Starlette deprecation and large avatar-chunk warnings retained"
+    ],
+    "performance": {
+      "successful_native_tool_event_wall_deltas_ms": [
+        33.369,
+        28.009,
+        28.762,
+        31.838
+      ],
+      "interpretation": "Four tiny synthetic-project reads only. UTC event deltas, not monotonic UI latency, p95 or a speedup benchmark. CPU/RAM/GPU overhead unmeasured in this slice.",
+      "limits": {
+        "entries": 2000,
+        "total_read_bytes": 2097152,
+        "file_bytes": 262144,
+        "matches": 32,
+        "search_seconds": 3,
+        "tool_deadline_ms": 5000
+      }
+    },
+    "architecture": {
+      "Hermes_primary": true,
+      "broker_sole_authority": true,
+      "Engine_Store_durable_owner": true,
+      "production_warm_reuse": false,
+      "excluded_forward_providers": [
+        "OpenRouter",
+        "OmniRoute"
+      ],
+      "direct_production_routes_qualified": false,
+      "local_model_installed": false,
+      "DOCX_publication_enabled": false
+    },
+    "remaining": [
+      "No qualified live direct-provider route or separately authorized real-model tool acceptance",
+      "Warm MCP credential crossing remains blocked; safe per-task Hermes unchanged",
+      "Native scanner-thread interruption is backend-test coverage; native Stop used a queued task",
+      "Transient disconnected header not sampled in the short native restart; presenter tests cover disconnected controls",
+      "Large-project hardware/idle-soak performance not measured"
+    ],
+    "next_step": "Qualify one direct Groq account/model for zero-cost execution and prepare one separately authorized public Hermes tool task; do not repeat consumed metadata approval.",
+    "changed_source_sha256": {
+      "apps/desktop/src/ProjectInspector.test.tsx": "31d3e83a2b27effc63563c2101a32b5ed783b64de68015781f322f0333bbfeee",
+      "apps/desktop/src/projectInspection.ts": "519f3abe902ee5c1cda1f82fef6a7b31ede90836418fb7727adc324c7f3a29c9",
+      "scripts/check-direct-model.py": "b4e1566717b3e5d78a2120ae4b1e870af2344f67dd920d56de554422ab30b81b",
+      "scripts/native_project_fixture.py": "fe705406f6ba6c2d23559657fab3628408c5882d15aff7e8608202ec72b82f81",
+      "services/broker/src/immortility_broker/direct_metadata.py": "41cda70d9326f80af0f6c17aef2242f33b4edd1fcfb22ff3da6541070c4a405a",
+      "services/broker/tests/test_direct_metadata.py": "418e33f9c3b1b7fcb7b972e45e2abdbf13c29693df8e997d76fe08cf4d9b2d59",
+      "apps/desktop/src-tauri/src/main.rs": "0cbc6fd28bc4f36cdc7b0677f8317ba7489ca631ec0159c7063bf3d0308d0662",
+      "apps/desktop/src/ProjectInspector.tsx": "0df0de6866f5c01ca10bd6a399a2c8ffbfea276484aa4e081317a3b5de18e4d2",
+      "apps/desktop/src/SettingsPanel.tsx": "b8fa45bd33a7a08fb179cb7578705874d912d8c5d5e35e84dedce89fe6fd537f",
+      "apps/desktop/src/transport.test.ts": "0539fa53296f4c61a4f3d6f8d11e05617113d87325f5a4188de20e740d7f1e13",
+      "apps/desktop/src/transport.ts": "f3c422f839bd7316914412c85ddfad5905ea6e689f30b9dae9b54750d4384960",
+      "scripts/native-model-hub-broker.py": "444b8534b41d50cec034162e1616829d4efeb63e0e5a9b84c21d5f18122d80bf",
+      "scripts/smoke-model-hub-native.py": "a9a4e4000056c7d3254c2500302dc8c163ce01b4e4a0c77e67d690d3595a7497",
+      "services/broker/src/immortility_broker/app.py": "2bbe8cea4852bbab8d1732556919896bac78b06d372597174b66b30fe92315f9",
+      "services/broker/src/immortility_broker/project_inspection.py": "259f2f026b16aee404042d9fda2b7e292727fffadc94bd574b9fbc851a0e085b",
+      "services/broker/src/immortility_broker/workspace.py": "847d84141b4cc6254c6de535eb5f50f2a90093a345ca743f7c8409b5b6e844da",
+      "services/broker/tests/test_broker.py": "d642f9bac0c9967624ad558231ddda8d7ab6d4e1151b11b28cc0c8f1d7a25142",
+      "services/broker/tests/test_native_event_fixture.py": "bf23f92030b37137fd29f4fd0aa6915bffb6ea8f3d5b796757788a0463e78e65",
+      "services/broker/tests/test_project_inspection.py": "692ff468c0941d508a156784175c77838b8814eeaf8dc705c175b6c31e568567"
+    },
+    "observed_dirty_state": [
+      " M apps/desktop/src-tauri/src/main.rs",
+      " M apps/desktop/src/ProjectInspector.tsx",
+      " M apps/desktop/src/SettingsPanel.tsx",
+      " M apps/desktop/src/transport.test.ts",
+      " M apps/desktop/src/transport.ts",
+      " M docs/implementation/CURRENT_STATUS.md",
+      " M docs/implementation/M3_VERIFICATION.json",
+      " M scripts/native-model-hub-broker.py",
+      " M scripts/smoke-model-hub-native.py",
+      " M services/broker/src/immortility_broker/app.py",
+      " M services/broker/src/immortility_broker/project_inspection.py",
+      " M services/broker/src/immortility_broker/workspace.py",
+      " M services/broker/tests/test_broker.py",
+      " M services/broker/tests/test_native_event_fixture.py",
+      " M services/broker/tests/test_project_inspection.py",
+      "?? apps/desktop/src/ProjectInspector.test.tsx",
+      "?? apps/desktop/src/projectInspection.ts",
+      "?? docs/implementation/FINAL_PRODUCT_SLICE_DIRECTIVE_2026-11-16.md",
+      "?? docs/implementation/MAIN_PRODUCT_BUILD_DIRECTIVE_2026-11-16.md",
+      "?? docs/implementation/PRODUCT_BUILD_CHECKPOINT_2026-11-16.md",
+      "?? scripts/check-direct-model.py",
+      "?? scripts/native_project_fixture.py",
+      "?? services/broker/src/immortility_broker/direct_metadata.py",
+      "?? services/broker/tests/test_direct_metadata.py"
+    ],
+    "source_scope_note": "Includes retained pre-session changes. No authorship or Git mutation is implied.",
+    "evidence_path": ".cache/verification/project-inspector-final-verification-fdacc1cd-7be7-452d-b28e-3e4ba32cef58.json"
+  }
 }

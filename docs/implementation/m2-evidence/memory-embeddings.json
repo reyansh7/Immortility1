@@ -1,0 +1,621 @@
+{
+  "model": "nomic-embed-text",
+  "dim": 768,
+  "endpoint": "loopback 127.0.0.1:11434 (fixed in code)",
+  "data": "synthetic: 15 memories, 4 direct + 16 paraphrase (tuning) + 10 held-out questions, 8 unrelated",
+  "embed_first_call_ms": 375.4,
+  "embed_query_ms": {
+    "median": 38.8,
+    "max": 41.6
+  },
+  "cosine": {
+    "expected_pairs": {
+      "min": 0.511,
+      "median": 0.66
+    },
+    "other_pairs": {
+      "median": 0.459,
+      "p95": 0.538,
+      "max": 0.604
+    },
+    "unrelated_best": {
+      "max": 0.535
+    },
+    "floor": 0.5,
+    "min": 0.56
+  },
+  "lexical": {
+    "direct": {
+      "n": 4,
+      "recall@1": 4,
+      "recall@3": 4
+    },
+    "paraphrase": {
+      "n": 16,
+      "recall@1": 3,
+      "recall@3": 3
+    },
+    "held_out": {
+      "n": 10,
+      "recall@1": 7,
+      "recall@3": 7
+    },
+    "unrelated_with_any_recall": 0,
+    "search_ms_median": 0.1
+  },
+  "hybrid": {
+    "direct": {
+      "n": 4,
+      "recall@1": 4,
+      "recall@3": 4
+    },
+    "paraphrase": {
+      "n": 16,
+      "recall@1": 11,
+      "recall@3": 14
+    },
+    "held_out": {
+      "n": 10,
+      "recall@1": 9,
+      "recall@3": 10
+    },
+    "unrelated_with_any_recall": 0,
+    "search_ms_median": 11.1
+  },
+  "rows": {
+    "lexical": [
+      {
+        "q": "what is my name",
+        "kind": "direct",
+        "top1": true,
+        "top3": true,
+        "top_body": "My name is Arjun",
+        "ms": 0.3
+      },
+      {
+        "q": "where do I live",
+        "kind": "direct",
+        "top1": true,
+        "top3": true,
+        "top_body": "I live in Pune",
+        "ms": 0.1
+      },
+      {
+        "q": "which dog do I have",
+        "kind": "direct",
+        "top1": true,
+        "top3": true,
+        "top_body": "My dog is a beagle called Bruno",
+        "ms": 0.1
+      },
+      {
+        "q": "what graphics card is in my laptop",
+        "kind": "direct",
+        "top1": true,
+        "top3": true,
+        "top_body": "My laptop has an RTX 4060 graphics card",
+        "ms": 0.1
+      },
+      {
+        "q": "which car do I own",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "what vehicle is parked at my place",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "what is my pet's breed",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "can I have an omelette",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "what food restrictions do I follow",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "what should happen before I push code",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "I always run pytest before committing",
+        "ms": 0.1
+      },
+      {
+        "q": "which programming languages does the assistant use",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": "Use metric units when you answer",
+        "ms": 0.1
+      },
+      {
+        "q": "what theme do I like in my IDE",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "what is my sibling doing at university",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": "I am vegetarian and do not eat eggs",
+        "ms": 0.1
+      },
+      {
+        "q": "when do I want my evening report",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "what GPU do I have",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "which antibiotic should a doctor avoid giving me",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "what musical instrument do I play",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "I play the tabla on weekends",
+        "ms": 0.1
+      },
+      {
+        "q": "should you use miles or kilometres",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "Use metric units when you answer",
+        "ms": 0.1
+      },
+      {
+        "q": "which IPL side do I support",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "which city am I based in",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": "I drive a grey Honda City",
+        "ms": 0.1
+      },
+      {
+        "q": "what do people call me",
+        "kind": "held_out",
+        "top1": false,
+        "top3": false,
+        "top_body": "My dog is a beagle called Bruno",
+        "ms": 0.1
+      },
+      {
+        "q": "what's the model of my car",
+        "kind": "held_out",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "tell me about Bruno",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "My dog is a beagle called Bruno",
+        "ms": 0.0
+      },
+      {
+        "q": "do I eat meat",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "I am vegetarian and do not eat eggs",
+        "ms": 0.1
+      },
+      {
+        "q": "what is my brother or sister studying",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "My sister Meera studies medicine in Manipal",
+        "ms": 0.1
+      },
+      {
+        "q": "which medicines am I allergic to",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "I am allergic to penicillin",
+        "ms": 0.1
+      },
+      {
+        "q": "what do I do on Saturdays",
+        "kind": "held_out",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 0.0
+      },
+      {
+        "q": "who do I cheer for in cricket",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "My favourite cricket team is Mumbai Indians",
+        "ms": 0.1
+      },
+      {
+        "q": "what town is my home",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "I live in Pune",
+        "ms": 0.1
+      },
+      {
+        "q": "light or dark theme for coding",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "I prefer dark mode for editors",
+        "ms": 0.1
+      }
+    ],
+    "hybrid": [
+      {
+        "q": "what is my name",
+        "kind": "direct",
+        "top1": true,
+        "top3": true,
+        "top_body": "My name is Arjun",
+        "ms": 11.9
+      },
+      {
+        "q": "where do I live",
+        "kind": "direct",
+        "top1": true,
+        "top3": true,
+        "top_body": "I live in Pune",
+        "ms": 11.1
+      },
+      {
+        "q": "which dog do I have",
+        "kind": "direct",
+        "top1": true,
+        "top3": true,
+        "top_body": "My dog is a beagle called Bruno",
+        "ms": 10.6
+      },
+      {
+        "q": "what graphics card is in my laptop",
+        "kind": "direct",
+        "top1": true,
+        "top3": true,
+        "top_body": "My laptop has an RTX 4060 graphics card",
+        "ms": 11.2
+      },
+      {
+        "q": "which car do I own",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "I drive a grey Honda City",
+        "ms": 11.1
+      },
+      {
+        "q": "what vehicle is parked at my place",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "I drive a grey Honda City",
+        "ms": 11.5
+      },
+      {
+        "q": "what is my pet's breed",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "My dog is a beagle called Bruno",
+        "ms": 11.2
+      },
+      {
+        "q": "can I have an omelette",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 9.6
+      },
+      {
+        "q": "what food restrictions do I follow",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": false,
+        "top_body": null,
+        "ms": 10.9
+      },
+      {
+        "q": "what should happen before I push code",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "I always run pytest before committing",
+        "ms": 11.6
+      },
+      {
+        "q": "which programming languages does the assistant use",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": true,
+        "top_body": "Use metric units when you answer",
+        "ms": 11.0
+      },
+      {
+        "q": "what theme do I like in my IDE",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "I prefer dark mode for editors",
+        "ms": 10.9
+      },
+      {
+        "q": "what is my sibling doing at university",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": true,
+        "top_body": "I am vegetarian and do not eat eggs",
+        "ms": 11.3
+      },
+      {
+        "q": "when do I want my evening report",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "Send me the daily summary at 9 pm",
+        "ms": 10.8
+      },
+      {
+        "q": "what GPU do I have",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "My laptop has an RTX 4060 graphics card",
+        "ms": 10.9
+      },
+      {
+        "q": "which antibiotic should a doctor avoid giving me",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "I am allergic to penicillin",
+        "ms": 11.3
+      },
+      {
+        "q": "what musical instrument do I play",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "I play the tabla on weekends",
+        "ms": 11.0
+      },
+      {
+        "q": "should you use miles or kilometres",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "Use metric units when you answer",
+        "ms": 11.4
+      },
+      {
+        "q": "which IPL side do I support",
+        "kind": "paraphrase",
+        "top1": true,
+        "top3": true,
+        "top_body": "My favourite cricket team is Mumbai Indians",
+        "ms": 11.0
+      },
+      {
+        "q": "which city am I based in",
+        "kind": "paraphrase",
+        "top1": false,
+        "top3": true,
+        "top_body": "I drive a grey Honda City",
+        "ms": 11.1
+      },
+      {
+        "q": "what do people call me",
+        "kind": "held_out",
+        "top1": false,
+        "top3": true,
+        "top_body": "My dog is a beagle called Bruno",
+        "ms": 11.0
+      },
+      {
+        "q": "what's the model of my car",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "I drive a grey Honda City",
+        "ms": 11.1
+      },
+      {
+        "q": "tell me about Bruno",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "My dog is a beagle called Bruno",
+        "ms": 11.2
+      },
+      {
+        "q": "do I eat meat",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "I am vegetarian and do not eat eggs",
+        "ms": 11.2
+      },
+      {
+        "q": "what is my brother or sister studying",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "My sister Meera studies medicine in Manipal",
+        "ms": 11.1
+      },
+      {
+        "q": "which medicines am I allergic to",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "I am allergic to penicillin",
+        "ms": 10.7
+      },
+      {
+        "q": "what do I do on Saturdays",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "I play the tabla on weekends",
+        "ms": 11.2
+      },
+      {
+        "q": "who do I cheer for in cricket",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "My favourite cricket team is Mumbai Indians",
+        "ms": 10.8
+      },
+      {
+        "q": "what town is my home",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "I live in Pune",
+        "ms": 11.8
+      },
+      {
+        "q": "light or dark theme for coding",
+        "kind": "held_out",
+        "top1": true,
+        "top3": true,
+        "top_body": "I prefer dark mode for editors",
+        "ms": 11.1
+      }
+    ]
+  },
+  "unrelated": {
+    "lexical": [
+      {
+        "q": "what is the capital of Peru",
+        "recalled": []
+      },
+      {
+        "q": "explain how photosynthesis works",
+        "recalled": []
+      },
+      {
+        "q": "convert 5 dollars to rupees",
+        "recalled": []
+      },
+      {
+        "q": "who wrote Hamlet",
+        "recalled": []
+      },
+      {
+        "q": "what is the boiling point of water",
+        "recalled": []
+      },
+      {
+        "q": "how tall is Mount Everest",
+        "recalled": []
+      },
+      {
+        "q": "translate good morning into French",
+        "recalled": []
+      },
+      {
+        "q": "what year did the Second World War end",
+        "recalled": []
+      }
+    ],
+    "hybrid": [
+      {
+        "q": "what is the capital of Peru",
+        "recalled": []
+      },
+      {
+        "q": "explain how photosynthesis works",
+        "recalled": []
+      },
+      {
+        "q": "convert 5 dollars to rupees",
+        "recalled": []
+      },
+      {
+        "q": "who wrote Hamlet",
+        "recalled": []
+      },
+      {
+        "q": "what is the boiling point of water",
+        "recalled": []
+      },
+      {
+        "q": "how tall is Mount Everest",
+        "recalled": []
+      },
+      {
+        "q": "translate good morning into French",
+        "recalled": []
+      },
+      {
+        "q": "what year did the Second World War end",
+        "recalled": []
+      }
+    ]
+  }
+}

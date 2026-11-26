@@ -40,11 +40,23 @@ class TaskRequest(BaseModel):
     privacy_class: Literal["public", "personal"] = "personal"
     cloud_consent: Literal[True]
     source: Literal["text", "voice"] = "text"
+    # "screen": the content is text the user pointed at ("Explain this"). Local model only,
+    # never captured as memory, never a trigger for tools, web lookups or pointer moves.
+    origin: Literal["typed", "screen"] = "typed"
     response_length: Literal["brief", "normal", "detailed"] = "normal"
     budget_mode: Literal["auto", "fast", "standard", "deep"] = "auto"
     requested_artifacts: Literal["none", "markdown-and-pdf"] = "none"
     allowed_capabilities: list[
-        Literal["arithmetic.add.v1", "clock.now.v1", "public.research.v1", "report.create.v1"]
+        Literal[
+            "arithmetic.add.v1",
+            "arithmetic.multiply.v1",
+            "clock.now.v1",
+            "public.research.v1",
+            "report.create.v1",
+            "project.outline.v1",
+            "project.search.v1",
+            "project.read.v1",
+        ]
     ] = Field(default_factory=list, max_length=4)
 
     @field_validator("allowed_capabilities")

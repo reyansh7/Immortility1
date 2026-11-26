@@ -1,0 +1,237 @@
+{
+ "hermes": "0.23.3 gateway (real), isolated canary",
+ "typed_tool_schemas": true,
+ "warmup": {
+  "state": "done",
+  "ms": 4286.9,
+  "error": null,
+  "calls_answered_locally": 1,
+  "ready_after_start_ms": 18091.5
+ },
+ "broker_start_ms": 13799.7,
+ "port_8642_open_after_stop": false,
+ "process": {
+  "broker_pid": 23380,
+  "gateway_pid": 10460,
+  "psutil": "unavailable: ModuleNotFoundError",
+  "snapshot": "{\"count\":8,\"ws_mb\":585.8}"
+ },
+ "cold_first_turn": {
+  "e2e_ms": 327.9,
+  "run_started_ms": 51.2,
+  "model_route_ms": 209.3,
+  "preflight_ms": 11.1,
+  "first_delta_ms": 229.3,
+  "gateway_cold_start_ms": 13306.6
+ },
+ "deterministic": {
+  "passed": 50,
+  "total": 50,
+  "by_kind_warm": {
+   "chat": {
+    "passed": 15,
+    "total": 15,
+    "e2e_ms": {
+     "n": 14,
+     "p50": 316.2,
+     "p95": 332.4,
+     "max": 333.9
+    },
+    "first_delta_ms": {
+     "n": 14,
+     "p50": 215.7,
+     "p95": 223.9,
+     "max": 224.3
+    },
+    "run_started_ms": {
+     "n": 14,
+     "p50": 42.0,
+     "p95": 47.1,
+     "max": 52.6
+    },
+    "model_route_ms": {
+     "n": 14,
+     "p50": 197.4,
+     "p95": 207.4,
+     "max": 210.4
+    },
+    "preflight_ms": {
+     "n": 14,
+     "p50": 3.3,
+     "p95": 4.0,
+     "max": 13.3
+    }
+   },
+   "clock": {
+    "passed": 10,
+    "total": 10,
+    "e2e_ms": {
+     "n": 10,
+     "p50": 452.8,
+     "p95": 807.3,
+     "max": 807.3
+    },
+    "first_delta_ms": {
+     "n": 10,
+     "p50": 346.5,
+     "p95": 719.2,
+     "max": 719.2
+    },
+    "run_started_ms": {
+     "n": 10,
+     "p50": 42.6,
+     "p95": 55.1,
+     "max": 55.1
+    },
+    "model_route_ms": {
+     "n": 10,
+     "p50": 194.3,
+     "p95": 218.7,
+     "max": 218.7
+    },
+    "preflight_ms": {
+     "n": 10,
+     "p50": 3.8,
+     "p95": 10.0,
+     "max": 10.0
+    }
+   },
+   "steps": {
+    "passed": 10,
+    "total": 10,
+    "e2e_ms": {
+     "n": 10,
+     "p50": 619.0,
+     "p95": 650.9,
+     "max": 650.9
+    },
+    "first_delta_ms": {
+     "n": 10,
+     "p50": 490.0,
+     "p95": 512.7,
+     "max": 512.7
+    },
+    "run_started_ms": {
+     "n": 10,
+     "p50": 44.1,
+     "p95": 53.0,
+     "max": 53.0
+    },
+    "model_route_ms": {
+     "n": 10,
+     "p50": 199.8,
+     "p95": 217.6,
+     "max": 217.6
+    },
+    "preflight_ms": {
+     "n": 10,
+     "p50": 4.3,
+     "p95": 6.1,
+     "max": 6.1
+    }
+   },
+   "duplicate": {
+    "passed": 8,
+    "total": 8,
+    "e2e_ms": {
+     "n": 8,
+     "p50": 311.5,
+     "p95": 324.6,
+     "max": 324.6
+    },
+    "first_delta_ms": {
+     "n": 8,
+     "p50": 209.9,
+     "p95": 222.7,
+     "max": 222.7
+    },
+    "run_started_ms": {
+     "n": 8,
+     "p50": 42.3,
+     "p95": 44.9,
+     "max": 44.9
+    },
+    "model_route_ms": {
+     "n": 8,
+     "p50": 194.1,
+     "p95": 207.2,
+     "max": 207.2
+    },
+    "preflight_ms": {
+     "n": 8,
+     "p50": 3.1,
+     "p95": 3.5,
+     "max": 3.5
+    }
+   },
+   "inject": {
+    "passed": 7,
+    "total": 7,
+    "e2e_ms": {
+     "n": 7,
+     "p50": 486.5,
+     "p95": 519.1,
+     "max": 519.1
+    },
+    "first_delta_ms": {
+     "n": 7,
+     "p50": 347.5,
+     "p95": 401.2,
+     "max": 401.2
+    },
+    "run_started_ms": {
+     "n": 7,
+     "p50": 43.7,
+     "p95": 46.0,
+     "max": 46.0
+    },
+    "model_route_ms": {
+     "n": 7,
+     "p50": 197.5,
+     "p95": 216.1,
+     "max": 216.1
+    },
+    "preflight_ms": {
+     "n": 7,
+     "p50": 4.1,
+     "p95": 5.6,
+     "max": 5.6
+    }
+   }
+  },
+  "warm_e2e_ms": {
+   "n": 49,
+   "p50": 434.5,
+   "p95": 632.4,
+   "max": 807.3
+  },
+  "warm_first_delta_ms": {
+   "n": 22,
+   "p50": 213.7,
+   "p95": 223.9,
+   "max": 224.3
+  }
+ },
+ "adversarial": {
+  "passed": 27,
+  "total": 27,
+  "prohibited_tool_started": 0
+ },
+ "adversarial_failures": [],
+ "deterministic_failures": [],
+ "cancel": {
+  "client_ms": {
+   "n": 5,
+   "p50": 178.0,
+   "p95": 186.1,
+   "max": 186.1
+  },
+  "broker_latency_ms": {
+   "n": 5,
+   "p50": 140.5,
+   "p95": 141.3,
+   "max": 141.3
+  },
+  "confirmed": 5
+ }
+}

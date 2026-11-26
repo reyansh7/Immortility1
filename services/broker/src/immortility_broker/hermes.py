@@ -4,10 +4,12 @@ import ast
 from .process_owner import ProcessOwner, reap, spawn_owned
 import asyncio
 import contextlib
+import hashlib
 import json
 import os
 import subprocess
 import tempfile
+import time
 import tomllib
 from collections.abc import AsyncIterator
 from pathlib import Path
@@ -37,7 +39,71 @@ def toolsets(source: Path) -> list[str]:
     raise BrokerError("hermes_incompatible", "Cannot verify Hermes toolset catalog.")
 
 
+def _runtime_fingerprint(settings: Settings) -> str:
+    source = settings.hermes_source
+    chunks = [str(source), settings.hermes_revision]
+    head = source / ".git" / "HEAD"
+    if head.is_file():
+        text = head.read_text(encoding="utf-8")
+        chunks.append(text)
+        if text.startswith("ref:"):
+            ref = source / ".git" / text.split(" ", 1)[1].strip()
+            if ref.is_file():
+                chunks.append(ref.read_text(encoding="utf-8"))
+    for relative in ("pyproject.toml", "toolsets.py", "tui_gateway/entry.py", ".git/index"):
+        path = source / relative
+        if path.is_file():
+            stat = path.stat()
+            chunks.append(f"{relative}:{stat.st_mtime_ns}:{stat.st_size}")
+        else:
+            chunks.append(relative + ":missing")
+    return hashlib.sha256("\n".join(chunks).encode()).hexdigest()
+
+
+def _cached_runtime(settings: Settings, fingerprint: str) -> dict[str, str] | None:
+    path = settings.data_dir / "hermes-runtime-cache.json"
+    try:
+        cached = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    result = cached.get("result") if isinstance(cached, dict) else None
+    if (
+        isinstance(cached, dict)
+        and cached.get("fingerprint") == fingerprint
+        and isinstance(result, dict)
+        and result.get("status") == "available"
+        and result.get("version") == REVIEWED_VERSION
+        and result.get("revision")
+    ):
+        return {key: str(result[key]) for key in ("status", "version", "revision")}
+    return None
+
+
+def _remember_runtime(settings: Settings, fingerprint: str, result: dict[str, str]) -> None:
+    if result.get("status") != "available":
+        return
+    path = settings.data_dir / "hermes-runtime-cache.json"
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(
+            json.dumps({"fingerprint": fingerprint, "result": result}, sort_keys=True),
+            encoding="utf-8",
+        )
+    except OSError:
+        return
+
+
 def runtime_check(settings: Settings) -> dict[str, str]:
+    fingerprint = _runtime_fingerprint(settings)
+    cached = _cached_runtime(settings, fingerprint)
+    if cached is not None:
+        return cached
+    result = _runtime_check_now(settings)
+    _remember_runtime(settings, fingerprint, result)
+    return result
+
+
+def _runtime_check_now(settings: Settings) -> dict[str, str]:
     source = settings.hermes_source
     python = source / "venv/Scripts/python.exe"
     if not python.is_file() or not (source / "tui_gateway/entry.py").is_file():
@@ -143,7 +209,8 @@ def isolated_config(
     companion = (
         "You are Immortility, the user's Windows assistant, running through Hermes. "
         "Use Immortility as your assistant identity; a provider's default persona is not your product identity. "
-        "The free provider route does not establish the underlying model's identity; say it is unknown when not verified. "
+        "Never claim to be Particle-1, Particle AI, or any other product. "
+        "When asked which model is answering, give only the verified provider and model id supplied for this turn. "
         "Be concise, warm and candid about uncertainty. Never claim you performed an action based only on model text. "
         "No direct tools are available in this Hermes session. "
         + {
@@ -182,6 +249,18 @@ def isolated_config(
         # Short, reviewed guidance for the fixed v1 report contract. Full typed
         # schemas still validate every proposal inside the broker gateway.
         for entry in compact:
+            if str(entry["name"]).startswith("project."):
+                arguments = entry.get("arguments")
+                if isinstance(arguments, dict):
+                    arguments.pop("scope_id", None)
+                entry["required"] = [
+                    item for item in entry.get("required", []) if item != "scope_id"
+                ]
+                entry["note"] = (
+                    "The broker binds the authorized project. Do not send scope_id. "
+                    "Call outline once, then at most one search and one read, then answer. "
+                    "Name a file, framework, or command only when that text appeared in a tool result."
+                )
             if entry["name"] == "report.create.v1":
                 entry.clear()
                 entry.update(
@@ -221,7 +300,16 @@ def isolated_config(
             "api_mode": "chat_completions",
         },
         "agent": {
-            "max_turns": 1 if role else 3 if broker_schemas else 2,
+            "max_turns": 1
+            if role
+            else 4
+            if broker_schemas
+            and any(
+                entry["manifest"]["name"].startswith("project.") for entry in broker_schemas
+            )
+            else 3
+            if broker_schemas
+            else 2,
             "disabled_toolsets": toolsets(source),
             "system_prompt": ROLE_PROMPTS.get(role or "", companion) + capabilities,
             "environment_probe": False,
@@ -284,6 +372,8 @@ class Hermes:
         self.response_length = "normal"
         self.broker_schemas: list[dict[str, Any]] = []
         self.tool_inventory: set[str] = set()
+        self.spawn_ms: float | None = None
+        self.ready_ms: float | None = None
         self.stopping = asyncio.Lock()
 
     async def send(self, method: str, params: dict[str, Any]) -> int:
@@ -379,6 +469,7 @@ class Hermes:
                 PYTHONUNBUFFERED="1",
             )
             try:
+                spawned = time.perf_counter()
                 self.process, self.owner = await spawn_owned(
                     str(source / "venv/Scripts/python.exe"),
                     "-m",
@@ -391,6 +482,7 @@ class Hermes:
                     limit=2 * 1024 * 1024,
                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                 )
+                self.spawn_ms = round((time.perf_counter() - spawned) * 1000, 1)
                 create_id = await self.send(
                     "session.create",
                     {
@@ -431,6 +523,7 @@ class Hermes:
                             }
                         )
                         self.tool_inventory = actual_tools
+                        self.ready_ms = round((time.perf_counter() - spawned) * 1000, 1)
                         if actual_tools != expected_tools:
                             raise BrokerError(
                                 "tools_enabled", "Hermes tool inventory is not empty; blocked.", 403

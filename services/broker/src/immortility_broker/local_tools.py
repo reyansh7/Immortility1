@@ -27,6 +27,32 @@ def save_local_tools_file(settings: Any, enabled: bool) -> None:
     settings.local_tools_enabled = enabled
 
 
+def _zone_label(moment: datetime) -> str:
+    """'IST, UTC+05:30'. Windows names zones in words ('India Standard Time') → initials."""
+    name = moment.tzname() or ""
+    if " " in name:
+        name = "".join(word[0] for word in name.split() if word[:1].isalpha()).upper()
+    offset = moment.strftime("%z")
+    offset = f"UTC{offset[:3]}:{offset[3:]}" if offset else "UTC"
+    return f"{name}, {offset}" if name and not name.startswith(("UTC", "+", "-")) else offset
+
+
+def clock_reading(now: datetime | None = None) -> dict[str, str]:
+    """K23: the clock answers in the PC's local time with an explicit offset, plus a ready
+    display string, so a small model never has to convert from UTC itself."""
+    moment = (now or datetime.now(timezone.utc)).astimezone()
+    hour = moment.strftime("%I").lstrip("0") or "12"
+    display = (
+        f"{hour}:{moment.strftime('%M %p')} on {moment.strftime('%A')} "
+        f"{moment.day} {moment.strftime('%B %Y')} ({_zone_label(moment)})"
+    )
+    return {
+        "timestamp": moment.isoformat(timespec="seconds"),
+        "utc": moment.astimezone(timezone.utc).isoformat(timespec="seconds"),
+        "local": display,
+    }
+
+
 def call_local_tool(name: str, enabled: bool) -> dict[str, str]:
     if not enabled or name not in AUTHORIZED:
         raise BrokerError("tool_denied", "That tool is not authorized.", 403)

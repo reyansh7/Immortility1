@@ -28,8 +28,10 @@ export function operation(
       ...(runtime[1] === undefined ? {} : { id: runtime[1] }),
     };
   if (path === "/v1/models" && !post) return { operation: "model_catalog" };
-  if (path === "/v1/projects/scope" && !post) return { operation: "project_scope" };
-  if (path === "/v1/settings/project" && post) return { operation: "set_project" };
+  if (path === "/v1/projects/scope" && !post)
+    return { operation: "project_scope" };
+  if (path === "/v1/settings/project" && post)
+    return { operation: "set_project" };
   if (path === "/v1/settings/model-mode" && post)
     return { operation: "set_model_mode" };
   if (path === "/v1/sessions")
@@ -37,6 +39,8 @@ export function operation(
   if (path === "/v1/tasks" && post) return { operation: "create_task" };
   if (path === "/v1/observations" && post)
     return { operation: "start_observation" };
+  if (path === "/v1/screen/target" && post)
+    return { operation: "screen_target" };
   const observation = /^\/v1\/observations\/([a-f0-9-]{36})$/.exec(path);
   if (observation && !post)
     return { operation: "observation_result", id: observation[1] };
@@ -66,6 +70,11 @@ export function operation(
     "/v1/mcp/call": "call_mcp",
     "/v1/memory/search": "memory_search",
     "/v1/memory/delete": "memory_delete",
+    "/v1/memory/facts": "fact_save",
+    "/v1/memory/facts/correct": "fact_correct",
+    "/v1/memory/facts/search": "fact_search",
+    "/v1/memory/facts/revoke": "fact_revoke",
+    "/v1/repairs": "repair",
     "/v1/tools/call": "call_tool",
   };
   if (

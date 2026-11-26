@@ -38,6 +38,8 @@ class FakeHermes:
         yield "Hello "
         if self.mode == "slow":
             await asyncio.sleep(30)
+        if self.mode == "crash":
+            raise RuntimeError("provider socket closed")
         yield "world"
 
     async def stop(self):
@@ -105,8 +107,10 @@ def test_provider_key_is_stored_and_never_returned(settings, monkeypatch):
         health = client.get("/health/ready", headers=AUTH)
         assert secret not in health.text
         assert health.json()["providers"]["gemini"] == (
-            "key stored locally; chat stays on the free OpenRouter route"
+            "free-tier allowlist; provider quota is not reported"
         )
+        assert "OpenRouter" not in health.json()["providers"]["gemini"]
+        assert health.json()["route_admitted"] is True
         nvidia = "dummy-nvidia-key-value"
         nvidia_response = client.post(
             "/v1/settings/provider-key",
@@ -118,8 +122,10 @@ def test_provider_key_is_stored_and_never_returned(settings, monkeypatch):
         health = client.get("/health/ready", headers=AUTH)
         assert nvidia not in health.text
         assert health.json()["providers"]["nvidia"] == (
-            "key stored locally; chat stays on the free OpenRouter route"
+            "free-tier allowlist; provider quota is not reported"
         )
+        assert "OpenRouter" not in health.json()["providers"]["nvidia"]
+        assert health.json()["route_admitted"] is True
         assert health.json()["model"] == "openrouter/free"
         rejected = client.post(
             "/v1/settings/provider-key",
@@ -213,6 +219,28 @@ def test_honest_failure(settings, mode, status):
         response, _ = start(client)
         task = settled(client, response.json()["task_id"])
         assert task["status"] == status and "result" not in task
+
+
+def test_stream_crash_keeps_partial_text_and_a_failure(settings):
+    with TestClient(create_app(settings, TOKEN, factory=lambda: FakeHermes("crash"))) as client:
+        response, _ = start(client)
+        task = settled(client, response.json()["task_id"])
+        assert task["status"] == "failed"
+        assert task["result"]["text"] == "Hello "
+        assert task["result"]["partial"] is True
+
+
+def test_persistence_failure_keeps_a_finished_answer(settings, monkeypatch):
+    def broken(self, session_id, task_id, text):
+        raise RuntimeError("disk")
+
+    monkeypatch.setattr(Store, "remember", broken)
+    with TestClient(create_app(settings, TOKEN, factory=lambda: FakeHermes())) as client:
+        response, _ = start(client)
+        task = settled(client, response.json()["task_id"])
+        assert task["status"] == "succeeded"
+        assert task["result"]["text"] == "Hello world"
+        assert "error" not in task or task["error"] is None
 
 
 def test_missing_key_is_blocked(settings):

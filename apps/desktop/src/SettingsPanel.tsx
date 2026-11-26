@@ -12,6 +12,7 @@ import type { ModelSelection } from "./contracts.generated";
 export interface Health {
   credential_source?: string;
   ready: boolean;
+  simulated_inference?: boolean;
   hermes: { status: string; version?: string; message?: string };
   providers: Record<string, string>;
   free_only: boolean;
@@ -103,6 +104,12 @@ export function LocalTools({
   const [matches, setMatches] = useState<{ task_id: string; body: string }[]>(
     [],
   );
+  const [fact, setFact] = useState("");
+  const [correction, setCorrection] = useState("");
+  const [selectedFact, setSelectedFact] = useState("");
+  const [facts, setFacts] = useState<
+    { id: string; body: string; trust: string; status: string }[]
+  >([]);
   const [result, setResult] = useState("");
   return (
     <div className="workspace">
@@ -143,6 +150,89 @@ export function LocalTools({
         )}
       </div>
       {result && <p>{result}</p>}
+      <label>
+        Confirmed preference
+        <input
+          value={fact}
+          maxLength={500}
+          onChange={(event) => setFact(event.target.value)}
+        />
+      </label>
+      <button
+        type="button"
+        disabled={!fact.trim()}
+        onClick={() =>
+          void api("/v1/memory/facts", {
+            kind: "preference",
+            scope: "user",
+            text: fact,
+            confirmed: true,
+          })
+            .then(() => setResult("Preference saved on this computer."))
+            .catch((issue: unknown) =>
+              onError(message(issue, "Could not save that preference.")),
+            )
+        }
+      >
+        Save confirmed preference
+      </button>
+      <button
+        type="button"
+        disabled={!fact.trim()}
+        onClick={() =>
+          void api<{
+            matches: {
+              id: string;
+              body: string;
+              trust: string;
+              status: string;
+            }[];
+          }>("/v1/memory/facts/search", { query: fact })
+            .then((body) => {
+              setFacts(body.matches);
+              setSelectedFact(body.matches[0]?.id ?? "");
+            })
+            .catch((issue: unknown) =>
+              onError(message(issue, "Confirmed memory search failed.")),
+            )
+        }
+      >
+        Find confirmed memory
+      </button>
+      {facts.map((item) => (
+        <p key={item.id}>
+          <button type="button" onClick={() => setSelectedFact(item.id)}>
+            {item.trust}: {item.body}
+          </button>
+        </p>
+      ))}
+      <label>
+        Correction
+        <input
+          value={correction}
+          maxLength={500}
+          onChange={(event) => setCorrection(event.target.value)}
+        />
+      </label>
+      <button
+        type="button"
+        disabled={!selectedFact || !correction.trim()}
+        onClick={() =>
+          void api("/v1/memory/facts/correct", {
+            id: selectedFact,
+            text: correction,
+            confirmed: true,
+          })
+            .then(() =>
+              setResult("Preference corrected. The old value is inactive."),
+            )
+            .catch((issue: unknown) =>
+              onError(message(issue, "Could not correct that preference.")),
+            )
+        }
+      >
+        Correct selected preference
+      </button>
       <label>
         Search this conversation’s memory
         <input
@@ -248,6 +338,8 @@ export interface InterfacePrefs {
   overlay: OverlayPolicy;
   reduced: boolean;
   pin: boolean;
+  cloudChat?: boolean;
+  pace?: "auto" | "fast" | "deep";
 }
 
 export function SettingsPanel({
@@ -263,6 +355,7 @@ export function SettingsPanel({
   onPreviewOverlay,
   localCapabilities,
   onModelChange,
+  onCloudChat,
 }: {
   health: Health | undefined;
   connected?: boolean;
@@ -276,6 +369,7 @@ export function SettingsPanel({
   onPreviewOverlay: () => void;
   localCapabilities?: ReactNode;
   onModelChange?: () => void;
+  onCloudChat?: (value: boolean) => void;
 }) {
   const localOnly = health?.runtime_mode === "local-background";
   const toggle = (path: string, label: string, key: keyof Health) => (
@@ -297,26 +391,32 @@ export function SettingsPanel({
   );
   return (
     <section className="settings" aria-label="Settings">
-      <h3>Interface</h3>
-      <label>
-        3D quality
-        <select
-          value={prefs.quality}
-          onChange={(event) =>
-            setPrefs({ quality: event.target.value as Quality })
-          }
-        >
-          <option value="high">High</option>
-          <option value="balanced">Balanced</option>
-          <option value="performance">Performance</option>
-          <option value="2d">Minimal (2D, no WebGL)</option>
-        </select>
-      </label>
-      <p className="hint">
-        The launch command chooses the graphics chip for this run. Battery
-        lowers the frame rate and resolution before it changes materials.
-        Performance keeps the higher frame rate while the face is active.
-      </p>
+      <h3>Chat</h3>
+      {!localOnly && (
+        <>
+          <label>
+            <input
+              type="checkbox"
+              checked={prefs.cloudChat === true}
+              onChange={(event) => onCloudChat?.(event.target.checked)}
+            />
+            Cloud chat
+          </label>
+          <p className="hint">
+            Messages go to a qualified free model. This does not approve file
+            changes, computer control, private uploads, or paid inference.
+          </p>
+        </>
+      )}
+      {!localOnly && connected && health?.ready !== true && (
+        <>
+          <p>
+            Chat needs a qualified free model. Save a provider key here.
+            Immortility uses it only after the broker admits a free route.
+          </p>
+          <ProviderKeys health={health} onSaved={onRefresh} />
+        </>
+      )}
       <label>
         <input
           type="checkbox"
@@ -325,156 +425,189 @@ export function SettingsPanel({
         />
         Reduce motion
       </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={prefs.pin}
-          onChange={(event) => {
-            setPrefs({ pin: event.target.checked });
-            void windowAction(event.target.checked ? "pin" : "unpin");
-          }}
-        />
-        Companion stays on top
-      </label>
-      <label>
-        Work overlay
-        <select
-          value={prefs.overlay}
-          onChange={(event) =>
-            setPrefs({ overlay: event.target.value as OverlayPolicy })
-          }
-        >
-          <option value="screen-control">
-            Collapse to overlay during screen control
-          </option>
-          <option value="never">Never collapse automatically</option>
-        </select>
-      </label>
-      <p className="hint">
-        Screen control (Computer Use) is disabled, so the overlay never opens on
-        its own today. File reads and research never trigger it.
-      </p>
-      <button type="button" onClick={onPreviewOverlay}>
-        Preview work overlay — no screen access
-      </button>
-      <h3>Runtime</h3>
-      {localOnly ? (
-        <p>
-          Local background runtime attached. Tasks continue when this dashboard
-          closes.
-        </p>
-      ) : (
-        <p>
-          Hermes {health?.hermes.version ?? ""} ·{" "}
-          {health?.hermes.status ?? "unavailable"}
-          {health?.hermes.message ? ` · ${health.hermes.message}` : ""}
-        </p>
-      )}
-      <p>
-        Paid inference: blocked · Code execution: disabled · Active task:{" "}
-        {health?.active_task ?? "none"}
-      </p>
-      <button type="button" onClick={onRefresh}>
-        Check connection
-      </button>
-      <h3>Capabilities</h3>
-      {localCapabilities}
-      {toggle(
-        "/v1/settings/delegation",
-        "Specialist agents (research, coding, review). No tools.",
-        "delegation_enabled",
-      )}
-      {toggle(
-        "/v1/settings/local-tools",
-        "Local clock tool. Terminal and files stay off.",
-        "local_tools_enabled",
-      )}
-      {toggle(
-        "/v1/settings/web-research",
-        "Public Wikipedia context and task-approved MCP security source retrieval. Pages are untrusted data; general web search is unavailable.",
-        "web_research_enabled",
-      )}
-      {toggle(
-        "/v1/settings/mcp",
-        "Local arithmetic MCP server. External servers stay off.",
-        "mcp_enabled",
-      )}
-      {toggle(
-        "/v1/settings/standard-mcp",
-        "Reviewed SDK arithmetic. Hermes needs separate permission for each task.",
-        "standard_mcp_enabled",
-      )}
-      {toggle(
-        "/v1/settings/artifacts",
-        "Report files (Markdown and PDF). Each task needs separate creation permission.",
-        "artifact_tools_enabled",
-      )}
-      {!localOnly && (
-        <>
-          <WorkspaceFolder
-            enabled={health?.workspace_tools_enabled === true}
-            onSaved={onRefresh}
-          />
-          <ProjectInspector session={session} connected={connected} busy={taskBusy || !!health?.active_task || !["IDLE", "ERROR", "CANCELLED"].includes(health?.voice_state ?? "IDLE")} />
-          <LocalTools
-            session={session}
-            mcp={health?.mcp_enabled === true}
-            clock={health?.local_tools_enabled === true}
-            onError={onError}
-          />
-        </>
-      )}
-      <h3>Voice</h3>
-      {localOnly ? (
-        <p className="hint">
-          Voice and model chat are unavailable in this local-only runtime.
-        </p>
-      ) : (
-        <VoiceControls voice={voice} settings />
-      )}
-      {!localOnly && (
-        <>
-          <h3>Providers</h3>
-          <ModelHub
-            connected={connected}
-            activeModel={health?.active_model}
-            active={
-              taskBusy ||
-              health?.active_task != null ||
-              !["IDLE", "ERROR", "CANCELLED"].includes(
-                health?.voice_state ?? "IDLE",
-              ) ||
-              !["IDLE", "ERROR", "CANCELLED"].includes(voice.status.state)
-            }
-            localOnly={localOnly}
-            onError={onError}
-            onChanged={() => {
-              onModelChange?.();
-              onRefresh();
-            }}
-          />
-          <p>
-            Credential storage:{" "}
-            {health?.credential_source ?? "local environment"}
-          </p>
-          <button
-            type="button"
-            onClick={() =>
-              void api("/v1/settings/migrate-credentials", {})
-                .then(onRefresh)
-                .catch((issue: unknown) =>
-                  onError(message(issue, "Migration failed.")),
-                )
+      <details className="advanced">
+        <summary>Advanced</summary>
+        <h3>Interface</h3>
+        <label>
+          3D quality
+          <select
+            value={prefs.quality}
+            onChange={(event) =>
+              setPrefs({ quality: event.target.value as Quality })
             }
           >
-            Move .env keys to Windows Credential Manager
-          </button>
-          <ProviderKeys health={health} onSaved={onRefresh} />
-        </>
-      )}
-      <p className="hint">
-        Ctrl+Shift+Space opens chat. Ctrl+Shift+Escape stops the active task.
-      </p>
+            <option value="high">High</option>
+            <option value="balanced">Balanced</option>
+            <option value="performance">Performance</option>
+            <option value="2d">Minimal (2D, no WebGL)</option>
+          </select>
+        </label>
+        <p className="hint">
+          The launch command chooses the graphics chip for this run. Battery
+          lowers the frame rate and resolution before it changes materials.
+          Performance keeps the higher frame rate while the face is active.
+        </p>
+        <label>
+          <input
+            type="checkbox"
+            checked={prefs.pin}
+            onChange={(event) => {
+              setPrefs({ pin: event.target.checked });
+              void windowAction(event.target.checked ? "pin" : "unpin");
+            }}
+          />
+          Companion stays on top
+        </label>
+        <label>
+          Work overlay
+          <select
+            value={prefs.overlay}
+            onChange={(event) =>
+              setPrefs({ overlay: event.target.value as OverlayPolicy })
+            }
+          >
+            <option value="screen-control">
+              Collapse to overlay during screen control
+            </option>
+            <option value="never">Never collapse automatically</option>
+          </select>
+        </label>
+        <p className="hint">
+          Screen control (Computer Use) is disabled, so the overlay never opens
+          on its own today. File reads and research never trigger it.
+        </p>
+        <button type="button" onClick={onPreviewOverlay}>
+          Preview work overlay — no screen access
+        </button>
+        <h3>Runtime</h3>
+        {localOnly ? (
+          <p>
+            Local background runtime attached. Tasks continue when this
+            dashboard closes.
+          </p>
+        ) : (
+          <p>
+            Hermes {health?.hermes.version ?? ""} ·{" "}
+            {health?.hermes.status ?? "unavailable"}
+            {health?.hermes.message ? ` · ${health.hermes.message}` : ""}
+          </p>
+        )}
+        <p>
+          Paid inference: blocked · Code execution: disabled · Active task:{" "}
+          {health?.active_task ?? "none"}
+        </p>
+        <button type="button" onClick={onRefresh}>
+          Check connection
+        </button>
+        <h3>Capabilities</h3>
+        {localCapabilities}
+        {toggle(
+          "/v1/settings/delegation",
+          "Specialist agents (research, coding, review). No tools.",
+          "delegation_enabled",
+        )}
+        {toggle(
+          "/v1/settings/local-tools",
+          "Local clock tool. Terminal and files stay off.",
+          "local_tools_enabled",
+        )}
+        {toggle(
+          "/v1/settings/web-research",
+          "Free public lookups (DuckDuckGo Instant Answers; Wikipedia once web-contact.json names a contact) and task-approved MCP security sources. Results are untrusted data, cited as [n], never saved to memory.",
+          "web_research_enabled",
+        )}
+        {toggle(
+          "/v1/settings/mcp",
+          "Local arithmetic MCP server. External servers stay off.",
+          "mcp_enabled",
+        )}
+        {toggle(
+          "/v1/settings/standard-mcp",
+          "Reviewed SDK arithmetic. Hermes needs separate permission for each task.",
+          "standard_mcp_enabled",
+        )}
+        {toggle(
+          "/v1/settings/artifacts",
+          "Report files (Markdown and PDF). Each task needs separate creation permission.",
+          "artifact_tools_enabled",
+        )}
+        {!localOnly && (
+          <>
+            <WorkspaceFolder
+              enabled={health?.workspace_tools_enabled === true}
+              onSaved={onRefresh}
+            />
+            <ProjectInspector
+              session={session}
+              connected={connected}
+              busy={
+                taskBusy ||
+                !!health?.active_task ||
+                !["IDLE", "ERROR", "CANCELLED"].includes(
+                  health?.voice_state ?? "IDLE",
+                )
+              }
+            />
+            <LocalTools
+              session={session}
+              mcp={health?.mcp_enabled === true}
+              clock={health?.local_tools_enabled === true}
+              onError={onError}
+            />
+          </>
+        )}
+        <h3>Voice</h3>
+        {localOnly ? (
+          <p className="hint">
+            Voice and model chat are unavailable in this local-only runtime.
+          </p>
+        ) : (
+          <VoiceControls voice={voice} settings />
+        )}
+        {!localOnly && (
+          <>
+            <h3>Providers</h3>
+            <ModelHub
+              connected={connected}
+              activeModel={health?.active_model}
+              active={
+                taskBusy ||
+                health?.active_task != null ||
+                !["IDLE", "ERROR", "CANCELLED"].includes(
+                  health?.voice_state ?? "IDLE",
+                ) ||
+                !["IDLE", "ERROR", "CANCELLED"].includes(voice.status.state)
+              }
+              localOnly={localOnly}
+              onError={onError}
+              onChanged={() => {
+                onModelChange?.();
+                onRefresh();
+              }}
+            />
+            <p>
+              Credential storage:{" "}
+              {health?.credential_source ?? "local environment"}
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                void api("/v1/settings/migrate-credentials", {})
+                  .then(onRefresh)
+                  .catch((issue: unknown) =>
+                    onError(message(issue, "Migration failed.")),
+                  )
+              }
+            >
+              Move .env keys to Windows Credential Manager
+            </button>
+            <ProviderKeys health={health} onSaved={onRefresh} />
+          </>
+        )}
+        <p className="hint">
+          Ctrl+Shift+Space opens chat. Ctrl+Shift+Escape stops the active task.
+        </p>
+      </details>
     </section>
   );
 }

@@ -117,7 +117,7 @@ def test_registry_does_not_accept_unbounded_or_nonfinite_grants(tmp_path):
 
 
 def test_real_production_clock_route_requires_no_model_or_hermes(tmp_path):
-    from datetime import datetime, timezone
+    from datetime import datetime, timedelta, timezone
     from fastapi.testclient import TestClient
     from immortility_broker.app import create_app
     from immortility_broker.config import Settings
@@ -147,8 +147,17 @@ def test_real_production_clock_route_requires_no_model_or_hermes(tmp_path):
         task = _wait(client, task_id, {"succeeded", "failed", "blocked", "disconnected"})
         assert task["status"] == "succeeded", task.get("error")
         assert task["result"]["model"] == "clock.now.v1"
-        parsed = datetime.fromisoformat(task["result"]["text"].removeprefix("UTC time: "))
-        assert abs((datetime.now(timezone.utc) - parsed).total_seconds()) < 3
+        # K23: the answer is the user's local wall clock (with zone label), not UTC.
+        from immortility_broker.local_tools import clock_reading
+
+        text = task["result"]["text"]
+        assert text.startswith("Local time: ")
+        now_readings = {
+            "Local time: "
+            + clock_reading(datetime.now(timezone.utc) - timedelta(seconds=s))["local"]
+            for s in range(0, 120)
+        }
+        assert text in now_readings
         assert app.state.store.ledger.summary(task_id)["calls"] == 0
         assert (
             client.get(f"/v1/tasks/{task_id}/trace", headers=AUTH).json()["agent"]["route"]

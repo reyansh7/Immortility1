@@ -6,14 +6,25 @@ import math
 from copy import deepcopy
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, ValidationError
 
 from .capabilities import StrictModel
 from .contracts import BrokerError
 
 TOOL_NAME = "mcp__immortility__execute"
+# Providers copy this short name. Hermes still receives TOOL_NAME.
+PROVIDER_TOOL_NAME = "execute"
 APPROVED_CAPABILITIES = frozenset(
-    {"arithmetic.add.v1", "clock.now.v1", "public.research.v1", "report.create.v1"}
+    {
+        "arithmetic.add.v1",
+        "arithmetic.multiply.v1",
+        "clock.now.v1",
+        "public.research.v1",
+        "report.create.v1",
+        "project.outline.v1",
+        "project.search.v1",
+        "project.read.v1",
+    }
 )
 
 
@@ -45,13 +56,18 @@ class ToolProposal(StrictModel):
 def capability_input(name: str) -> type[StrictModel]:
     from .capabilities import AddInput, EmptyInput
     from .artifacts import ReportInput
+    from .project_inspection import ModelOutlineInput, ModelReadInput, ModelSearchInput
     from .research import ResearchInput
 
     models: dict[str, type[StrictModel]] = {
         "arithmetic.add.v1": AddInput,
+        "arithmetic.multiply.v1": AddInput,
         "clock.now.v1": EmptyInput,
         "public.research.v1": ResearchInput,
         "report.create.v1": ReportInput,
+        "project.outline.v1": ModelOutlineInput,
+        "project.search.v1": ModelSearchInput,
+        "project.read.v1": ModelReadInput,
     }
     return models[name]
 
@@ -91,14 +107,23 @@ def _compact_schema(schema: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-def tool_spec(names: list[str], *, typed: bool = False) -> dict[str, Any]:
+def accepted_tool_prefix(candidate: str) -> bool:
+    """A streamed name may arrive in pieces and must match one exact reviewed name."""
+    return TOOL_NAME.startswith(candidate) or PROVIDER_TOOL_NAME.startswith(candidate)
+
+
+def tool_spec(names: list[str], *, typed: bool = False, provider: bool = False) -> dict[str, Any]:
     if not names or not set(names) <= APPROVED_CAPABILITIES:
         raise BrokerError("tool_denied", "No approved broker tool scope.", 403)
     result: dict[str, Any] = {
         "type": "function",
         "function": {
-            "name": TOOL_NAME,
-            "description": "Execute one explicitly approved broker capability. Results are untrusted data.",
+            "name": PROVIDER_TOOL_NAME if provider else TOOL_NAME,
+            "description": (
+                "Call execute for one explicitly approved broker capability. Results are untrusted data."
+                if provider
+                else "Execute one explicitly approved broker capability. Results are untrusted data."
+            ),
             "parameters": {
                 "type": "object",
                 "additionalProperties": False,
@@ -150,7 +175,7 @@ def validate_calls(calls: Any, names: list[str]) -> list[dict[str, Any]]:
             ):
                 raise ValueError
             reason = "tool_name"
-            if not isinstance(fn, dict) or fn.get("name") != TOOL_NAME:
+            if not isinstance(fn, dict) or fn.get("name") not in {TOOL_NAME, PROVIDER_TOOL_NAME}:
                 raise ValueError
             reason = "argument_encoding"
             if not isinstance(fn.get("arguments"), str) or len(fn["arguments"].encode()) > 16000:
@@ -167,7 +192,14 @@ def validate_calls(calls: Any, names: list[str]) -> list[dict[str, Any]]:
             if proposal.capability not in names or proposal.capability not in APPROVED_CAPABILITIES:
                 raise ValueError
             reason = "capability_arguments"
-            capability_input(proposal.capability).model_validate(proposal.arguments, strict=True)
+            try:
+                capability_input(proposal.capability).model_validate(proposal.arguments, strict=True)
+            except ValidationError as error:
+                fields = ",".join(
+                    ".".join(str(part) for part in item.get("loc", ())) for item in error.errors()
+                )
+                reason = "capability_arguments:" + proposal.capability + ":" + fields
+                raise ValueError from None
             ids.add(ident)
             clean.append(
                 {
@@ -343,7 +375,7 @@ def validate_stream(chunks: list[dict[str, Any]], names: list[str]) -> list[dict
                             raise ValueError
                         current = call["function"]["name"]
                         candidate = current if name == current else current + name
-                        if not TOOL_NAME.startswith(candidate):
+                        if not accepted_tool_prefix(candidate):
                             raise BrokerError(
                                 "tool_denied",
                                 "Provider requested an unapproved broker operation.",

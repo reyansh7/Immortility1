@@ -106,6 +106,20 @@ class Store:
                 CREATE TABLE IF NOT EXISTS route_observations(task_id TEXT PRIMARY KEY REFERENCES tasks(id), route_id TEXT NOT NULL, task_class TEXT NOT NULL, protocol_success INTEGER NOT NULL, verified_success INTEGER, latency_ms REAL NOT NULL, tokens INTEGER NOT NULL);
                 CREATE INDEX IF NOT EXISTS route_benchmark ON route_observations(route_id,task_class) WHERE verified_success IS NOT NULL;
                 CREATE TABLE IF NOT EXISTS inference_routes(attempt_id TEXT PRIMARY KEY REFERENCES usage_attempts(id), provider TEXT NOT NULL, model TEXT NOT NULL, account_scope TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS confirmed_facts(
+                    id TEXT PRIMARY KEY,
+                    scope TEXT NOT NULL CHECK(scope IN ('user','project')),
+                    project_id TEXT NOT NULL DEFAULT '',
+                    kind TEXT NOT NULL CHECK(kind IN ('preference','decision','outcome')),
+                    trust TEXT NOT NULL CHECK(trust='user-confirmed'),
+                    body TEXT NOT NULL,
+                    body_key TEXT NOT NULL,
+                    status TEXT NOT NULL CHECK(status IN ('active','superseded','revoked')),
+                    supersedes TEXT,
+                    created TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS confirmed_facts_lookup
+                    ON confirmed_facts(status, scope, project_id, kind, body_key);
                 PRAGMA user_version=4;
             """)
         self.fts = False
@@ -118,6 +132,14 @@ class Store:
             self.fts = True
         except sqlite3.OperationalError:
             self.fts = False
+        self.fact_fts = False
+        try:
+            self.db.execute(
+                "CREATE VIRTUAL TABLE IF NOT EXISTS fact_fts USING fts5(fact_id UNINDEXED, body)"
+            )
+            self.fact_fts = True
+        except sqlite3.OperationalError:
+            self.fact_fts = False
         # Only explicitly authorized local read workflows may recover; no cloud,
         # conversation, approval, write or other side effect is replayed.
         journal = WorkflowJournal(self)
@@ -236,6 +258,7 @@ class Store:
                 "allowed_capabilities": request.allowed_capabilities,
                 "requested_artifacts": request.requested_artifacts,
                 "model_selection": model_selection or {"mode": "auto_cloud", "route_id": None},
+                **({"origin": "screen"} if request.origin == "screen" else {}),
             },
             "capabilities": ["chat.respond", *request.allowed_capabilities],
             "budget": {"max_paid_usd": 0, "timeout_ms": 90000, "max_tokens": 2048},
@@ -367,6 +390,45 @@ class Store:
             self._event(task["task_id"], "task.state", {"status": "created"})
         return task
 
+    def create_repair(self, session_id: str, request_id: str, summary: str) -> dict[str, Any]:
+        if not self.db.execute("SELECT 1 FROM sessions WHERE id=?", (session_id,)).fetchone():
+            raise BrokerError("not_found", "Session not found.", 404)
+        identity = "repair-" + request_id
+        if self.db.execute("SELECT 1 FROM tasks WHERE request_id=?", (identity,)).fetchone():
+            raise BrokerError("idempotency_conflict", "Repair request was already submitted.", 409)
+        task: dict[str, Any] = {
+            "schema_version": "1.0",
+            "task_id": uid(),
+            "session_id": session_id,
+            "request_id": identity,
+            "created_at": now(),
+            "status": "created",
+            "workspace_id": None,
+            "privacy_class": "personal",
+            "input": {
+                "type": "local_repair",
+                "content": summary[:500],
+                "no_cloud": True,
+                "source": "text",
+            },
+            "capabilities": ["project.repair.v1"],
+            "budget": {"max_paid_usd": 0, "max_tokens": 0, "max_calls": 0, "timeout_ms": 60000},
+        }
+        validate("task", task)
+        with self.db:
+            self.db.execute(
+                "INSERT INTO tasks VALUES(?,?,?,?,?)",
+                (
+                    task["task_id"],
+                    session_id,
+                    identity,
+                    json.dumps({"request_id": identity}),
+                    json.dumps(task),
+                ),
+            )
+            self._event(task["task_id"], "task.state", {"status": "created"})
+        return task
+
     def _event(self, task_id: str, kind: str, data: dict[str, Any]) -> dict[str, Any]:
         sequence = self.db.execute(
             "SELECT COALESCE(MAX(sequence),0)+1 FROM events WHERE task_id=?", (task_id,)
@@ -394,7 +456,7 @@ class Store:
         task = self.get(task_id)
         allowed = {
             "created": {"queued", "blocked", "cancelled", "disconnected"},
-            "queued": {"running", "cancelled", "disconnected", "failed"},
+            "queued": {"running", "cancelled", "disconnected", "failed", "stopping"},
             "running": {
                 "queued",
                 "verifying",
@@ -404,9 +466,19 @@ class Store:
                 "blocked",
                 "rate_limited",
                 "disconnected",
+                "stopping",
             },
-            "awaiting_approval": {"running", "cancelled", "blocked", "failed", "disconnected"},
-            "verifying": {"queued", "succeeded", "failed", "cancelled", "disconnected"},
+            "awaiting_approval": {
+                "running",
+                "cancelled",
+                "blocked",
+                "failed",
+                "disconnected",
+                "stopping",
+            },
+            "verifying": {"queued", "succeeded", "failed", "cancelled", "disconnected", "stopping"},
+            # A stop was requested. Only a confirmed executor exit may record `cancelled`.
+            "stopping": {"cancelled", "disconnected", "failed"},
         }
         if status not in allowed.get(task["status"], set()):
             raise BrokerError("invalid_transition", "Invalid task transition.")
@@ -478,10 +550,148 @@ class Store:
             )
         return int(cursor.rowcount)
 
+    def confirm_fact(self, scope: str, project_id: str, kind: str, text: str) -> dict[str, str]:
+        if not self.fact_fts:
+            raise BrokerError("tool_denied", "Local fact search is unavailable.", 503)
+        body = " ".join(text.split())[:500]
+        key = body.casefold()
+        if (
+            not body
+            or scope not in {"user", "project"}
+            or kind
+            not in {
+                "preference",
+                "decision",
+                "outcome",
+            }
+        ):
+            raise BrokerError(
+                "invalid_request", "Confirmed memory needs a short factual statement.", 400
+            )
+        if scope == "user" and project_id:
+            raise BrokerError("invalid_request", "User memory has no project scope.", 400)
+        if scope == "project" and len(project_id) != 64:
+            raise BrokerError("invalid_request", "Project memory requires its project scope.", 400)
+        existing = self.db.execute(
+            "SELECT id,body FROM confirmed_facts WHERE status='active' AND scope=? "
+            "AND project_id=? AND kind=? AND body_key=?",
+            (scope, project_id, kind, key),
+        ).fetchone()
+        if existing:
+            return self._fact_row(str(existing["id"]))
+        fact_id = uid()
+        with self.db:
+            self.db.execute(
+                "INSERT INTO confirmed_facts VALUES(?,?,?,?,?,?,?,?,?,?)",
+                (
+                    fact_id,
+                    scope,
+                    project_id,
+                    kind,
+                    "user-confirmed",
+                    body,
+                    key,
+                    "active",
+                    None,
+                    now(),
+                ),
+            )
+            self.db.execute(
+                "INSERT INTO fact_fts(fact_id, body) VALUES(?,?)",
+                (fact_id, body),
+            )
+        return self._fact_row(fact_id)
+
+    def correct_fact(self, fact_id: str, text: str) -> dict[str, str]:
+        current = self._active_fact(fact_id)
+        body = " ".join(text.split())[:500]
+        if not body:
+            raise BrokerError("invalid_request", "A correction needs replacement text.", 400)
+        if body.casefold() == current["body_key"]:
+            return self._fact_row(fact_id)
+        replacement = self.confirm_fact(
+            current["scope"], current["project_id"], current["kind"], body
+        )
+        if replacement["id"] == fact_id:
+            return replacement
+        with self.db:
+            self.db.execute(
+                "UPDATE confirmed_facts SET status='superseded' WHERE id=? AND status='active'",
+                (fact_id,),
+            )
+            self.db.execute("DELETE FROM fact_fts WHERE fact_id=?", (fact_id,))
+            self.db.execute(
+                "UPDATE confirmed_facts SET supersedes=? WHERE id=? AND supersedes IS NULL",
+                (fact_id, replacement["id"]),
+            )
+        return self._fact_row(replacement["id"])
+
+    def revoke_fact(self, fact_id: str) -> dict[str, str]:
+        self._active_fact(fact_id)
+        with self.db:
+            self.db.execute(
+                "UPDATE confirmed_facts SET status='revoked' WHERE id=? AND status='active'",
+                (fact_id,),
+            )
+            self.db.execute("DELETE FROM fact_fts WHERE fact_id=?", (fact_id,))
+        row = self._fact_row(fact_id)
+        return row
+
+    def recall_facts(self, query: str, project_id: str, limit: int = 5) -> list[dict[str, str]]:
+        if not self.fact_fts:
+            return []
+        tokens = re.findall(r"[A-Za-z0-9]{3,}", query)[:8]
+        if not tokens:
+            return []
+        try:
+            rows = self.db.execute(
+                "SELECT fact_id FROM fact_fts WHERE fact_fts MATCH ? LIMIT 16",
+                (" OR ".join(f'"{token}"' for token in tokens),),
+            ).fetchall()
+        except sqlite3.OperationalError:
+            return []
+        chosen: list[dict[str, str]] = []
+        used = 0
+        for row in rows:
+            fact = self._fact_row(str(row["fact_id"]))
+            if fact["status"] != "active" or fact["trust"] != "user-confirmed":
+                continue
+            if fact["scope"] == "project" and fact["project_id"] != project_id:
+                continue
+            if fact["scope"] not in {"user", "project"}:
+                continue
+            if used + len(fact["body"]) > 800 or len(chosen) >= limit:
+                break
+            chosen.append(fact)
+            used += len(fact["body"])
+        return chosen
+
+    def _active_fact(self, fact_id: str) -> dict[str, str]:
+        fact = self._fact_row(fact_id)
+        if fact["status"] != "active":
+            raise BrokerError("not_found", "That confirmed memory is no longer active.", 404)
+        return fact
+
+    def _fact_row(self, fact_id: str) -> dict[str, str]:
+        row = self.db.execute(
+            "SELECT id,scope,project_id,kind,trust,body,body_key,status,supersedes,created "
+            "FROM confirmed_facts WHERE id=?",
+            (fact_id,),
+        ).fetchone()
+        if row is None:
+            raise BrokerError("not_found", "Confirmed memory was not found.", 404)
+        return {key: "" if row[key] is None else str(row[key]) for key in row.keys()}
+
     def history(self, session_id: str) -> list[dict[str, str]]:
         history = []
         for task in self.tasks(session_id):
-            if task["status"] == "succeeded" and not task.get("recall_excluded"):
+            if (
+                task["status"] == "succeeded"
+                and not task.get("recall_excluded")
+                # Explain-this screen text stays in its own local turn: later (possibly
+                # cloud) turns never receive it as history.
+                and task["input"].get("origin") != "screen"
+            ):
                 history.extend(
                     [
                         {"role": "user", "content": task["input"]["content"]},

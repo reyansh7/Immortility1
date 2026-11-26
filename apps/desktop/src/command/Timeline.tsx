@@ -66,6 +66,7 @@ const statePhase: Record<string, string> = {
   running: "Request analyzed",
   verifying: "Verifying",
   awaiting_approval: "Approval required",
+  stopping: "Stopping",
   succeeded: "Result completed",
   failed: "Failed",
   blocked: "Blocked",

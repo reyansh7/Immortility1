@@ -9,6 +9,35 @@ from immortility_broker.app import create_app
 from immortility_broker.config import ROOT, Settings
 
 
+def test_project_native_fixture_cannot_admit_personal_roots_or_other_tools(tmp_path):
+    spec = importlib.util.spec_from_file_location(
+        "native_project_fixture", ROOT / "scripts/native_project_fixture.py"
+    )
+    fixture = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fixture)
+    fixture.prepare(tmp_path)
+    assert "answer = 42" in (tmp_path / "project-one/example.ts").read_text()
+    assert fixture.allowed(
+        "/v1/settings/project", {"enabled": True, "root": str(tmp_path / "project-one")}, tmp_path
+    )
+    for root in [
+        str(tmp_path.parent),
+        str(tmp_path / "project-one/../outside"),
+        "\\\\server\\share",
+    ]:
+        assert not fixture.allowed(
+            "/v1/settings/project", {"enabled": True, "root": root}, tmp_path
+        )
+    assert fixture.allowed(
+        "/v1/workflows", {"steps": [{"capability": "project.read.v1"}]}, tmp_path
+    )
+    for capability in ["terminal", "arithmetic.add.v1", "public.research.v1"]:
+        assert not fixture.allowed(
+            "/v1/workflows", {"steps": [{"capability": capability}]}, tmp_path
+        )
+    assert not fixture.allowed("/v1/tasks", {"cloud_consent": True}, tmp_path)
+
+
 async def test_native_fixture_completes_a_real_store_task_without_inference(tmp_path):
     spec = importlib.util.spec_from_file_location(
         "native_event_fixture", ROOT / "scripts/native_event_fixture.py"

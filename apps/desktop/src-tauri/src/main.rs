@@ -69,7 +69,36 @@ impl ManagedBroker {
 
 const COMPACT: (f64, f64) = (148., 176.);
 
+fn canary_data_root() -> Result<Option<PathBuf>, String> {
+    let Some(raw) = std::env::var_os("IMMORTILITY_CANARY_DATA") else {
+        return Ok(None);
+    };
+    let Some(local) = std::env::var_os("LOCALAPPDATA") else {
+        return Err("Canary data requires LOCALAPPDATA.".into());
+    };
+    let parent = PathBuf::from(local).join("Immortility");
+    let parent = parent
+        .canonicalize()
+        .map_err(|_| "Immortility data directory is unavailable.")?;
+    let path = PathBuf::from(raw)
+        .canonicalize()
+        .map_err(|_| "Canary data directory must exist.")?;
+    let name = path
+        .file_name()
+        .and_then(|value| value.to_str())
+        .unwrap_or("");
+    if !path.starts_with(&parent) || path == parent || !name.starts_with("canary-") {
+        return Err(
+            "Canary data must be a canary- folder inside the Immortality data directory.".into(),
+        );
+    }
+    Ok(Some(path))
+}
+
 fn runtime_directory(root: &std::path::Path) -> Result<(PathBuf, bool), String> {
+    if let Some(path) = canary_data_root()? {
+        return Ok((path, false));
+    }
     // Debug-only acceptance root: cannot select arbitrary paths or start a model
     // broker. Production IPC never accepts a rendezvous path from the webview.
     #[cfg(debug_assertions)]
@@ -225,6 +254,15 @@ fn spawn_broker(root: &std::path::Path, data_root: &std::path::Path) -> Result<B
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::null());
+    if data_root
+        .file_name()
+        .and_then(|name| name.to_str())
+        .is_some_and(|name| name.starts_with("canary-"))
+    {
+        if let Ok(file) = std::fs::File::create(data_root.join("broker-stderr.log")) {
+            command.stderr(Stdio::from(file));
+        }
+    }
     #[cfg(windows)]
     {
         use std::os::windows::process::CommandExt;
@@ -409,6 +447,7 @@ enum Operation {
     CreateWorkflow,
     GetWorkflow,
     StartObservation,
+    ScreenTarget,
     ObservationResult,
     ShutdownBackground,
     Cancel,
@@ -442,6 +481,11 @@ enum Operation {
     CallMcp,
     MemorySearch,
     MemoryDelete,
+    FactSave,
+    FactCorrect,
+    FactSearch,
+    FactRevoke,
+    Repair,
     Rollback,
 }
 fn valid_id(id: Option<String>) -> Result<String, String> {
@@ -477,6 +521,8 @@ fn endpoint(operation: Operation, id: Option<String>) -> Result<(reqwest::Method
         Operation::CreateWorkflow => (Method::POST, "/v1/workflows".into()),
         Operation::GetWorkflow => (Method::GET, format!("/v1/workflows/{}", valid_id(id)?)),
         Operation::StartObservation => (Method::POST, "/v1/observations".into()),
+        // Explain this: one user-initiated read of the text under the cursor (D24).
+        Operation::ScreenTarget => (Method::POST, "/v1/screen/target".into()),
         Operation::ShutdownBackground => (Method::POST, "/v1/runtime/shutdown".into()),
         Operation::ObservationResult => {
             (Method::GET, format!("/v1/observations/{}", valid_id(id)?))
@@ -515,6 +561,11 @@ fn endpoint(operation: Operation, id: Option<String>) -> Result<(reqwest::Method
         Operation::CallMcp => (Method::POST, "/v1/mcp/call".into()),
         Operation::MemorySearch => (Method::POST, "/v1/memory/search".into()),
         Operation::MemoryDelete => (Method::POST, "/v1/memory/delete".into()),
+        Operation::FactSave => (Method::POST, "/v1/memory/facts".into()),
+        Operation::FactCorrect => (Method::POST, "/v1/memory/facts/correct".into()),
+        Operation::FactSearch => (Method::POST, "/v1/memory/facts/search".into()),
+        Operation::FactRevoke => (Method::POST, "/v1/memory/facts/revoke".into()),
+        Operation::Repair => (Method::POST, "/v1/repairs".into()),
         Operation::Rollback => (
             Method::POST,
             format!("/v1/tasks/{}/rollback", valid_id(id)?),
@@ -599,6 +650,7 @@ async fn broker_request(
     let seconds = match operation {
         Operation::RuntimeStatus => 28,
         Operation::ObservationResult => 85,
+        Operation::ScreenTarget => 25,
         Operation::ResolveApproval | Operation::CallMcp => 30,
         _ => 8,
     };
@@ -1137,6 +1189,12 @@ fn main() {
                     _ => {}
                 })
                 .build(app)?;
+            // Start the broker while WebView2 paints. The window must not wait on Python.
+            let handle = app.handle().clone();
+            std::thread::spawn(move || {
+                let state = handle.state::<Supervisor>();
+                let _ = ensure_broker(&state);
+            });
             // Conflicts are visible; startup continues with tray controls available.
             for shortcut in ["Ctrl+Shift+Space", "Ctrl+Shift+Escape"] {
                 if app.global_shortcut().register(shortcut).is_err() {
@@ -1254,6 +1312,24 @@ mod tests {
             "local_model_download",
         ] {
             assert!(serde_json::from_value::<Operation>(serde_json::json!(name)).is_err());
+        }
+    }
+    #[test]
+    fn project_reads_use_only_fixed_native_routes() {
+        let scope = endpoint(Operation::ProjectScope, None).unwrap();
+        assert_eq!(scope.0, reqwest::Method::GET);
+        assert_eq!(scope.1, "/v1/projects/scope");
+        let selection = endpoint(Operation::SetProject, None).unwrap();
+        assert_eq!(selection.0, reqwest::Method::POST);
+        assert_eq!(selection.1, "/v1/settings/project");
+        let facts = endpoint(Operation::FactSearch, None).unwrap();
+        assert_eq!(facts.0, reqwest::Method::POST);
+        assert_eq!(facts.1, "/v1/memory/facts/search");
+        let repair = endpoint(Operation::Repair, None).unwrap();
+        assert_eq!(repair.0, reqwest::Method::POST);
+        assert_eq!(repair.1, "/v1/repairs");
+        for operation in ["project_shell", "project_write", "project_arbitrary_url"] {
+            assert!(serde_json::from_value::<Operation>(serde_json::json!(operation)).is_err());
         }
     }
     #[test]
